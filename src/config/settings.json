@@ -1,0 +1,26 @@
+{
+        "general": {
+                "file_read_size": 104857600
+        },
+        "archive": {
+                "archive_directory": "/var/archiver_cpp/bin/archives",
+		"temp_archive_directory": "/var/archiver_cpp/bin/temp",
+                "target_size": 10737418240,
+                "single_archive_size": 4294967296
+        },
+        "database": {
+                "user": "user",
+                "password": "password",
+                "location": {
+                	"host": "127.0.0.1",
+                	"port": 33060,
+                	"schema": "archiver"
+                },
+		"options": ["parseTime=true"]
+        },
+        "aws": {
+                "access_key": "access_key",
+                "secret_key": "secret_key"
+
+        }
+}

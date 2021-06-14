@@ -1,0 +1,2 @@
+#define Archiver_VERSION_MAJOR @Archiver_VERSION_MAJOR@
+#define Archiver_VERSION_MINOR @Archiver_VERSION_MINOR@

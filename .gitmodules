@@ -1,0 +1,18 @@
+[submodule "lib/Hash"]
+	path = lib/Hash
+	url = https://github.com/Chocobo1/Hash.git
+[submodule "lib/fmt"]
+	path = lib/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "lib/spdlog"]
+	path = lib/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "lib/cxxopts"]
+	path = lib/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
+[submodule "lib/unfmt"]
+	path = lib/unfmt
+	url = https://github.com/JoryVardas/unfmt.git
+[submodule "lib/json"]
+	path = lib/json
+	url = https://github.com/nlohmann/json.git
