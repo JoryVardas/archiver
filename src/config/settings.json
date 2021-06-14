@@ -1,0 +1,22 @@
+{
+        "general": {
+                "file_read_size": 104857600
+        },
+        "archive": {
+                "archive_directory": "/mnt/archiver_archives",
+		"temp_archive_directory": "/mnt/archiver_temp",
+                "target_size": 10737418240,
+                "single_archive_size": 4294967296
+        },
+        "database": {
+                "user": "root",
+                "password": "255NeverForget",
+                "location": "tcp(127.0.0.1:3306)/archiver",
+		"options": ["parseTime=true"]
+        },
+        "aws": {
+                "access_key": "AKIAQYLTWF32WPZJY2HI",
+                "secret_key": "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"
+
+        }
+}

@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "Z:/home/archiver/src/app"
+		},
+		{
+			"path": "Z:/home/archiver/src/config"
+		},
+		{
+			"path": "Z:/home/archiver/src/database"
+		}
+	],
+	"settings": {
+		"go.gopath": "Z:/home/go",
+		"go.lintTool": "revive",
+		"go.lintFlags": [
+			"-config=Z:/home/archiver/revive.toml",
+			"-formatter=default"
+		]
+	}
+}

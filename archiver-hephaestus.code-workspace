@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "/media/shared-navilks/home/archiver/src/app"
+		},
+		{
+			"path": "/media/shared-navilks/home/archiver/src/config"
+		},
+		{
+			"path": "/media/shared-navilks/home/archiver/src/database"
+		}
+	],
+	"settings": {
+		"go.lintTool": "revive",
+		"go.lintFlags": [
+			"-config=/media/shared-navilks/home/archiver/revive.toml",
+			"-formatter=default"
+		]
+	}
+}
