@@ -94,7 +94,7 @@ std::filesystem::path operator"" _path_generic(const char* str, std::size_t) {
     return std::filesystem::path{str,
                                  std::filesystem::path::format::generic_format};
 };
-std::filesystem::path operator"" _path_natic(const char* str, std::size_t) {
+std::filesystem::path operator"" _path_native(const char* str, std::size_t) {
     return std::filesystem::path{str,
                                  std::filesystem::path::format::native_format};
 };
