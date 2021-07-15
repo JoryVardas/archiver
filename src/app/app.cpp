@@ -8,29 +8,8 @@
 #include <string>
 #include <vector>
 
-auto parseParameters(CArray<CString, int> parameters) {
-    cxxopts::Options options("Archiver",
-                             "Custom archival solution for large "
-                             "amounts of highly compressible files.");
-    options.add_options()("A,archive",
-                          "Archive the specified files/directories.",
-                          cxxopts::value<std::vector<std::string>>())(
-        "D,dearchive", "Dearchive the specified files/directories.",
-        cxxopts::value<std::vector<
-            std::string>>())("v,verbose", "Enable verbose output.",
-                             cxxopts::value<bool>()->default_value(
-                                 "false"))("p,prefix",
-                                           "Specify a prefix to remove from "
-                                           "the paths of files/directories "
-                                           "being "
-                                           "archived.",
-                                           cxxopts::value<std::string>()
-                                               ->default_value(""));
-    return options.parse(parameters.size(), parameters.rawData());
-};
-
 int main(int argc, const char* argv[]) {
-    auto arguments = parseParameters(CArray{argv, argc});
+    auto arguments = registerCommandlineOptions(CArray{argv, argc});
 
     std::shared_ptr<Config> defaultConfig =
         std::make_shared<Config>("settings.json"_path);
