@@ -9,8 +9,8 @@
 #include <unfmt.h>
 #include <vector>
 
-// Clang doesn't yet have the <format> library, so use fmtlib which impliments
-// it.
+// Neither Clang nor GCC have standard libraries which support the <format>
+// library, so use fmtlib which implements it.
 #if __has_include(<format>)
 #include <format>
 // The FMT library is no longer needed now that there is a native <format>
