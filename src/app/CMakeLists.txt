@@ -3,6 +3,7 @@ target_sources(Archiver PRIVATE
         archive.cpp
         archive_manager.cpp
         archiver.cpp
+        commandline_options.cpp
         common.cpp
         directory.cpp
         directory_manager.cpp
