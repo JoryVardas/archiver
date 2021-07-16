@@ -33,16 +33,12 @@ target_compile_options(Archiver PRIVATE -Wall
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
         -Werror>)
 
-target_include_directories(Archiver PUBLIC lib/unfmt/include)
-target_include_directories(Archiver PUBLIC lib/json/single_include/nlohmann)
-target_include_directories(Archiver PUBLIC lib/fmt/include)
-target_include_directories(Archiver PUBLIC lib/cxxopts/include)
 target_include_directories(Archiver PUBLIC lib/)
-target_include_directories(Archiver PUBLIC lib/spdlog/include)
 target_include_directories(Archiver SYSTEM PUBLIC /usr/include/mysql-cppconn-8)
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/config/settings.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+add_subdirectory(lib)
 add_subdirectory(src)
 
 target_link_libraries(Archiver mysqlcppconn8)

@@ -1,0 +1,11 @@
+target_include_directories(Archiver PUBLIC unfmt/include)
+target_include_directories(Archiver PUBLIC json/single_include/nlohmann)
+target_include_directories(Archiver PUBLIC fmt/include)
+target_include_directories(Archiver PUBLIC cxxopts/include)
+target_include_directories(Archiver PUBLIC spdlog/include)
+target_include_directories(Archiver PUBLIC date/include)
+target_include_directories(Archiver PUBLIC sqlpp11/include)
+target_include_directories(Archiver PUBLIC sqlpp11-connector-mysql/include)
+
+add_subdirectory(sqlpp11)
+add_subdirectory(sqlpp11-connector-mysql)
