@@ -16,3 +16,12 @@
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
+[submodule "lib/sqlpp11"]
+	path = lib/sqlpp11
+	url = https://github.com/rbock/sqlpp11.git
+[submodule "lib/sqlpp11-connector-mysql"]
+	path = lib/sqlpp11-connector-mysql
+	url = https://github.com/rbock/sqlpp11-connector-mysql.git
+[submodule "lib/date"]
+	path = lib/date
+	url = https://github.com/HowardHinnant/date.git
