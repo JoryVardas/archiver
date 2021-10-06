@@ -7,23 +7,25 @@ _make_exception_(FileDatabaseError);
 
 class FileDatabase {
   public:
-    virtual FileRevision
-    getMostRecentRevision(const ArchivedFile& file) const abstract;
-    virtual ArchivedFile addNewFile(const ArchivedDirectory& parentDirectory,
-                                    const std::string& name) abstract;
-    virtual FileRevision addNewRevision(const ArchivedFile& file,
-                                        const FileInfo& fileInfo,
-                                        const Archive& archive) abstract;
-    virtual std::optional<ArchivedFile>
-    getFile(const ArchivedDirectory& parentDirectory,
-            const std::string& name) const abstract;
-    virtual std::optional<FileRevision>
-    findRevision(const FileInfo& fileInfo) const abstract;
+    virtual auto getMostRecentRevision(const ArchivedFile& file) const
+        -> FileRevision abstract;
+    virtual auto addNewFile(const ArchivedDirectory& parentDirectory,
+                            const std::string_view name)
+        -> ArchivedFile abstract;
+    virtual auto addNewRevision(const ArchivedFile& file,
+                                const FileInfo& fileInfo,
+                                const Archive& archive)
+        -> FileRevision abstract;
+    virtual auto getFile(const ArchivedDirectory& parentDirectory,
+                         const std::string_view& name) const
+        -> std::optional<ArchivedFile> abstract;
+    virtual auto findRevision(const FileInfo& fileInfo) const
+        -> std::optional<FileRevision> abstract;
     virtual void
     addDuplicateRevision(const ArchivedFile& file,
                          const FileRevision& duplicateRevision) abstract;
-    virtual std::optional<FileRevision>
-    getFileRevisionMatchingInfo(const FileInfo& fileInfo) const abstract;
+    virtual auto getFileRevisionMatchingInfo(const FileInfo& fileInfo) const
+        -> std::optional<FileRevision> abstract;
 };
 
 #endif
