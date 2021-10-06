@@ -2,20 +2,11 @@
 #define _DIRECTORY_MANAGER_H
 
 #include "../config/config.h"
+#include "../database/directory_database.hpp"
 #include "archive.h"
 #include "common.h"
 #include "file.h"
 #include <string>
-
-class DirectoryDatabase {
-  public:
-    virtual std::optional<ArchivedDirectory>
-    getDirectory(DirectoryID id) const abstract;
-    virtual std::optional<ArchivedDirectory>
-    getDirectory(DirectoryID parent, const std::string& name) const abstract;
-    virtual ArchivedDirectory addNewDirectory(DirectoryID parent,
-                                              const std::string& name) abstract;
-};
 
 class DirectoryManager {
   public:
