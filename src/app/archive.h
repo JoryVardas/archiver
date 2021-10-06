@@ -3,8 +3,10 @@
 
 #include "common.h"
 
+using ArchiveID = ID;
+
 struct Archive {
-    ID id;
+    ArchiveID id;
     Extension extension;
     std::filesystem::path path;
 
