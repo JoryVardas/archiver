@@ -3,22 +3,24 @@
 
 #include "common.h"
 
+using DirectoryID = ID;
+
 struct ArchivedDirectory {
-    ArchivedDirectory(ID id, const std::string_view name,
+    ArchivedDirectory(DirectoryID id, const std::string_view name,
                       const std::optional<ID>& parentID);
 
-    ID id() const;
+    DirectoryID id() const;
     const std::string& name() const;
-    std::optional<ID> parent() const;
+    std::optional<DirectoryID> parent() const;
     bool isRoot() const;
 
     static ArchivedDirectory getRootDirectory();
 
   private:
-    ID _id;
-    std::optional<ID> _parent;
+    DirectoryID _id;
+    std::optional<DirectoryID> _parent;
     std::string _name;
-    static constexpr ID RootDirectoryID = 1;
+    static constexpr DirectoryID RootDirectoryID = 1;
     static constexpr std::string_view RootDirectoryName = "/";
 };
 
