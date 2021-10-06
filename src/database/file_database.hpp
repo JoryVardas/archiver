@@ -3,7 +3,6 @@
 
 #include "../app/file.h"
 #include <string_view>
-_make_exception_(FileDatabaseError);
 
 class FileDatabase {
   public:
