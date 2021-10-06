@@ -6,13 +6,14 @@
 
 class DirectoryDatabase {
   public:
-    virtual std::optional<ArchivedDirectory>
-    getDirectory(DirectoryID id) const abstract;
-    virtual std::optional<ArchivedDirectory>
-    getDirectory(DirectoryID parent,
-                 const std::string_view name) const abstract;
-    virtual ArchivedDirectory
-    addNewDirectory(DirectoryID parent, const std::string_view name) abstract;
+    virtual auto getDirectory(DirectoryID id) const
+        -> std::optional<ArchivedDirectory> abstract;
+    virtual auto getDirectory(DirectoryID parent,
+                              const std::string_view name) const
+        -> std::optional<ArchivedDirectory> abstract;
+    virtual auto addNewDirectory(DirectoryID parent,
+                                 const std::string_view name)
+        -> ArchivedDirectory abstract;
 };
 
 #endif
