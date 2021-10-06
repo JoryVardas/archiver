@@ -2,33 +2,11 @@
 #define _FILE_MANAGER_H
 
 #include "../config/config.h"
+#include "../database/file_database.hpp"
 #include "archive.h"
 #include "common.h"
 #include "file.h"
 #include <string>
-
-_make_exception_(FileDatabaseError);
-
-class FileDatabase {
-  public:
-    virtual FileRevision
-    getMostRecentRevision(const ArchivedFile& file) const abstract;
-    virtual ArchivedFile addNewFile(const ArchivedDirectory& parentDirectory,
-                                    const std::string& name) abstract;
-    virtual FileRevision addNewRevision(const ArchivedFile& file,
-                                        const FileInfo& fileInfo,
-                                        const Archive& archive) abstract;
-    virtual std::optional<ArchivedFile>
-    getFile(const ArchivedDirectory& parentDirectory,
-            const std::string& name) const abstract;
-    virtual std::optional<FileRevision>
-    findRevision(const FileInfo& fileInfo) const abstract;
-    virtual void
-    addDuplicateRevision(const ArchivedFile& file,
-                         const FileRevision& duplicateRevision) abstract;
-    virtual std::optional<FileRevision>
-    getFileRevisionMatchingInfo(const FileInfo& fileInfo) const abstract;
-};
 
 class FileManager {
   public:
