@@ -36,33 +36,35 @@ struct FileInfo {
     Size size;
 };
 
+using FileID = ID;
+
 struct FileRevision {
-    FileRevision(ID parentFileID, const FileInfo& fileInfo,
+    FileRevision(FileID parentFileID, const FileInfo& fileInfo,
                  TimeStamp archiveTime, const Archive& containingArchive);
     const FileHash& hashs() const;
-    ID parentFileID() const;
+    FileID parentFileID() const;
     Size size() const;
     TimeStamp archiveTime() const;
     const Archive& containingArchive() const;
     std::string getName() const;
 
   private:
-    ID _fileId;
+    FileID _fileId;
     FileInfo _fileInfo;
     TimeStamp _archiveTime;
     Archive _archive;
 };
 
 struct ArchivedFile {
-    ArchivedFile(ID id, const ArchivedDirectory& parent,
+    ArchivedFile(FileID id, const ArchivedDirectory& parent,
                  const std::string& name);
 
-    ID id() const;
+    FileID id() const;
     const ArchivedDirectory& parent() const;
     const std::string& name() const;
 
   private:
-    ID _id;
+    FileID _id;
     ArchivedDirectory _parent;
     std::string _name;
 };

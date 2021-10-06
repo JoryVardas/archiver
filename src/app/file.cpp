@@ -28,13 +28,13 @@ FileHash::FileHash(std::basic_istream<char>& inputStream,
 const FileHash::Sha3& FileHash::getSHA3() const { return _sha3; };
 const FileHash::Blake2b& FileHash::getBlake2b() const { return _blake2b; };
 
-FileRevision::FileRevision(ID parentFileID, const FileInfo& fileInfo,
+FileRevision::FileRevision(FileID parentFileID, const FileInfo& fileInfo,
                            TimeStamp archiveTime,
                            const Archive& containingArchive)
     : _fileId(parentFileID), _fileInfo(fileInfo), _archiveTime(archiveTime),
       _archive(containingArchive){};
 const FileHash& FileRevision::hashs() const { return _fileInfo.hash; };
-ID FileRevision::parentFileID() const { return _fileId; };
+FileID FileRevision::parentFileID() const { return _fileId; };
 Size FileRevision::size() const { return _fileInfo.size; };
 TimeStamp FileRevision::archiveTime() const { return _archiveTime; };
 const Archive& FileRevision::containingArchive() const { return _archive; };
@@ -48,10 +48,10 @@ std::string FileRevision::getName() const {
                        miliseconds.count());
 };
 
-ArchivedFile::ArchivedFile(ID id, const ArchivedDirectory& parent,
+ArchivedFile::ArchivedFile(FileID id, const ArchivedDirectory& parent,
                            const std::string& name)
     : _id(id), _parent(parent), _name(name){};
-ID ArchivedFile::id() const { return _id; };
+FileID ArchivedFile::id() const { return _id; };
 const ArchivedDirectory& ArchivedFile::parent() const { return _parent; };
 const std::string& ArchivedFile::name() const { return _name; };
 
