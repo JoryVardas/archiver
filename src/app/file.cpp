@@ -21,12 +21,12 @@ FileHash::FileHash(std::basic_istream<char>& inputStream,
         blake2b.addData(buffer.rawData(), read);
     }
 
-    std::copy_n(sha3.finalize().toVector(), 64, _sha3);
-    std::copy_n(blake2b.finalize().toVector(), 64, _blake2b);
+    _sha3 = sha3.finalize().toString();
+    _blake2b = blake2b.finalize().toString();
 };
 
-const FileHash::Sha3& FileHash::getSHA3() const { return _sha3; };
-const FileHash::Blake2b& FileHash::getBlake2b() const { return _blake2b; };
+auto FileHash::getSHA3() const -> std::string_view { return _sha3; };
+auto FileHash::getBlake2b() const -> std::string_view { return _blake2b; };
 
 FileRevision::FileRevision(FileID parentFileID, const FileInfo& fileInfo,
                            TimeStamp archiveTime,

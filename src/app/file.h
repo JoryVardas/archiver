@@ -17,18 +17,15 @@ class FileReadBuffer {
 _make_exception_(FileHashError);
 
 struct FileHash {
-    using Sha3 = std::array<uint8_t, 64>;
-    using Blake2b = std::array<uint8_t, 64>;
-
     FileHash(std::basic_istream<char>& inputStream, FileReadBuffer& readBuffer);
-    FileHash(const Sha3& sha3, const Blake2b& blake2b);
+    FileHash(std::string_view sha3, std::string_view blake2b);
 
-    const Sha3& getSHA3() const;
-    const Blake2b& getBlake2b() const;
+    auto getSHA3() const -> std::string_view;
+    auto getBlake2b() const -> std::string_view;
 
   private:
-    Sha3 _sha3;
-    Blake2b _blake2b;
+    std::string _sha3;
+    std::string _blake2b;
 };
 
 struct FileInfo {
