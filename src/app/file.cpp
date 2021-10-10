@@ -55,7 +55,7 @@ FileID ArchivedFile::id() const { return _id; };
 const ArchivedDirectory& ArchivedFile::parent() const { return _parent; };
 const std::string& ArchivedFile::name() const { return _name; };
 
-RawFile::RawFile(const std::filesystem::path& path)
+RawFile::RawFile(const std::filesystem::path& path, FileReadBuffer& buffer)
     : _name(path.filename()), _extension(path.extension()),
       _parent(path.parent_path()), _size(std::filesystem::file_size(path)) {
     if (!pathExists(path))
@@ -66,8 +66,9 @@ RawFile::RawFile(const std::filesystem::path& path)
         throw RawFileError(
             fmt::format("Could not open the path \"{}\" as a file.", path));
 
+    std::ifstream inputStream;
     try {
-        _inputStream.open(path, _inputStream.binary);
+        inputStream.open(path, inputStream.binary);
     } catch (std::exception& e) {
         throw RawFileError(fmt::format(
             "The following error occured while trying to open the raw "
@@ -77,16 +78,18 @@ RawFile::RawFile(const std::filesystem::path& path)
         throw RawFileError(fmt::format(
             "An unknown error occured while trying to open the file {}", path));
     }
-    if (_inputStream.bad())
+    if (inputStream.bad())
         throw RawFileError(fmt::format(
             "An unknown error occured while trying to open the file {}", path));
+    _fileHash = FileHash(inputStream, buffer);
+    inputStream.close();
 };
 
 const std::string& RawFile::name() const { return _name; };
 const Extension& RawFile::extension() const { return _extension; };
 const RawDirectory& RawFile::parent() const { return _parent; };
 Size RawFile::size() const { return _size; };
-std::basic_istream<char>& RawFile::getStream() { return _inputStream; };
+auto RawFile::getHashes() const -> const FileHash& { return _fileHash; }
 std::filesystem::path RawFile::getFullPath() const {
     return _parent.containingPath() / _parent.name() / name();
 };

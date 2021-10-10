@@ -19,7 +19,7 @@ void Archiver::archive(const std::filesystem::path& path,
             if (entry.is_directory()) {
                 archiveDirectory(RawDirectory(path));
             } else if (entry.is_regular_file()) {
-                RawFile rawFile{path};
+                RawFile rawFile{path, *_readBuffers.first};
                 archiveFile(rawFile);
             } else {
                 if (continueOnError)
@@ -35,7 +35,7 @@ void Archiver::archive(const std::filesystem::path& path,
             }
         }
     else if (isFile(path)) {
-        RawFile rawFile{path};
+        RawFile rawFile{path, *_readBuffers.first};
         archiveFile(rawFile);
     } else
         throw PathDoesntExistError(
@@ -67,7 +67,7 @@ void Archiver::archiveDirectory(const RawDirectory& directory) {
 }
 
 void Archiver::archiveFile(RawFile& file) {
-    FileInfo fileInfo{{file.getStream(), *(_readBuffers.first)}, file.size()};
+    FileInfo fileInfo{file.getHashes(), file.size()};
     std::optional<FileRevision> revision =
         _fileManager->getFileRevisionMatchingInfo(fileInfo);
 

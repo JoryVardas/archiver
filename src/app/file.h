@@ -71,13 +71,13 @@ struct ArchivedFile {
 
 _make_exception_(RawFileError);
 struct RawFile {
-    RawFile(const std::filesystem::path& path);
+    RawFile(const std::filesystem::path& path, FileReadBuffer& buffer);
 
     const std::string& name() const;
     const Extension& extension() const;
     const RawDirectory& parent() const;
     Size size() const;
-    std::basic_istream<char>& getStream();
+    auto getHashes() const -> const FileHash&;
     std::filesystem::path getFullPath() const;
 
   private:
@@ -85,7 +85,7 @@ struct RawFile {
     Extension _extension;
     RawDirectory _parent;
     Size _size;
-    std::ifstream _inputStream;
+    FileHash _fileHash;
 };
 
 #endif
