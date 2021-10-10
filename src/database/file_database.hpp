@@ -1,5 +1,5 @@
-#ifndef ARCHIVER_DIRECTORY_DATABASE_HPP
-#define ARCHIVER_DIRECTORY_DATABASE_HPP
+#ifndef ARCHIVER_FILE_DATABASE_HPP
+#define ARCHIVER_FILE_DATABASE_HPP
 
 #include "../app/file.h"
 #include <string_view>
