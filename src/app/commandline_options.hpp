@@ -1,23 +1,38 @@
 #ifndef ARCHIVER_COMMANDLINE_OPTIONS_HPP
 #define ARCHIVER_COMMANDLINE_OPTIONS_HPP
 
-#include <cxxopts.hpp>
-#include <filesystem>
-#include <string>
-#include <vector>
+#include "common.h"
+#include <cxxsubs.hpp>
 
-struct CommandlineOptions {
-    std::vector<std::filesystem::path> locationsToStage;
-    std::vector<std::filesystem::path> locationsToDearchive;
-    bool stage;
-    bool archive;
-    bool dearchive;
-    bool uploadStaged;
+_make_exception_(CommandValidateException);
+
+class StageCommand : public cxxsubs::IOptions {
+public:
+  StageCommand();
+
+  void validate() override;
+  void exec() override;
 };
+class ArchiveCommand : public cxxsubs::IOptions {
+public:
+  ArchiveCommand();
 
-cxxopts::Options registerCommandlineOptions();
-CommandlineOptions
-parseCommandlineOptions(cxxopts::Options& commandlineOptions,
-                        CArray<CString, std::size_t> parameters);
+  void validate() override;
+  void exec() override;
+};
+class UploadCommand : public cxxsubs::IOptions {
+public:
+  UploadCommand();
+
+  void validate() override;
+  void exec() override;
+};
+class DearchiveCommand : public cxxsubs::IOptions {
+public:
+  DearchiveCommand();
+
+  void validate() override;
+  void exec() override;
+};
 
 #endif
