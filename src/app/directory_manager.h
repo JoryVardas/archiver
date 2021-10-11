@@ -9,17 +9,17 @@
 #include <string>
 
 class DirectoryManager {
-  public:
-    DirectoryManager(std::shared_ptr<DirectoryDatabase>& directoryDatabase,
-                     std::shared_ptr<Config>& config);
+public:
+  DirectoryManager(std::shared_ptr<DirectoryDatabase>& directoryDatabase,
+                   std::shared_ptr<Config>& config);
 
-    virtual std::optional<ArchivedDirectory>
-    getDirectory(const RawDirectory& directory);
-    virtual ArchivedDirectory addDirectoryIfNew(const RawDirectory& directory);
+  virtual std::optional<ArchivedDirectory>
+  getDirectory(const RawDirectory& directory);
+  virtual ArchivedDirectory addDirectoryIfNew(const RawDirectory& directory);
 
-  protected:
-    std::shared_ptr<DirectoryDatabase> _directoryDatabase;
-    std::shared_ptr<Config> _config;
+protected:
+  std::shared_ptr<DirectoryDatabase> _directoryDatabase;
+  std::shared_ptr<Config> _config;
 };
 
 #endif
