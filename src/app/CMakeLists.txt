@@ -9,4 +9,5 @@ target_sources(Archiver PRIVATE
         directory_manager.cpp
         file.cpp
         file_manager.cpp
+        staged_directory.cpp
         )
