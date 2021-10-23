@@ -7,7 +7,7 @@
 using StagedDirectoryID = DirectoryID;
 
 struct StagedDirectory {
-  StagedDirectory(const StagedDirectoryID id, const string& name,
+  StagedDirectory(const StagedDirectoryID id, const std::string& name,
                   const std::optional<ID>& parentID);
 
   StagedDirectoryID id() const;
@@ -18,7 +18,7 @@ struct StagedDirectory {
   // These should probably be abstracted into a base class since they are also
   // part of the archived directory class, and are the same in both bool
   bool isRoot() const;
-  static ArchivedDirectory getRootDirectory();
+  static StagedDirectory getRootDirectory();
 
 private:
   StagedDirectoryID _id;
