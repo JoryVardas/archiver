@@ -55,9 +55,12 @@ FileID ArchivedFile::id() const { return _id; };
 const ArchivedDirectory& ArchivedFile::parent() const { return _parent; };
 const std::string& ArchivedFile::name() const { return _name; };
 
-RawFile::RawFile(const std::filesystem::path& path, FileReadBuffer& buffer)
-  : _name(path.filename()), _extension(path.extension()),
-    _parent(path.parent_path()), _size(std::filesystem::file_size(path)) {
+RawFile::RawFile(const std::filesystem::path& path,
+                 const std::filesystem::path& relativePath,
+                 FileReadBuffer& buffer)
+  : _name(relativePath.filename()), _extension(relativePath.extension()),
+    _parent(relativePath.parent_path()),
+    _size(std::filesystem::file_size(path)) {
   if (!pathExists(path))
     throw RawFileError(fmt::format(
       "Attempt to open the path \"{}\" which does not exists", path));
@@ -87,9 +90,8 @@ RawFile::RawFile(const std::filesystem::path& path, FileReadBuffer& buffer)
 
 const std::string& RawFile::name() const { return _name; };
 const Extension& RawFile::extension() const { return _extension; };
-const RawDirectory& RawFile::parent() const { return _parent; };
+auto RawFile::parent() const -> const std::filesystem::path& {
+  return _parent;
+};
 Size RawFile::size() const { return _size; };
 auto RawFile::getHashes() const -> const FileHash& { return _fileHash; }
-std::filesystem::path RawFile::getFullPath() const {
-  return _parent.containingPath() / _parent.name() / name();
-};

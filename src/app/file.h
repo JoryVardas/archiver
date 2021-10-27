@@ -68,19 +68,19 @@ private:
 
 _make_exception_(RawFileError);
 struct RawFile {
-  RawFile(const std::filesystem::path& path, FileReadBuffer& buffer);
+  RawFile(const std::filesystem::path& path,
+          const std::filesystem::path& relativePath, FileReadBuffer& buffer);
 
   const std::string& name() const;
   const Extension& extension() const;
-  const RawDirectory& parent() const;
+  auto parent() const -> const std::filesystem::path&;
   Size size() const;
   auto getHashes() const -> const FileHash&;
-  std::filesystem::path getFullPath() const;
 
 private:
   std::string _name;
   Extension _extension;
-  RawDirectory _parent;
+  std::filesystem::path _parent;
   Size _size;
   FileHash _fileHash;
 };
