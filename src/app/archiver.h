@@ -6,6 +6,7 @@
 #include "file_manager.h"
 #include <filesystem>
 #include <memory>
+#include <span>
 #include <vector>
 
 _make_exception_(PathDoesntExistError);
@@ -15,8 +16,7 @@ public:
   Archiver(std::shared_ptr<FileManager>& fileManager,
            std::shared_ptr<ArchiveManager>& archiveManager,
            std::shared_ptr<DirectoryManager>& directoryManager,
-           std::pair<std::shared_ptr<FileReadBuffer>,
-                     std::shared_ptr<FileReadBuffer>>& readBuffers);
+           std::pair<std::span<uint8_t>, std::span<uint8_t>> readBuffers);
 
   void archive(const std::filesystem::path& path, bool continueOnError = true);
   void archive(const std::vector<std::filesystem::path>& paths,
@@ -26,8 +26,7 @@ private:
   std::shared_ptr<FileManager>& _fileManager;
   std::shared_ptr<ArchiveManager>& _archiveManager;
   std::shared_ptr<DirectoryManager>& _directoryManager;
-  std::pair<std::shared_ptr<FileReadBuffer>, std::shared_ptr<FileReadBuffer>>
-    _readBuffers;
+  std::pair<std::span<uint8_t>, std::span<uint8_t>> _readBuffers;
 
   void archiveDirectory(const RawDirectory& directory);
   void archiveFile(RawFile& file);

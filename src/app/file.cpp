@@ -3,7 +3,7 @@
 #include <Hash/src/sha3.h>
 
 FileHash::FileHash(std::basic_istream<char>& inputStream,
-                   FileReadBuffer& readBuffer) {
+                   std::span<uint8_t> readBuffer) {
   Chocobo1::SHA3_512 sha3;
   Chocobo1::Blake2 blake2b;
 
@@ -11,14 +11,12 @@ FileHash::FileHash(std::basic_istream<char>& inputStream,
     throw FileHashError(
       "Could not hash the file as the input stream is in a bad state.");
 
-  auto& buffer = readBuffer.getBuffer();
-
   while (!inputStream.eof()) {
-    inputStream.read(buffer.rawData(), buffer.size());
+    inputStream.read((char*)readBuffer.data(), readBuffer.size());
     Size read = inputStream.gcount();
 
-    sha3.addData(buffer.rawData(), read);
-    blake2b.addData(buffer.rawData(), read);
+    sha3.addData(readBuffer.data(), read);
+    blake2b.addData(readBuffer.data(), read);
   }
 
   _sha3 = sha3.finalize().toString();
@@ -57,7 +55,7 @@ const std::string& ArchivedFile::name() const { return _name; };
 
 RawFile::RawFile(const std::filesystem::path& path,
                  const std::filesystem::path& relativePath,
-                 FileReadBuffer& buffer)
+                 std::span<uint8_t> buffer)
   : _name(relativePath.filename()), _extension(relativePath.extension()),
     _parent(relativePath.parent_path()),
     _size(std::filesystem::file_size(path)) {

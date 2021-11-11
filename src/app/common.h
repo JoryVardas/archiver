@@ -30,25 +30,6 @@ using Size = uint64_t;
 using Extension = std::string;
 using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
 
-template <typename T, typename Size_T> struct CArray {
-  CArray(T* data, Size_T size) : _data(data), _size(size) {}
-
-  Size_T size() { return _size; }
-  T* rawData() { return _data; }
-
-  T& operator[](Size_T index) {
-    if (index >= _size)
-      throw std::out_of_range(
-        "Index into CArray is outside the size of the CArray.");
-
-    return _data[index];
-  }
-
-private:
-  T* _data;
-  Size_T _size;
-};
-
 #define _make_formatter_for_exception_(type)                                   \
   template <typename CharT>                                                    \
   struct fmt::formatter<type, CharT>                                           \

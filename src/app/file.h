@@ -7,17 +7,14 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <span>
 #include <string>
-
-class FileReadBuffer {
-public:
-  virtual CArray<char, Size>& getBuffer() abstract;
-};
 
 _make_exception_(FileHashError);
 
 struct FileHash {
-  FileHash(std::basic_istream<char>& inputStream, FileReadBuffer& readBuffer);
+  FileHash(std::basic_istream<char>& inputStream,
+           std::span<uint8_t> readBuffer);
   FileHash(std::string_view sha3, std::string_view blake2b);
 
   auto getSHA3() const -> std::string_view;
@@ -69,7 +66,7 @@ private:
 _make_exception_(RawFileError);
 struct RawFile {
   RawFile(const std::filesystem::path& path,
-          const std::filesystem::path& relativePath, FileReadBuffer& buffer);
+          const std::filesystem::path& relativePath, std::span<uint8_t> buffer);
 
   const std::string& name() const;
   const Extension& extension() const;

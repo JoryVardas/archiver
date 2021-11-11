@@ -1,10 +1,10 @@
 #include "archiver.h"
 
-Archiver::Archiver(std::shared_ptr<FileManager>& fileManager,
-                   std::shared_ptr<ArchiveManager>& archiveManager,
-                   std::shared_ptr<DirectoryManager>& directoryManager,
-                   std::pair<std::shared_ptr<FileReadBuffer>,
-                             std::shared_ptr<FileReadBuffer>>& readBuffers)
+Archiver::Archiver(
+  std::shared_ptr<FileManager>& fileManager,
+  std::shared_ptr<ArchiveManager>& archiveManager,
+  std::shared_ptr<DirectoryManager>& directoryManager,
+  std::pair<std::span<uint8_t>, std::span<uint8_t>> readBuffers)
   : _fileManager(fileManager), _archiveManager(archiveManager),
     _directoryManager(directoryManager), _readBuffers(readBuffers){};
 
@@ -18,7 +18,7 @@ void Archiver::archive(const std::filesystem::path& path,
       if (entry.is_directory()) {
         archiveDirectory(RawDirectory(path));
       } else if (entry.is_regular_file()) {
-        RawFile rawFile{path, *_readBuffers.first};
+        RawFile rawFile{path, _readBuffers.first};
         archiveFile(rawFile);
       } else {
         if (continueOnError)
@@ -34,7 +34,7 @@ void Archiver::archive(const std::filesystem::path& path,
       }
     }
   else if (isFile(path)) {
-    RawFile rawFile{path, *_readBuffers.first};
+    RawFile rawFile{path, _readBuffers.first};
     archiveFile(rawFile);
   } else
     throw PathDoesntExistError(
