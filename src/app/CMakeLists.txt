@@ -5,6 +5,7 @@ target_sources(Archiver PRIVATE
                common.cpp
                directory.cpp
                file.cpp
+               raw_file.cpp
                staged_directory.cpp
                staged_file.cpp
                )

@@ -63,23 +63,4 @@ private:
   std::string _name;
 };
 
-_make_exception_(RawFileError);
-struct RawFile {
-  RawFile(const std::filesystem::path& path,
-          const std::filesystem::path& relativePath, std::span<uint8_t> buffer);
-
-  const std::string& name() const;
-  const Extension& extension() const;
-  auto parent() const -> const std::filesystem::path&;
-  Size size() const;
-  auto getHashes() const -> const FileHash&;
-
-private:
-  std::string _name;
-  Extension _extension;
-  std::filesystem::path _parent;
-  Size _size;
-  FileHash _fileHash;
-};
-
 #endif
