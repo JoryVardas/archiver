@@ -2,7 +2,6 @@
 #define ARCHIVER_RAW_FILE_HPP
 
 #include "common.h"
-#include "file_read_buffer_old.hpp"
 #include <span>
 
 _make_exception_(FileDoesNotExist);
