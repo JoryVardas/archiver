@@ -9,3 +9,4 @@ AlignConsecutiveMacros: AcrossComments
 ContinuationIndentWidth: 2
 IndentWrappedFunctionNames: false
 ConstructorInitializerIndentWidth: 2
+FixNamespaceComments: false
