@@ -1,4 +1,5 @@
 #include "commandline_options.hpp"
+#include "../config/config.h"
 #include <algorithm>
 #include <filesystem>
 #include <ranges>
@@ -20,6 +21,10 @@ StageCommand::StageCommand()
     )
     ("paths", "List of paths to stage",
       cxxopts::value<std::vector<std::string>>(), "<paths>"
+    )
+    (
+      "config", "Configuration file to use",
+      cxxopts::value<std::string>()->default_value("config.json")
     );
   // clang-format on
 
@@ -45,6 +50,9 @@ void StageCommand::exec() {
   const auto& paths =
     (*this->parse_result)["paths"].as<std::vector<std::string>>();
 
+  const auto config =
+    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+
   const auto prefix = (*this->parse_result)["prefix"].as<std::string>();
 
   // TODO stage(paths, prefix)
@@ -55,7 +63,11 @@ ArchiveCommand::ArchiveCommand()
   // clang-format off
   options.add_options()
     ("help", "Print help")
-    ("v, verbose", "Enable verbose output");
+    ("v, verbose", "Enable verbose output")
+    (
+      "config", "Configuration file to use",
+      cxxopts::value<std::string>()->default_value("config.json")
+    );
   // clang-format on
 }
 void ArchiveCommand::validate() {
@@ -71,6 +83,9 @@ void ArchiveCommand::exec() {
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
 
+  const auto config =
+    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+
   // TODO archive
 }
 
@@ -81,7 +96,11 @@ UploadCommand::UploadCommand()
     ("help", "Print help")
     ("v, verbose", "Enable verbose output")
     ("staged", "Upload staged files")
-    ("archived", "Upload archived files");
+    ("archived", "Upload archived files")
+    (
+      "config", "Configuration file to use",
+      cxxopts::value<std::string>()->default_value("config.json")
+    );
   // clang-format on
 }
 void UploadCommand::validate() {
@@ -102,6 +121,9 @@ void UploadCommand::exec() {
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
 
+  const auto config =
+    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+
   // TODO Upload archived, or staged files
 }
 
@@ -119,6 +141,10 @@ DearchiveCommand::DearchiveCommand()
     )
     ("paths", "List of paths to dearchive",
       cxxopts::value<std::vector<std::string>>(), "<paths>"
+    )
+    (
+      "config", "Configuration file to use",
+      cxxopts::value<std::string>()->default_value("config.json")
     );
   // clang-format on
 
@@ -140,6 +166,9 @@ void DearchiveCommand::exec() {
 
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
+
+  const auto config =
+    Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
   // TODO dearchive
 }
