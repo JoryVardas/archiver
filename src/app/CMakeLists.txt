@@ -8,4 +8,5 @@ target_sources(Archiver PRIVATE
                raw_file.cpp
                staged_directory.cpp
                staged_file.cpp
+               stager.cpp
                )
