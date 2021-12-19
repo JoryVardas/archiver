@@ -42,8 +42,8 @@ CREATE TABLE `file_revision`
 (
     `revision_id`  BIGINT UNSIGNED NOT NULL AUTOINCREMENT,
     `file_id`      BIGINT UNSIGNED NOT NULL,
-    `blake2b`      CHAR(88) NOT NULL,
-    `sha3`         CHAR(88) NOT NULL,
+    `blake2b`      CHAR(128) NOT NULL,
+    `sha3`         CHAR(128) NOT NULL,
     `size`         BIGINT UNSIGNED NOT NULL,
     `archive_time` DATETIME(2) NOT NULL,
     `archive`      BIGINT UNSIGNED NOT NULL,
@@ -77,8 +77,8 @@ CREATE TABLE `staged_file`
     `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `name`      VARCHAR(1024) NOT NULL,
     `parent_id` BIGINT UNSIGNED NOT NULL,
-    `blake2b`   CHAR(88)      NOT NULL,
-    `sha3`      CHAR(88)      NOT NULL,
+    `blake2b`   CHAR(128)     NOT NULL,
+    `sha3`      CHAR(128)     NOT NULL,
     `size`      BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)
