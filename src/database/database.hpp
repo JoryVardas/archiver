@@ -2,14 +2,13 @@
 #define ARCHIVER_DATABASE_HPP
 
 #include "../app/common.h"
+#include <concepts>
 
-class Database {
-public:
-  virtual void startTransaction() abstract;
-  virtual void commit() abstract;
-  virtual void rollback() abstract;
-
-  virtual ~Database() = default;
+template <typename T>
+concept Database = requires(T t) {
+  t.startTransaction();
+  t.commit();
+  t.rollback();
 };
 
 _make_exception_(DatabaseException);

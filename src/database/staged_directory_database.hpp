@@ -4,14 +4,17 @@
 #include "../app/common.h"
 #include "../app/staged_directory.h"
 #include "database.hpp"
+#include <concepts>
 #include <vector>
 
-class StagedDirectoryDatabase : public Database {
-public:
-  virtual auto listAll() -> std::vector<StagedDirectory> abstract;
-  virtual void add(const std::filesystem::path& stagePath) abstract;
-  virtual void remove(const StagedDirectory& directory) abstract;
-  virtual void removeAll() abstract;
+template <typename T>
+concept StagedDirectoryDatabase = Database<T> &&
+  requires(T t, const std::filesystem::path& stagePath,
+           const StagedDirectory& directory) {
+  { t.listAll() } -> std::same_as<std::vector<StagedDirectory>>;
+  t.add(stagePath);
+  t.remove(directory);
+  t.removeAll();
 };
 
 _make_exception_(StagedDirectoryDatabaseException);

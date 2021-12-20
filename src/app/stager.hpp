@@ -6,6 +6,8 @@
 #include "common.h"
 #include <span>
 
+template <StagedFileDatabase StagedFileDatabase,
+          StagedDirectoryDatabase StagedDirectoryDatabase>
 class Stager {
 public:
   Stager(std::shared_ptr<StagedFileDatabase>& fileDatabase,
@@ -29,7 +31,12 @@ private:
   std::shared_ptr<StagedFileDatabase> stagedFileDatabase;
   std::shared_ptr<StagedDirectoryDatabase> stagedDirectoryDatabase;
   std::span<uint8_t> readBuffer;
+
+  using path = std::filesystem::path;
 };
 
 _make_exception_(StagerException);
+
+#include "stager.tpp"
+
 #endif
