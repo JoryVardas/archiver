@@ -24,6 +24,8 @@ private:
   StagedDirectoryID _id;
   std::optional<StagedDirectoryID> _parent;
   std::string _name;
+
+public:
   static constexpr StagedDirectoryID RootDirectoryID = 1;
   static constexpr std::string_view RootDirectoryName = "/";
 };
