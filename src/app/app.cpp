@@ -2,7 +2,6 @@
 #include "archiver.h"
 #include "commandline_options.hpp"
 #include "common.h"
-#include "util/clone_char_ptr_array.hpp"
 #include <cxxsubs.hpp>
 #include <iostream>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -19,11 +18,8 @@ int main(int argc, const char* const argv[]) {
 
     spdlog::set_level(spdlog::level::err);
 
-    auto mutableArgv = cloneCharPtrArray<char*>(argv, argc);
-
-    auto commands =
-      cxxsubs::Verbs<StageCommand, ArchiveCommand, DearchiveCommand,
-                     UploadCommand>(argc, mutableArgv.get());
+    auto commands = cxxsubs::Verbs<StageCommand, ArchiveCommand,
+                                   DearchiveCommand, UploadCommand>(argc, argv);
 
     return EXIT_SUCCESS;
 

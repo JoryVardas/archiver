@@ -10,29 +10,29 @@ class StageCommand : public cxxsubs::IOptions {
 public:
   StageCommand();
 
-  void validate() override;
-  void exec() override;
+  int validate() override;
+  int exec() override;
 };
 class ArchiveCommand : public cxxsubs::IOptions {
 public:
   ArchiveCommand();
 
-  void validate() override;
-  void exec() override;
+  int validate() override;
+  int exec() override;
 };
 class UploadCommand : public cxxsubs::IOptions {
 public:
   UploadCommand();
 
-  void validate() override;
-  void exec() override;
+  int validate() override;
+  int exec() override;
 };
 class DearchiveCommand : public cxxsubs::IOptions {
 public:
   DearchiveCommand();
 
-  void validate() override;
-  void exec() override;
+  int validate() override;
+  int exec() override;
 };
 
 #endif

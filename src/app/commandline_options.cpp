@@ -30,18 +30,20 @@ StageCommand::StageCommand()
 
   options.parse_positional({"paths"});
 }
-void StageCommand::validate() {
+int StageCommand::validate() {
   if (this->parse_result->count("help"))
-    return;
+    return EXIT_SUCCESS;
 
   if (this->parse_result->count("paths") < 1)
     throw CommandValidateException(
       "stage command requires at least one path in <paths>");
+
+  return EXIT_SUCCESS;
 }
-void StageCommand::exec() {
+int StageCommand::exec() {
   if (this->parse_result->count("help")) {
     std::cout << this->options.help({""}) << std::endl;
-    return;
+    return EXIT_SUCCESS;
   }
 
   if (this->parse_result->count("verbose") > 0)
@@ -56,6 +58,7 @@ void StageCommand::exec() {
   const auto prefix = (*this->parse_result)["prefix"].as<std::string>();
 
   // TODO stage(paths, prefix)
+  return EXIT_SUCCESS;
 }
 
 ArchiveCommand::ArchiveCommand()
@@ -70,14 +73,15 @@ ArchiveCommand::ArchiveCommand()
     );
   // clang-format on
 }
-void ArchiveCommand::validate() {
+int ArchiveCommand::validate() {
   if (this->parse_result->count("help"))
-    return;
+    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
-void ArchiveCommand::exec() {
+int ArchiveCommand::exec() {
   if (this->parse_result->count("help")) {
     std::cout << this->options.help({""}) << std::endl;
-    return;
+    return EXIT_SUCCESS;
   }
 
   if (this->parse_result->count("verbose") > 0)
@@ -87,6 +91,7 @@ void ArchiveCommand::exec() {
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
   // TODO archive
+  return EXIT_SUCCESS;
 }
 
 UploadCommand::UploadCommand()
@@ -103,19 +108,20 @@ UploadCommand::UploadCommand()
     );
   // clang-format on
 }
-void UploadCommand::validate() {
+int UploadCommand::validate() {
   if (this->parse_result->count("help"))
-    return;
+    return EXIT_SUCCESS;
 
   if (!(this->parse_result->count("staged") ||
         this->parse_result->count("archived")))
     throw CommandValidateException(
       "upload command requires at least one of -staged or -archived");
+  return EXIT_SUCCESS;
 }
-void UploadCommand::exec() {
+int UploadCommand::exec() {
   if (this->parse_result->count("help")) {
     std::cout << this->options.help({""}) << std::endl;
-    return;
+    return EXIT_SUCCESS;
   }
 
   if (this->parse_result->count("verbose") > 0)
@@ -125,6 +131,7 @@ void UploadCommand::exec() {
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
   // TODO Upload archived, or staged files
+  return EXIT_SUCCESS;
 }
 
 DearchiveCommand::DearchiveCommand()
@@ -150,18 +157,19 @@ DearchiveCommand::DearchiveCommand()
 
   options.parse_positional({"paths"});
 }
-void DearchiveCommand::validate() {
+int DearchiveCommand::validate() {
   if (this->parse_result->count("help"))
-    return;
+    return EXIT_SUCCESS;
 
   if (this->parse_result->count("paths") < 1)
     throw CommandValidateException(
       "dearchive command requires at least one path in <paths>");
+  return EXIT_SUCCESS;
 }
-void DearchiveCommand::exec() {
+int DearchiveCommand::exec() {
   if (this->parse_result->count("help")) {
     std::cout << this->options.help({""}) << std::endl;
-    return;
+    return EXIT_SUCCESS;
   }
 
   if (this->parse_result->count("verbose") > 0)
@@ -171,4 +179,5 @@ void DearchiveCommand::exec() {
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
   // TODO dearchive
+  return EXIT_SUCCESS;
 }

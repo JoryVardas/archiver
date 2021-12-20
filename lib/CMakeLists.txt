@@ -5,8 +5,6 @@ target_include_directories(Archiver SYSTEM PUBLIC cxxopts/include)
 target_include_directories(Archiver SYSTEM PUBLIC spdlog/include)
 target_include_directories(Archiver SYSTEM PUBLIC date/include)
 target_include_directories(Archiver SYSTEM PUBLIC sqlpp11/include)
-target_include_directories(Archiver SYSTEM PUBLIC sqlpp11-connector-mysql/include)
 target_include_directories(Archiver SYSTEM PUBLIC cxxsubs/include)
 
 add_subdirectory(sqlpp11)
-add_subdirectory(sqlpp11-connector-mysql)
