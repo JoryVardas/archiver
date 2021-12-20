@@ -11,10 +11,10 @@ template <typename T>
 concept StagedDirectoryDatabase = Database<T> &&
   requires(T t, const std::filesystem::path& stagePath,
            const StagedDirectory& directory) {
-  { t.listAll() } -> std::same_as<std::vector<StagedDirectory>>;
+  { t.listAllDirectories() } -> std::same_as<std::vector<StagedDirectory>>;
   t.add(stagePath);
   t.remove(directory);
-  t.removeAll();
+  t.removeAllDirectories();
 };
 
 _make_exception_(StagedDirectoryDatabaseException);

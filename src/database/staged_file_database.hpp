@@ -11,10 +11,10 @@ template <typename T>
 concept StagedFileDatabase = Database<T> &&
   requires(T t, const RawFile& file, const std::filesystem::path& stagePath,
            const StagedFile& stagedFile) {
-  { t.listAll() } -> std::same_as<std::vector<StagedFile>>;
+  { t.listAllFiles() } -> std::same_as<std::vector<StagedFile>>;
   t.add(file, stagePath);
   t.remove(stagedFile);
-  t.removeAll();
+  t.removeAllFiles();
 };
 _make_exception_(StagedFileDatabaseException);
 
