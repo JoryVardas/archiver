@@ -111,7 +111,7 @@ void StagedDatabase::add(const RawFile& file,
     databaseConnection(
       insert_into(stagedFilesTable)
         .set(stagedFilesTable.parentId = parentStagedDirectory->id(),
-             stagedFilesTable.name = stagePath.filename(),
+             stagedFilesTable.name = stagePath.filename().string(),
              stagedFilesTable.sha3 = file.shaHash,
              stagedFilesTable.blake2B = file.blakeHash,
              stagedFilesTable.size = file.size));
@@ -183,7 +183,7 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
     databaseConnection(
       insert_into(stagedDirectoriesTable)
         .set(stagedDirectoriesTable.parentId = parentStagedDirectory->id(),
-             stagedDirectoriesTable.name = pathToStage.filename()));
+             stagedDirectoriesTable.name = pathToStage.filename().string()));
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(fmt::format(
       "Could not add directory to staged directory database: {}"s, err));
@@ -225,7 +225,7 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
         select(all_of(stagedDirectoriesTable))
           .from(stagedDirectoriesTable)
           .where(stagedDirectoriesTable.parentId == currentId and
-                 stagedDirectoriesTable.name == name));
+                 stagedDirectoriesTable.name == name.string()));
       if (results.empty()) {
         return std::nullopt;
       }
