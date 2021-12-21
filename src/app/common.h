@@ -3,15 +3,6 @@
 
 #define SPDLOG_FMT_EXTERNAL
 
-#include <filesystem>
-#include <iostream>
-#include <optional>
-#include <spdlog/spdlog.h>
-#include <stdexcept>
-#include <string>
-#include <unfmt.h>
-#include <vector>
-
 // Neither Clang nor GCC have standard libraries which support the <format>
 // library, so use fmtlib which implements it.
 #if __has_include(<format>)
@@ -22,11 +13,20 @@
 //  and std::formatter.
 #define fmt std
 #else
-#define FMT_HEADER_ONLY
+//#define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
 #include <fmt/chrono.h>
 #endif
+
+#include <filesystem>
+#include <iostream>
+#include <optional>
+#include <spdlog/spdlog.h>
+#include <stdexcept>
+#include <string>
+#include <unfmt.h>
+#include <vector>
 
 using CString = const char*;
 using ID = uint64_t;
