@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define SPDLOG_FMT_EXTERNAL
+
 #include <filesystem>
 #include <iostream>
 #include <optional>
@@ -21,8 +23,9 @@
 #define fmt std
 #else
 #define FMT_HEADER_ONLY
-#include <fmt/chrono.h>
 #include <fmt/format.h>
+
+#include <fmt/chrono.h>
 #endif
 
 using CString = const char*;
