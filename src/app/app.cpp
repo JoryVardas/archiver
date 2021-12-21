@@ -2,7 +2,6 @@
 #include "commandline_options.hpp"
 #include "common.h"
 #include <cxxsubs.hpp>
-#include <fmt/format-inl.h>
 #include <iostream>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
