@@ -30,13 +30,13 @@ configure_file(src/config/version.h.in include/config/version.h)
 add_executable(Archiver "")
 
 target_compile_options(Archiver PRIVATE -Wall
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-        -Werror>)
+                       $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+                       -Werror>)
 
 target_include_directories(Archiver PUBLIC lib/)
 target_include_directories(Archiver SYSTEM PUBLIC /usr/include/mysql-cppconn-8)
 
-file(COPY ${CMAKE_SOURCE_DIR}/src/config/settings.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY_FILE ${CMAKE_SOURCE_DIR}/src/config/default_config.json ${CMAKE_CURRENT_BINARY_DIR}/config.json)
 
 add_subdirectory(lib)
 add_subdirectory(src)
