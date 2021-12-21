@@ -96,6 +96,7 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
     throw StagedFileDatabaseException(
       fmt::format("Could not list staged files: {}"s, err));
   }
+  return stagedFiles;
 }
 
 void StagedDatabase::add(const RawFile& file,
@@ -157,6 +158,7 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
     throw StagedDirectoryDatabaseException(
       fmt::format("Could not list staged directories: {}"s, err));
   }
+  return stagedDirectories;
 }
 
 void StagedDatabase::add(const std::filesystem::path& stagePath) {
