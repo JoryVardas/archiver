@@ -4,7 +4,6 @@ target_sources(Archiver PRIVATE
                commandline_options.cpp
                common.cpp
                directory.cpp
-               file.cpp
                raw_file.cpp
                staged_directory.cpp
                staged_file.cpp
