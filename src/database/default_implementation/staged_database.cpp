@@ -212,6 +212,8 @@ void StagedDatabase::removeAllDirectories() {
 
 auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
   -> std::optional<StagedDirectory> {
+  StagedDirectory foundStagedDirectory = StagedDirectory::getRootDirectory();
+
   try {
     ID currentId = StagedDirectory::RootDirectoryID;
 
@@ -219,19 +221,27 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
       if (name == StagedDirectory::RootDirectoryName)
         continue;
 
-      const auto& row = databaseConnection(
+      const auto& results = databaseConnection(
         select(all_of(stagedDirectoriesTable))
           .from(stagedDirectoriesTable)
           .where(stagedDirectoriesTable.parentId == currentId and
                  stagedDirectoriesTable.name == name));
-      if (row.empty()) {
+      if (results.empty()) {
         return std::nullopt;
       }
 
-      currentId = row.front().directoryId;
+      const auto& row = results.front();
+      currentId = row.directoryId;
+      foundStagedDirectory =
+        StagedDirectory(row.directoryId, row.name,
+                        row.parentId == StagedDirectory::RootDirectoryID
+                          ? std::optional<ID>{std::nullopt}
+                          : std::optional<ID>{row.parentId});
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(fmt::format(
       "Could not get directory from staged directory database: {}"s, err));
   }
+
+  return foundStagedDirectory;
 }
