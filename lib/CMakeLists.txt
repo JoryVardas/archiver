@@ -9,5 +9,6 @@ target_include_directories(Archiver SYSTEM PUBLIC cxxsubs/include)
 
 find_package(MySQL REQUIRED)
 target_include_directories(Archiver SYSTEM PUBLIC ${MYSQL_INCLUDE_DIR})
+target_link_libraries(Archiver ${MYSQL_LIBRARIES})
 
 add_subdirectory(sqlpp11)
