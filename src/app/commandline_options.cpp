@@ -1,8 +1,12 @@
 #include "commandline_options.hpp"
 #include "../config/config.h"
+#include "../database/default_implementation/staged_database.hpp"
+#include "stager.hpp"
+#include "util/get_file_read_buffer.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <ranges>
+#include <span>
 #include <spdlog/spdlog.h>
 
 namespace ranges = std::ranges;
@@ -50,14 +54,32 @@ int StageCommand::exec() {
     spdlog::set_level(spdlog::level::info);
 
   const auto& paths =
-    (*this->parse_result)["paths"].as<std::vector<std::string>>();
+    (*this->parse_result)["paths"].as<std::vector<std::filesystem::path>>();
 
   const auto config =
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
   const auto prefix = (*this->parse_result)["prefix"].as<std::string>();
 
-  // TODO stage(paths, prefix)
+  auto [dataPointer, size] = getFileReadBuffer(config);
+  std::span span{dataPointer.get(), size};
+
+  auto databaseConnectionConfig =
+    std::make_shared<StagedDatabase::ConnectionConfig>();
+  databaseConnectionConfig->database = config.database.location.schema;
+  databaseConnectionConfig->host = config.database.location.host;
+  databaseConnectionConfig->port = config.database.location.port;
+  databaseConnectionConfig->user = config.database.user;
+  databaseConnectionConfig->password = config.database.password;
+
+  auto stagedDatabase =
+    std::make_shared<StagedDatabase>(databaseConnectionConfig);
+
+  Stager stager(stagedDatabase, stagedDatabase,
+                std::span{dataPointer.get(), size});
+
+  stager.stage(paths, prefix);
+
   return EXIT_SUCCESS;
 }
 
