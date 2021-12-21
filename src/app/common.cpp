@@ -1,5 +1,4 @@
 #include "common.h"
-#include <fmt/format-inl.h>
 
 bool isDirectory(const std::string& path) {
   return std::filesystem::is_directory(std::filesystem::status(path));
