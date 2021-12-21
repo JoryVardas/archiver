@@ -1,5 +1,4 @@
 #include "../config/config.h"
-#include "archiver.h"
 #include "commandline_options.hpp"
 #include "common.h"
 #include <cxxsubs.hpp>
