@@ -18,6 +18,7 @@ std::string toString(const TimeStamp& timestamp) {
   auto miliseconds = timestampAsMilliseconds - timestampAsSeconds;
   return fmt::format("{:%Y-%m-%e-%H:%M:%S}.{}", timestamp, miliseconds.count());
 };
-TimeStamp toTimestamp(const std::string& str){
-
+TimeStamp toTimestamp(const std::string& str) {
+  // TODO return an actual value here.
+  return std::chrono::system_clock::now();
 };
