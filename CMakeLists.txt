@@ -29,18 +29,25 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 configure_file(src/config/version.h.in include/config/version.h)
 
+# Create an object library targets to allow for a single compilation pass
+add_library(Archiver_sources OBJECT "")
+
+target_compile_options(Archiver_sources PRIVATE -Wall
+                       $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+                       -Werror>)
+
+target_include_directories(Archiver_sources PUBLIC lib/)
+
 # Settings for the app
-add_executable(Archiver "")
+add_executable(Archiver $<TARGET_OBJECTS:Archiver_sources>)
 
 target_compile_options(Archiver PRIVATE -Wall
                        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
                        -Werror>)
 
-target_include_directories(Archiver PUBLIC lib/)
-target_include_directories(Archiver SYSTEM PUBLIC /usr/include/mysql-cppconn-8)
+target_link_libraries(Archiver PRIVATE Archiver_sources)
 
 file(COPY_FILE ${CMAKE_SOURCE_DIR}/src/config/default_config.json ${CMAKE_CURRENT_BINARY_DIR}/config.json)
 
 add_subdirectory(lib)
 add_subdirectory(src)
-

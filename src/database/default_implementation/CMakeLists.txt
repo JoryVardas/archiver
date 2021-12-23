@@ -1,4 +1,4 @@
-target_sources(Archiver PRIVATE
+target_sources(Archiver_sources PRIVATE
                staged_database.cpp
                )
 
