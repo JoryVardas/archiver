@@ -10,6 +10,9 @@ public:
   struct General {
     std::vector<Size> fileReadSizes;
   } general;
+  struct Stager {
+    std::filesystem::path stage_directory;
+  } stager;
   struct Archive {
     std::filesystem::path archive_directory;
     std::filesystem::path temp_archive_directory;

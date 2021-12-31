@@ -9,9 +9,10 @@ template <StagedFileDatabase StagedFileDatabase,
 Stager<StagedFileDatabase, StagedDirectoryDatabase>::Stager(
   std::shared_ptr<StagedFileDatabase>& fileDatabase,
   std::shared_ptr<StagedDirectoryDatabase>& directoryDatabase,
-  std::span<uint8_t> fileReadBuffer)
+  std::span<uint8_t> fileReadBuffer, const path& stageDirectoryLocation)
   : stagedFileDatabase(fileDatabase),
-    stagedDirectoryDatabase(directoryDatabase), readBuffer(fileReadBuffer) {}
+    stagedDirectoryDatabase(directoryDatabase), readBuffer(fileReadBuffer),
+    stageLocation(stageDirectoryLocation) {}
 
 template <StagedFileDatabase StagedFileDatabase,
           StagedDirectoryDatabase StagedDirectoryDatabase>
@@ -38,6 +39,9 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
       try {
         stageFile(itemPath, removePrefix(itemPath));
       } catch (StagedFileDatabaseException& err) {
+        throw StagerException(fmt::format("Could not stage file \"{}\" : {}",
+                                          itemPath, err.what()));
+      } catch (std::filesystem::filesystem_error& err) {
         throw StagerException(fmt::format("Could not stage file \"{}\" : {}",
                                           itemPath, err.what()));
       }
@@ -101,5 +105,7 @@ template <StagedFileDatabase StagedFileDatabase,
 void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stageFile(
   const std::filesystem::path& path, const std::filesystem::path& stagePath) {
   RawFile rawFile{path, readBuffer};
+  std::filesystem::copy(rawFile.path,
+                        stageLocation / (rawFile.shaHash + rawFile.blakeHash));
   stagedFileDatabase->add(rawFile, stagePath);
 }

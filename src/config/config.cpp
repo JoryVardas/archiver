@@ -29,12 +29,16 @@ Config::Config(const std::filesystem::path& path) {
   configFile.close();
 
   auto general = configuration["general"];
+  auto stager = configuration["stager"];
   auto archive = configuration["archive"];
   auto database = configuration["database"];
   auto aws = configuration["aws"];
 
   if (general.is_null()) {
     throw ConfigError("Config file is missing a required section \"general\".");
+  }
+  if (stager.is_null()) {
+    throw ConfigError("Config file is missing a required section \"stager\".");
   }
   if (archive.is_null()) {
     throw ConfigError("Config file is missing a required section \"archive\".");
@@ -48,6 +52,7 @@ Config::Config(const std::filesystem::path& path) {
   }
 
   auto general_file_read_sizes = general["file_read_sizes"];
+  auto stager_stage_directory = stager["stage_directory"];
   auto archive_archive_directory = archive["archive_directory"];
   auto archive_temp_archive_directory = archive["temp_archive_directory"];
   auto archive_target_size = archive["target_size"];
@@ -62,6 +67,10 @@ Config::Config(const std::filesystem::path& path) {
   if (general_file_read_sizes.is_null()) {
     throw ConfigError("Config file is missing a required entry "
                       "\"file_read_size\" in section \"general\".");
+  }
+  if (stager_stage_directory.is_null()) {
+    throw ConfigError("Config file is missing a required entry "
+                      "\"stage_directory\" in section \"stager\".");
   }
   if (archive_archive_directory.is_null()) {
     throw ConfigError("Config file is missing a required entry "
@@ -123,6 +132,7 @@ Config::Config(const std::filesystem::path& path) {
 
   this->general.fileReadSizes =
     general_file_read_sizes.get<std::vector<Size>>();
+  this->stager.stage_directory = stager_stage_directory.get<std::string>();
   this->archive.archive_directory =
     archive_archive_directory.get<std::string>();
   this->archive.temp_archive_directory =

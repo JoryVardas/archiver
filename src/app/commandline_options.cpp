@@ -76,7 +76,8 @@ int StageCommand::exec() {
     std::make_shared<StagedDatabase>(databaseConnectionConfig);
 
   Stager stager(stagedDatabase, stagedDatabase,
-                std::span{dataPointer.get(), size});
+                std::span{dataPointer.get(), size},
+                config.stager.stage_directory);
 
   stager.stage(paths, prefix);
 
