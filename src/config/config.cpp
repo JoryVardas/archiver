@@ -1,5 +1,4 @@
 #include "config.h"
-#include <exception>
 #include <fstream>
 #include <json.hpp>
 
@@ -9,6 +8,7 @@ _make_formatter_for_exception_(nlohmann::json::parse_error);
 
 Config::Config(const std::filesystem::path& path) {
   using namespace nlohmann;
+  using namespace std::string_literals;
 
   std::ifstream configFile(path);
   if (!configFile.is_open())
@@ -28,124 +28,48 @@ Config::Config(const std::filesystem::path& path) {
 
   configFile.close();
 
-  auto general = configuration["general"];
-  auto stager = configuration["stager"];
-  auto archive = configuration["archive"];
-  auto database = configuration["database"];
-  auto aws = configuration["aws"];
+  const auto getRequired = [&](const std::string& jsonPointer) {
+    try {
+      return configuration.at(json::json_pointer{jsonPointer});
+    } catch (const json::out_of_range& err) {
+      auto jsonPointerView = std::string_view{jsonPointer};
+      jsonPointerView.remove_prefix(1);
+      throw ConfigError(fmt::format(
+        "Config file is missing a required entry \"{}\"", jsonPointerView));
+    }
+  };
 
-  if (general.is_null()) {
-    throw ConfigError("Config file is missing a required section \"general\".");
-  }
-  if (stager.is_null()) {
-    throw ConfigError("Config file is missing a required section \"stager\".");
-  }
-  if (archive.is_null()) {
-    throw ConfigError("Config file is missing a required section \"archive\".");
-  }
-  if (database.is_null()) {
-    throw ConfigError(
-      "Config file is missing a required section \"database\".");
-  }
-  if (aws.is_null()) {
-    throw ConfigError("Config file is missing a required section \"aws\".");
-  }
+  // Call getRequired with on objects even though their values need to be
+  // retrieved separately, this is so that an error is generated if the section
+  // does not exist.
 
-  auto general_file_read_sizes = general["file_read_sizes"];
-  auto stager_stage_directory = stager["stage_directory"];
-  auto archive_archive_directory = archive["archive_directory"];
-  auto archive_temp_archive_directory = archive["temp_archive_directory"];
-  auto archive_target_size = archive["target_size"];
-  auto archive_single_archive_size = archive["single_archive_size"];
-  auto database_user = database["user"];
-  auto database_password = database["password"];
-  auto database_location = database["location"];
-  auto database_options = database["options"];
-  auto aws_access_key = aws["access_key"];
-  auto aws_secret_key = aws["secret_key"];
+  getRequired("/general"s);
+  getRequired("/general/file_read_sizes"s).get_to(this->general.fileReadSizes);
 
-  if (general_file_read_sizes.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"file_read_size\" in section \"general\".");
-  }
-  if (stager_stage_directory.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"stage_directory\" in section \"stager\".");
-  }
-  if (archive_archive_directory.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"archive_directory\" in section \"archive\".");
-  }
-  if (archive_temp_archive_directory.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"temp_archive_directory\" in section \"archive\".");
-  }
-  if (archive_target_size.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"target_size\" in section \"archive\".");
-  }
-  if (archive_single_archive_size.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"single_archive_size\" in section \"archive\".");
-  }
-  if (database_user.is_null()) {
-    throw ConfigError("Config file is missing a required entry \"user\" in "
-                      "section \"database\".");
-  }
-  if (database_password.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"password\" in section \"database\".");
-  }
-  if (database_location.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"location\" in section \"database\".");
-  }
-  if (database_options.is_null()) {
-    throw ConfigError("Config file is missing a required entry \"options\" "
-                      "in section \"database\".");
-  }
-  if (aws_access_key.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"access_key\" in section \"aws\".");
-  }
-  if (aws_secret_key.is_null()) {
-    throw ConfigError("Config file is missing a required entry "
-                      "\"secret_key\" in section \"aws\".");
-  }
+  getRequired("/stager"s);
+  getRequired("/stager/stage_directory"s).get_to(this->stager.stage_directory);
 
-  auto database_location_host = database_location["host"];
-  auto database_location_port = database_location["port"];
-  auto database_location_schema = database_location["schema"];
+  getRequired("/archive"s);
+  getRequired("/archive/archive_directory"s)
+    .get_to(this->archive.archive_directory);
+  getRequired("/archive/temp_archive_directory"s)
+    .get_to(this->archive.temp_archive_directory);
+  getRequired("/archive/target_size"s).get_to(this->archive.target_size);
+  getRequired("/archive/single_archive_size"s)
+    .get_to(this->archive.single_archive_size);
 
-  if (database_location_host.is_null()) {
-    throw ConfigError("Config file is missing a required entry \"host\" in "
-                      "section \"database.location\".");
-  }
-  if (database_location_port.is_null()) {
-    throw ConfigError("Config file is missing a required entry \"port\" in "
-                      "section \"database.location\".");
-  }
-  if (database_location_schema.is_null()) {
-    throw ConfigError("Config file is missing a required entry \"schema\" "
-                      "in section \"database.location\".");
-  }
+  getRequired("/database"s);
+  getRequired("/database/user"s).get_to(this->database.user);
+  getRequired("/database/password"s).get_to(this->database.password);
+  getRequired("/database/options"s).get_to(this->database.options);
 
-  this->general.fileReadSizes =
-    general_file_read_sizes.get<std::vector<Size>>();
-  this->stager.stage_directory = stager_stage_directory.get<std::string>();
-  this->archive.archive_directory =
-    archive_archive_directory.get<std::string>();
-  this->archive.temp_archive_directory =
-    archive_temp_archive_directory.get<std::string>();
-  this->archive.target_size = archive_target_size.get<uint64_t>();
-  this->archive.single_archive_size =
-    archive_single_archive_size.get<uint64_t>();
-  this->database.user = database_user.get<std::string>();
-  this->database.password = database_password.get<std::string>();
-  this->database.location.host = database_location_host.get<std::string>();
-  this->database.location.port = database_location_port.get<uint64_t>();
-  this->database.location.schema = database_location_schema.get<std::string>();
-  this->database.options = database_options.get<std::vector<std::string>>();
-  this->aws.access_key = aws_access_key.get<std::string>();
-  this->aws.secret_key = aws_secret_key.get<std::string>();
-};
+  getRequired("/database/location"s);
+  getRequired("/database/location/host"s).get_to(this->database.location.host);
+  getRequired("/database/location/port"s).get_to(this->database.location.port);
+  getRequired("/database/location/schema"s)
+    .get_to(this->database.location.schema);
+
+  getRequired("/aws"s);
+  getRequired("/aws/access_key"s).get_to(this->aws.access_key);
+  getRequired("/aws/secret_key"s).get_to(this->aws.secret_key);
+}
