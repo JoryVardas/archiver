@@ -23,6 +23,9 @@ public:
   Stager(Stager&&) = default;
   ~Stager() = default;
 
+  Stager& operator=(const Stager&) = delete;
+  Stager& operator=(Stager&&) = default;
+
 private:
   void stageFile(const std::filesystem::path& path,
                  const std::filesystem::path& stagePath);
