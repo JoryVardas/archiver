@@ -24,17 +24,4 @@ private:
   static constexpr std::string_view RootDirectoryName = "/";
 };
 
-_make_exception_(RawDirectoryError);
-struct RawDirectory {
-  explicit RawDirectory(const std::filesystem::path& path);
-
-  const std::filesystem::path& containingPath() const;
-  const std::string& name() const;
-  std::filesystem::path fullPath() const;
-
-private:
-  std::string _name;
-  std::filesystem::path _containingPath;
-};
-
 #endif
