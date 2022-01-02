@@ -9,23 +9,41 @@ USE
 
 CREATE TABLE `directory`
 (
-    `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024)   NOT NULL,
-    `parent_id` BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(1024)   NOT NULL,
+    PRIMARY KEY (`id`)
 );
 
-INSERT INTO `directory` (`name`, `parent_id`)
-VALUES ("/", 1);
+CREATE TABLE `directory_parent`
+(
+    `parent_id` BIGINT UNSIGNED NOT NULL,
+    `child_id`  BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`parent_id`, `child_id`),
+    FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`),
+    FOREIGN KEY (`child_id`) REFERENCES `directory` (`id`)
+);
+
+INSERT INTO `directory` (`name`)
+VALUES ("/");
+INSERT INTO `directory_parent` (`parent_id`, `child_id`)
+SELECT `id` AS `parent`, `id` AS `child`
+FROM `directory`
+LIMIT 1;
 
 CREATE TABLE `file`
 (
-    `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024)   NOT NULL,
-    `parent_id` BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(1024)   NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `file_parent`
+(
+    `directory_id` BIGINT UNSIGNED NOT NULL,
+    `file_id`      BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`directory_id`, `file_id`),
+    FOREIGN KEY (`directory_id`) REFERENCES `directory` (`id`),
+    FOREIGN KEY (`file_id`) REFERENCES `file` (`id`)
 );
 
 CREATE TABLE `archive`
@@ -40,46 +58,72 @@ VALUES ("<SINGLE>");
 
 CREATE TABLE `file_revision`
 (
-    `revision_id`  BIGINT UNSIGNED NOT NULL AUTOINCREMENT,
-    `file_id`      BIGINT UNSIGNED NOT NULL,
-    `blake2b`      CHAR(128)       NOT NULL,
-    `sha3`         CHAR(128)       NOT NULL,
-    `size`         BIGINT UNSIGNED NOT NULL,
+    `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `blake2b`      CHAR(128),
+    `sha3`         CHAR(128),
+    `size`         BIGINT UNSIGNED,
     `archive_time` DATETIME(2)     NOT NULL,
-    `archive`      BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (`revision_id`),
-    FOREIGN KEY (`file_id`) REFERENCES `file` (`id`),
-    FOREIGN KEY (`archive`) REFERENCES `archive` (`id`)
+    PRIMARY KEY (`id`)
 );
 
-CREATE TABLE `file_duplicate`
+CREATE TABLE `file_revision_parent`
 (
-    `id`                    BIGINT UNSIGNED NOT NULL AUTOINCREMENT,
-    `file_id`               BIGINT UNSIGNED NOT NULL,
-    `archive_time`          DATETIME(2)     NOT NULL,
-    `duplicate_revision_id` BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`file_id`) REFERENCES `file` (`id`),
-    FOREIGN KEY (`duplicate_revision_id`) REFERENCES `file_revision` (`revision_id`)
+    `revision_id` BIGINT UNSIGNED NOT NULL,
+    `file_id`     BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`revision_id`, `file_id`),
+    FOREIGN KEY (`revision_id`) REFERENCES `file_revision` (`id`),
+    FOREIGN KEY (`file_id`) REFERENCES `file` (`id`)
+);
+
+CREATE TABLE `file_revision_archive`
+(
+    `revision_id` BIGINT UNSIGNED NOT NULL,
+    `archive_id`  BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`revision_id`, `archive_id`),
+    FOREIGN KEY (`revision_id`) REFERENCES `file_revision` (`id`),
+    FOREIGN KEY (`archive_id`) REFERENCES `archive` (`id`)
+);
+
+CREATE TABLE `file_revision_duplicate`
+(
+    `revision_id`          BIGINT UNSIGNED NOT NULL,
+    `original_revision_id` BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`revision_id`, `original_revision_id`),
+    FOREIGN KEY (`revision_id`) REFERENCES `file_revision` (`id`),
+    FOREIGN KEY (`original_revision_id`) REFERENCES `file_revision` (`id`)
 );
 
 CREATE TABLE `staged_directory`
 (
-    `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024)   NOT NULL,
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(1024)   NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `staged_directory_parent`
+(
     `parent_id` BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`parent_id`) REFERENCES `staged_directory` (`id`)
+    `child_id`  BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`parent_id`, `child_id`),
+    FOREIGN KEY (`parent_id`) REFERENCES `staged_directory` (`id`),
+    FOREIGN KEY (`child_id`) REFERENCES `staged_directory` (`id`)
 );
 
 CREATE TABLE `staged_file`
 (
-    `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024)   NOT NULL,
-    `parent_id` BIGINT UNSIGNED NOT NULL,
-    `blake2b`   CHAR(128)       NOT NULL,
-    `sha3`      CHAR(128)       NOT NULL,
-    `size`      BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)
+    `id`      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`    VARCHAR(1024)   NOT NULL,
+    `blake2b` CHAR(128)       NOT NULL,
+    `sha3`    CHAR(128)       NOT NULL,
+    `size`    BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `staged_file_parent`
+(
+    `directory_id` BIGINT UNSIGNED NOT NULL,
+    `file_id`      BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`directory_id`, `file_id`),
+    FOREIGN KEY (`directory_id`) REFERENCES `staged_directory` (`id`),
+    FOREIGN KEY (`file_id`) REFERENCES `staged_file` (`id`)
 );

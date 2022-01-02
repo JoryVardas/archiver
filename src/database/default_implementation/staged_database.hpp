@@ -43,7 +43,9 @@ public:
 private:
   sqlpp::mysql::connection databaseConnection;
   archiver_database::StagedFile stagedFilesTable;
+  archiver_database::StagedFileParent stagedFileParentTable;
   archiver_database::StagedDirectory stagedDirectoriesTable;
+  archiver_database::StagedDirectoryParent stagedDirectoryParentTable;
   bool hasTransaction = false;
 
   auto getStagedDirectory(const std::filesystem::path& stagePath)

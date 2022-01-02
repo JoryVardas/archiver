@@ -88,7 +88,13 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
                                         .unconditionally());
 
     for (const auto& stagedFile : results) {
-      stagedFiles.emplace_back(stagedFile.id, stagedFile.parentId,
+      const auto& stagedFileParent =
+        databaseConnection(
+          select(stagedFileParentTable.directoryId)
+            .from(stagedFileParentTable)
+            .where(stagedFileParentTable.fileId == stagedFile.id))
+          .front();
+      stagedFiles.emplace_back(stagedFile.id, stagedFileParent.directoryId,
                                stagedFile.name, stagedFile.size,
                                stagedFile.sha3, stagedFile.blake2B);
     }
@@ -108,13 +114,16 @@ void StagedDatabase::add(const RawFile& file,
         "Could not add file to staged file database as the parent directory "
         "hasn't been added to the staged directory database"));
     }
-    databaseConnection(
+    const auto stagedFileId = databaseConnection(
       insert_into(stagedFilesTable)
-        .set(stagedFilesTable.parentId = parentStagedDirectory->id(),
-             stagedFilesTable.name = stagePath.filename().string(),
+        .set(stagedFilesTable.name = stagePath.filename().string(),
              stagedFilesTable.sha3 = file.shaHash,
              stagedFilesTable.blake2B = file.blakeHash,
              stagedFilesTable.size = file.size));
+    databaseConnection(
+      insert_into(stagedFileParentTable)
+        .set(stagedFileParentTable.fileId = stagedFileId,
+             stagedFileParentTable.directoryId = parentStagedDirectory->id()));
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(
       fmt::format("Could not add file to staged file database: {}"s, err));
@@ -148,11 +157,17 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
                                         .unconditionally());
 
     for (const auto& stagedDirectory : results) {
+      const auto& stagedDirectoryParent =
+        databaseConnection(
+          select(stagedDirectoryParentTable.parentId)
+            .from(stagedDirectoryParentTable)
+            .where(stagedDirectoryParentTable.childId == stagedDirectory.id))
+          .front();
       stagedDirectories.emplace_back(
         stagedDirectory.id, stagedDirectory.name,
-        stagedDirectory.parentId == StagedDirectory::RootDirectoryID
+        stagedDirectoryParent.parentId == StagedDirectory::RootDirectoryID
           ? std::optional<ID>{std::nullopt}
-          : std::optional<ID>{stagedDirectory.parentId});
+          : std::optional<ID>{stagedDirectoryParent.parentId});
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(
@@ -180,10 +195,13 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
     }
     parentStagedDirectory = getStagedDirectory(pathToStage.parent_path());
 
-    databaseConnection(
+    const auto stagedDirectoryId = databaseConnection(
       insert_into(stagedDirectoriesTable)
-        .set(stagedDirectoriesTable.parentId = parentStagedDirectory->id(),
-             stagedDirectoriesTable.name = pathToStage.filename().string()));
+        .set(stagedDirectoriesTable.name = pathToStage.filename().string()));
+    databaseConnection(
+      insert_into(stagedDirectoryParentTable)
+        .set(stagedDirectoryParentTable.parentId = parentStagedDirectory->id(),
+             stagedDirectoryParentTable.childId = stagedDirectoryId));
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(fmt::format(
       "Could not add directory to staged directory database: {}"s, err));
@@ -222,9 +240,12 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
         continue;
 
       const auto& results = databaseConnection(
-        select(all_of(stagedDirectoriesTable))
-          .from(stagedDirectoriesTable)
-          .where(stagedDirectoriesTable.parentId == currentId and
+        select(all_of(stagedDirectoriesTable),
+               stagedDirectoryParentTable.parentId)
+          .from(stagedDirectoriesTable.join(stagedDirectoryParentTable)
+                  .on(stagedDirectoriesTable.id ==
+                      stagedDirectoryParentTable.childId))
+          .where(stagedDirectoryParentTable.parentId == currentId and
                  stagedDirectoriesTable.name == name.string()));
       if (results.empty()) {
         return std::nullopt;
