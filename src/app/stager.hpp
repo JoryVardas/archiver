@@ -18,6 +18,9 @@ public:
   void stage(const std::vector<std::filesystem::path>& paths,
              std::string_view prefixToRemove);
 
+  auto getDirectoriesSorted() -> std::vector<StagedDirectory>;
+  auto getFilesSorted() -> std::vector<StagedFile>;
+
   Stager() = delete;
   Stager(const Stager&) = delete;
   Stager(Stager&&) = default;

@@ -96,6 +96,23 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
 
 template <StagedFileDatabase StagedFileDatabase,
           StagedDirectoryDatabase StagedDirectoryDatabase>
+auto Stager<StagedFileDatabase, StagedDirectoryDatabase>::getDirectoriesSorted()
+  -> std::vector<StagedDirectory> {
+  auto directories = stagedDirectoryDatabase->list();
+  std::ranges::sort(directories, {}, &StagedDirectory::id);
+  return directories;
+}
+template <StagedFileDatabase StagedFileDatabase,
+          StagedDirectoryDatabase StagedDirectoryDatabase>
+auto Stager<StagedFileDatabase, StagedDirectoryDatabase>::getFilesSorted()
+  -> std::vector<StagedFile> {
+  auto files = stagedFileDatabase->list();
+  std::ranges::sort(files, {}, &StagedFile::parent);
+  return files;
+}
+
+template <StagedFileDatabase StagedFileDatabase,
+          StagedDirectoryDatabase StagedDirectoryDatabase>
 void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stageDirectory(
   const std::filesystem::path& path, const std::filesystem::path& stagePath) {
   stagedDirectoryDatabase->add({stagePath});
