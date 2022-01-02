@@ -1,16 +1,16 @@
 DROP
-DATABASE IF EXISTS `archiver`;
+    DATABASE IF EXISTS `archiver`;
 
 CREATE
-DATABASE `archiver`;
+    DATABASE `archiver`;
 
 USE
-`archiver`;
+    `archiver`;
 
 CREATE TABLE `directory`
 (
     `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024) NOT NULL,
+    `name`      VARCHAR(1024)   NOT NULL,
     `parent_id` BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)
@@ -22,7 +22,7 @@ VALUES ("/", 1);
 CREATE TABLE `file`
 (
     `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024) NOT NULL,
+    `name`      VARCHAR(1024)   NOT NULL,
     `parent_id` BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)
@@ -31,7 +31,7 @@ CREATE TABLE `file`
 CREATE TABLE `archive`
 (
     `id`       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `contents` VARCHAR(255) NOT NULL,
+    `contents` VARCHAR(255)    NOT NULL,
     PRIMARY KEY (`id`)
 );
 
@@ -42,10 +42,10 @@ CREATE TABLE `file_revision`
 (
     `revision_id`  BIGINT UNSIGNED NOT NULL AUTOINCREMENT,
     `file_id`      BIGINT UNSIGNED NOT NULL,
-    `blake2b`      CHAR(128) NOT NULL,
-    `sha3`         CHAR(128) NOT NULL,
+    `blake2b`      CHAR(128)       NOT NULL,
+    `sha3`         CHAR(128)       NOT NULL,
     `size`         BIGINT UNSIGNED NOT NULL,
-    `archive_time` DATETIME(2) NOT NULL,
+    `archive_time` DATETIME(2)     NOT NULL,
     `archive`      BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`revision_id`),
     FOREIGN KEY (`file_id`) REFERENCES `file` (`id`),
@@ -56,7 +56,7 @@ CREATE TABLE `file_duplicate`
 (
     `id`                    BIGINT UNSIGNED NOT NULL AUTOINCREMENT,
     `file_id`               BIGINT UNSIGNED NOT NULL,
-    `archive_time`          DATETIME(2) NOT NULL,
+    `archive_time`          DATETIME(2)     NOT NULL,
     `duplicate_revision_id` BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`file_id`) REFERENCES `file` (`id`),
@@ -65,9 +65,9 @@ CREATE TABLE `file_duplicate`
 
 CREATE TABLE `staged_directory`
 (
-    `directory_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`         VARCHAR(1024) NOT NULL,
-    `parent_id`    BIGINT UNSIGNED NOT NULL,
+    `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`      VARCHAR(1024)   NOT NULL,
+    `parent_id` BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `staged_directory` (`id`)
 );
@@ -75,10 +75,10 @@ CREATE TABLE `staged_directory`
 CREATE TABLE `staged_file`
 (
     `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`      VARCHAR(1024) NOT NULL,
+    `name`      VARCHAR(1024)   NOT NULL,
     `parent_id` BIGINT UNSIGNED NOT NULL,
-    `blake2b`   CHAR(128)     NOT NULL,
-    `sha3`      CHAR(128)     NOT NULL,
+    `blake2b`   CHAR(128)       NOT NULL,
+    `sha3`      CHAR(128)       NOT NULL,
     `size`      BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`)

@@ -149,7 +149,7 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
 
     for (const auto& stagedDirectory : results) {
       stagedDirectories.emplace_back(
-        stagedDirectory.directoryId, stagedDirectory.name,
+        stagedDirectory.id, stagedDirectory.name,
         stagedDirectory.parentId == StagedDirectory::RootDirectoryID
           ? std::optional<ID>{std::nullopt}
           : std::optional<ID>{stagedDirectory.parentId});
@@ -194,7 +194,7 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
   try {
     databaseConnection(
       remove_from(stagedDirectoriesTable)
-        .where(stagedDirectoriesTable.directoryId == stagedDirectory.id()));
+        .where(stagedDirectoriesTable.id == stagedDirectory.id()));
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(fmt::format(
       "Could not remove directory from staged directory database: {}"s, err));
@@ -231,9 +231,9 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
       }
 
       const auto& row = results.front();
-      currentId = row.directoryId;
+      currentId = row.id;
       foundStagedDirectory =
-        StagedDirectory(row.directoryId, row.name,
+        StagedDirectory(row.id, row.name,
                         row.parentId == StagedDirectory::RootDirectoryID
                           ? std::optional<ID>{std::nullopt}
                           : std::optional<ID>{row.parentId});
