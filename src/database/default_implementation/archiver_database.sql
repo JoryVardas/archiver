@@ -59,8 +59,7 @@ VALUES ("<SINGLE>");
 CREATE TABLE `file_revision`
 (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `blake2b`      CHAR(128),
-    `sha3`         CHAR(128),
+    `hash`         CHAR(256),
     `size`         BIGINT UNSIGNED,
     `archive_time` DATETIME(2)     NOT NULL,
     PRIMARY KEY (`id`)
@@ -111,11 +110,10 @@ CREATE TABLE `staged_directory_parent`
 
 CREATE TABLE `staged_file`
 (
-    `id`      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`    VARCHAR(1024)   NOT NULL,
-    `blake2b` CHAR(128)       NOT NULL,
-    `sha3`    CHAR(128)       NOT NULL,
-    `size`    BIGINT UNSIGNED NOT NULL,
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(1024)   NOT NULL,
+    `hash` CHAR(256)       NOT NULL,
+    `size` BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`)
 );
 

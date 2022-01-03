@@ -37,8 +37,7 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
     blake2B.addData(buffer.data(), read);
   }
 
-  this->shaHash = sha3.finalize().toString();
-  this->blakeHash = blake2B.finalize().toString();
+  this->hash = sha3.finalize().toString() + blake2B.finalize().toString();
   this->size = std::filesystem::file_size(path);
   this->path = path;
 }

@@ -96,7 +96,7 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
           .front();
       stagedFiles.emplace_back(stagedFile.id, stagedFileParent.directoryId,
                                stagedFile.name, stagedFile.size,
-                               stagedFile.sha3, stagedFile.blake2B);
+                               stagedFile.hash);
     }
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(
@@ -117,8 +117,7 @@ void StagedDatabase::add(const RawFile& file,
     const auto stagedFileId = databaseConnection(
       insert_into(stagedFilesTable)
         .set(stagedFilesTable.name = stagePath.filename().string(),
-             stagedFilesTable.sha3 = file.shaHash,
-             stagedFilesTable.blake2B = file.blakeHash,
+             stagedFilesTable.hash = file.hash,
              stagedFilesTable.size = file.size));
     databaseConnection(
       insert_into(stagedFileParentTable)

@@ -11,8 +11,7 @@ _make_exception_(FileException);
 struct RawFile {
 public:
   std::uint64_t size;
-  std::string shaHash;
-  std::string blakeHash;
+  std::string hash;
   std::filesystem::path path;
 
   RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer);

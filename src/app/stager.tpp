@@ -122,7 +122,6 @@ template <StagedFileDatabase StagedFileDatabase,
 void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stageFile(
   const std::filesystem::path& path, const std::filesystem::path& stagePath) {
   RawFile rawFile{path, readBuffer};
-  std::filesystem::copy(rawFile.path,
-                        stageLocation / (rawFile.shaHash + rawFile.blakeHash));
+  std::filesystem::copy(rawFile.path, stageLocation / rawFile.hash);
   stagedFileDatabase->add(rawFile, stagePath);
 }

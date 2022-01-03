@@ -10,8 +10,7 @@ using StagedFileID = FileID;
 struct StagedFile {
 public:
   StagedFile(StagedFileID id, StagedDirectoryID parent,
-             const std::string& stagedName, Size size,
-             const std::string& shaHash, const std::string& blakeHash);
+             const std::string& stagedName, Size size, const std::string& hash);
 
   StagedFile() = delete;
   StagedFile(const StagedFile&) = default;
@@ -20,8 +19,7 @@ public:
   StagedFile& operator=(StagedFile&&) = default;
 
   Size size;
-  std::string shaHash;
-  std::string blakeHash;
+  std::string hash;
   std::string name;
   StagedDirectoryID parent;
   StagedFileID id;
