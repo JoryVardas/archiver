@@ -2,10 +2,9 @@
 #define ARCHIVER_STAGED_FILE_HPP
 
 #include "common.h"
-#include "file.h"
 #include "staged_directory.h"
 
-using StagedFileID = FileID;
+using StagedFileID = ID;
 
 struct StagedFile {
 public:
