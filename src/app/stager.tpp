@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/string_helpers.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <ranges>
@@ -20,15 +21,12 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
   const std::vector<path>& paths, std::string_view prefixToRemove) {
   // If the prefix has a trailing forward slash then when we remove it from a
   // path that path will be missing a leading forward slash.
-  if (prefixToRemove.ends_with('/'))
-    prefixToRemove.remove_suffix(1);
+  prefixToRemove = removeSuffix(prefixToRemove, "/");
 
   const auto removePrefix = [&](const path& fullPath) -> path {
     auto stringPath = fullPath.generic_string();
     std::string_view stringPathView = stringPath;
-    if (stringPathView.starts_with(prefixToRemove)) {
-      stringPathView.remove_prefix(prefixToRemove.size());
-    }
+    ::removePrefix(stringPathView, prefixToRemove);
     // Need to make a copy because the string that stringPathView is viewing is
     // local.
     return {stringPathView};
