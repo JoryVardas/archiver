@@ -1,5 +1,4 @@
 target_sources(Archiver_sources PRIVATE
-               archive.cpp
                commandline_options.cpp
                common.cpp
                raw_file.cpp
