@@ -96,7 +96,7 @@ template <StagedFileDatabase StagedFileDatabase,
           StagedDirectoryDatabase StagedDirectoryDatabase>
 auto Stager<StagedFileDatabase, StagedDirectoryDatabase>::getDirectoriesSorted()
   -> std::vector<StagedDirectory> {
-  auto directories = stagedDirectoryDatabase->list();
+  auto directories = stagedDirectoryDatabase->listAllDirectories();
   std::ranges::sort(directories, {}, &StagedDirectory::id);
   return directories;
 }
@@ -104,7 +104,7 @@ template <StagedFileDatabase StagedFileDatabase,
           StagedDirectoryDatabase StagedDirectoryDatabase>
 auto Stager<StagedFileDatabase, StagedDirectoryDatabase>::getFilesSorted()
   -> std::vector<StagedFile> {
-  auto files = stagedFileDatabase->list();
+  auto files = stagedFileDatabase->listAllFiles();
   std::ranges::sort(files, {}, &StagedFile::parent);
   return files;
 }
