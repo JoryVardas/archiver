@@ -1,6 +1,8 @@
 #include "commandline_options.hpp"
 #include "../config/config.h"
+#include "../database/default_implementation/archived_database.hpp"
 #include "../database/default_implementation/staged_database.hpp"
+#include "archiver.hpp"
 #include "stager.hpp"
 #include "util/get_file_read_buffer.hpp"
 #include <algorithm>
@@ -113,7 +115,31 @@ int ArchiveCommand::exec() {
   const auto config =
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
-  // TODO archive
+  auto fakeReadBuffer = std::array<uint8_t, 1>{0};
+
+  auto databaseConnectionConfig =
+    std::make_shared<StagedDatabase::ConnectionConfig>();
+  databaseConnectionConfig->database = config.database.location.schema;
+  databaseConnectionConfig->host = config.database.location.host;
+  databaseConnectionConfig->port = config.database.location.port;
+  databaseConnectionConfig->user = config.database.user;
+  databaseConnectionConfig->password = config.database.password;
+
+  auto stagedDatabase =
+    std::make_shared<StagedDatabase>(databaseConnectionConfig);
+  auto archivedDatabase = std::make_shared<ArchivedDatabase>(
+    databaseConnectionConfig, config.archive.target_size);
+
+  Stager stager(stagedDatabase, stagedDatabase,
+                std::span{fakeReadBuffer.data(), 1},
+                config.stager.stage_directory);
+  Archiver<ArchivedDatabase, ArchivedDatabase, ArchivedDatabase> archiver(
+    archivedDatabase, archivedDatabase, archivedDatabase,
+    config.stager.stage_directory, config.archive.temp_archive_directory,
+    config.archive.single_archive_size);
+
+  archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted());
+
   return EXIT_SUCCESS;
 }
 
