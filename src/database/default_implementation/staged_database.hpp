@@ -6,12 +6,9 @@
 #include "../../app/staged_directory.h"
 #include "../../app/staged_file.hpp"
 #include "archiver_database.h"
+#include "database.hpp"
 #include <optional>
-#include <sqlpp11/mysql/mysql.h>
-#include <sqlpp11/sqlpp11.h>
 #include <vector>
-
-_make_formatter_for_exception_(sqlpp::exception);
 
 class StagedDatabase {
 public:
