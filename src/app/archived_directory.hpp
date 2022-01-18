@@ -21,6 +21,8 @@ private:
   ArchivedDirectoryID _id;
   std::optional<ArchivedDirectoryID> _parent;
   std::string _name;
+
+public:
   static constexpr ArchivedDirectoryID RootDirectoryID = 1;
   static constexpr std::string_view RootDirectoryName = "/";
 };
