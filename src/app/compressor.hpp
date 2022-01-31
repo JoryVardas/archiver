@@ -23,6 +23,8 @@ public:
 private:
   std::shared_ptr<ArchiveDatabase> archiveDatabase;
   std::filesystem::path archiveLocation;
+
+  void compressSingleArchives();
 };
 
 _make_exception_(CompressorException);

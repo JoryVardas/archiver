@@ -1,5 +1,6 @@
 #include "compressor.hpp"
 #include <concepts>
+#include <filesystem>
 #include <functional>
 #include <limits>
 #include <ranges>
@@ -12,6 +13,8 @@ Compressor<ArchiveDatabase>::Compressor(
 
 template <ArchiveDatabase ArchiveDatabase>
 void Compressor<ArchiveDatabase>::compress(const Archive& archive) {
+  if (archive.id == 1)
+    return compressSingleArchives();
   const auto newArchiveName =
     archiveLocation /
     fmt::format("{}_{}.zpaq", archive.id,
@@ -31,4 +34,26 @@ void Compressor<ArchiveDatabase>::compress(const Archive& archive) {
   std::flush(std::cout);
 
   archiveDatabase->incrementNextArchivePartNumber(archive);
+}
+
+template <ArchiveDatabase ArchiveDatabase>
+void Compressor<ArchiveDatabase>::compressSingleArchives() {
+  std::ranges::for_each(
+    std::filesystem::directory_iterator(archiveLocation / "1"),
+    [&](const auto& file) {
+      const auto newArchiveName =
+        archiveLocation / fmt::format("1_{}.zpaq", file.path().filename());
+      const std::string command =
+        fmt::format("zpaq a {} {} -m5", newArchiveName, file.path());
+
+      std::flush(std::cout);
+      if (const auto exitCode = system(command.c_str()); exitCode != 0) {
+        throw CompressorException(
+          fmt::format("There was an error while compressing the single file "
+                      "archive with name {}, "
+                      "zpaq returned the error {}",
+                      file.path().filename(), exitCode));
+      }
+      std::flush(std::cout);
+    });
 }
