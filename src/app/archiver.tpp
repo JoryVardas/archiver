@@ -1,4 +1,5 @@
 #include "common.h"
+#include "compressor.hpp"
 #include "util/string_helpers.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -12,7 +13,7 @@ template <ArchivedFileDatabase ArchivedFileDatabase,
 Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase, ArchiveDatabase>::
   Archiver(std::shared_ptr<ArchivedFileDatabase>& fileDatabase,
            std::shared_ptr<ArchivedDirectoryDatabase>& directoryDatabase,
-           std::shared_ptr<ArchivedDatabase>& archiveDatabase,
+           std::shared_ptr<ArchiveDatabase>& archiveDatabase,
            const std::filesystem::path& stageDirectoryLocation,
            const std::filesystem::path& archiveDirectoryLocation,
            Size singleFileArchiveSize)
@@ -50,6 +51,12 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
     startTransactions();
     archiveDirectories(stagedDirectories);
     archiveFiles(stagedFiles);
+    commitTransactions();
+
+    // Saving the archive parts takes a while and on failure should not undo the
+    // entire archive operation.
+    startTransactions();
+    saveArchiveParts();
     commitTransactions();
   } catch (const std::exception& err) {
     rollbackTransactions();
@@ -121,7 +128,19 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
 
         std::filesystem::copy_file(stageLocation / stagedFile.hash,
                                    archiveDirectory / stagedFile.hash);
+        modifiedArchives.insert(archive);
       }
     }
+  }
+}
+
+template <ArchivedFileDatabase ArchivedFileDatabase,
+          ArchivedDirectoryDatabase ArchivedDirectoryDatabase,
+          ArchiveDatabase ArchiveDatabase>
+void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
+              ArchiveDatabase>::saveArchiveParts() {
+  Compressor<ArchiveDatabase> compressor{archiveDatabase, archiveLocation};
+  for (const auto& archive : modifiedArchives) {
+    compressor.compress(archive);
   }
 }

@@ -7,6 +7,7 @@
 #include "common.h"
 #include "staged_directory.h"
 #include "staged_file.hpp"
+#include <set>
 #include <span>
 
 template <ArchivedFileDatabase ArchivedFileDatabase,
@@ -16,7 +17,7 @@ class Archiver {
 public:
   Archiver(std::shared_ptr<ArchivedFileDatabase>& fileDatabase,
            std::shared_ptr<ArchivedDirectoryDatabase>& directoryDatabase,
-           std::shared_ptr<ArchivedDatabase>& archiveDatabase,
+           std::shared_ptr<ArchiveDatabase>& archiveDatabase,
            const std::filesystem::path& stageDirectoryLocation,
            const std::filesystem::path& archiveDirectoryLocation,
            Size singleFileArchiveSize);
@@ -39,6 +40,7 @@ private:
   std::filesystem::path stageLocation;
   std::filesystem::path archiveLocation;
   Size singleFileArchiveSize;
+  std::set<Archive> modifiedArchives;
 
   std::map<StagedDirectoryID, ArchivedDirectory> archivedDirectoryMap = {
     {StagedDirectory::RootDirectoryID, ArchivedDirectory::getRootDirectory()}};
@@ -48,6 +50,7 @@ private:
   void
   archiveDirectories(const std::vector<StagedDirectory>& stagedDirectories);
   void archiveFiles(const std::vector<StagedFile>& stagedFiles);
+  void saveArchiveParts();
 };
 
 _make_exception_(ArchiverException);
