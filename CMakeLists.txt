@@ -51,3 +51,4 @@ file(COPY_FILE ${CMAKE_SOURCE_DIR}/src/config/default_config.json ${CMAKE_CURREN
 
 add_subdirectory(lib)
 add_subdirectory(src)
+add_subdirectory(test)
