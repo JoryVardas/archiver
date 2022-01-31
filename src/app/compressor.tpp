@@ -1,5 +1,4 @@
 #include "compressor.hpp"
-#include "util/index_iterator.hpp"
 #include <concepts>
 #include <functional>
 #include <limits>
