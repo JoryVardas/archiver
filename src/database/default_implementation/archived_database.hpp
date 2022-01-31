@@ -36,6 +36,8 @@ public:
   void rollback();
 
   auto getArchiveForFile(const StagedFile& file) -> Archive;
+  auto getNextArchivePartNumber(const Archive& archive) -> uint64_t;
+  void incrementNextArchivePartNumber(const Archive& archive);
 
   auto listChildDirectories(const ArchivedDirectory& directory)
     -> std::vector<ArchivedDirectory>;

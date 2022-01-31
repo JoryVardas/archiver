@@ -48,8 +48,9 @@ CREATE TABLE `file_parent`
 
 CREATE TABLE `archive`
 (
-    `id`       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `contents` VARCHAR(255)    NOT NULL,
+    `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `next_part_number` BIGINT UNSIGNED NOT NULL DEFAULT 1,
+    `contents`         VARCHAR(255)    NOT NULL,
     PRIMARY KEY (`id`)
 );
 

@@ -93,6 +93,43 @@ auto ArchivedDatabase::getArchiveForFile(const StagedFile& file) -> Archive {
 
   return addArchiveForExtension(fileExtension);
 }
+auto ArchivedDatabase::getNextArchivePartNumber(const Archive& archive)
+  -> uint64_t {
+  try {
+    auto archiveResults =
+      databaseConnection(select(archivesTable.nextPartNumber)
+                           .from(archivesTable)
+                           .where(archivesTable.id == archive.id)
+                           .limit(1u));
+
+    if (archiveResults.empty())
+      throw ArchiveDatabaseException(
+        fmt::format("Could not find archive with id {}"s, archive.id));
+    else
+      return archiveResults.front().nextPartNumber;
+  } catch (const sqlpp::exception& err) {
+    throw ArchiveDatabaseException(fmt::format(
+      "Could not get next archive part number for archive with id {}: {}"s,
+      archive.id, err));
+  }
+}
+void ArchivedDatabase::incrementNextArchivePartNumber(const Archive& archive) {
+  try {
+    auto rowsUpdated = databaseConnection(
+      update(archivesTable)
+        .set(archivesTable.nextPartNumber = archivesTable.nextPartNumber + 1)
+        .where(archivesTable.id == archive.id));
+
+    if (rowsUpdated != 1)
+      throw ArchiveDatabaseException(fmt::format(
+        "Could not update next archive part number of archive with id {}"s,
+        archive.id));
+  } catch (const sqlpp::exception& err) {
+    throw ArchiveDatabaseException(fmt::format(
+      "Could not update next archive part number of archive with id {}"s,
+      archive.id, err));
+  }
+}
 
 auto ArchivedDatabase::getArchiveForExtension(std::string_view extension)
   -> Archive {
