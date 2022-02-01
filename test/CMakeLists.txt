@@ -23,7 +23,6 @@ include(Catch)
 catch_discover_tests(Archiver-Tests)
 
 # Add test source to target
-target_sources(Archiver-Tests PRIVATE
-               test1.cpp)
+target_sources(Archiver-Tests PRIVATE "")
 
 add_subdirectory(config)
