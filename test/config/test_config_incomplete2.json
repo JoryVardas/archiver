@@ -1,0 +1,26 @@
+{
+  "general": {
+    "file_read_size": 104857600
+  },
+  "stager": {
+    "stage_directory": "{StageDirectory}"
+  },
+  "archive": {
+    "archive_directory": "{ArchiveDirectory}",
+    "temp_archive_directory": "{ArchiveTempDirectory}",
+    "target_size": 10240,
+    "single_archive_size": 5120
+  },
+  "database": {
+    "user": "{TestDatabaseUser}",
+    "password": "{TestDatabasePassword}",
+    "location": {
+      "host": "127.0.0.1",
+      "port": 33060,
+      "schema": "archiver"
+    },
+    "options": [
+      "parseTime=true"
+    ]
+  }
+}
