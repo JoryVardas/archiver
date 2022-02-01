@@ -1,6 +1,8 @@
 {
   "general": {
-    "file_read_size": 104857600
+    "file_read_sizes": [
+      104857600
+    ]
   },
   "stager": {
     "stage_directory": "/var/archiver_cpp/bin/stage"

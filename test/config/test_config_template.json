@@ -1,6 +1,8 @@
 {
   "general": {
-    "file_read_size": 104857600
+    "file_read_sizes": [
+      104857600
+    ]
   },
   "stager": {
     "stage_directory": "${ARCHIVER_TEST_CONFIG_STAGE_DIRECTORY_VALUE}"
