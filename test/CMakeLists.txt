@@ -12,6 +12,10 @@ list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 # Create the target
 add_executable(Archiver-Tests "")
 target_link_libraries(Archiver-Tests PRIVATE Catch2::Catch2WithMain)
+# Include Archiver_sources target which builds the application code
+target_link_libraries(Archiver-Tests PRIVATE Archiver_sources)
+# Include the source directory as an include directory
+target_include_directories(Archiver-Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 include(CTest)
 include(Catch)
