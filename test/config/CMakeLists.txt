@@ -9,51 +9,20 @@ if (NOT DEFINED ARCHIVER_TEST_DATABASE_PASSWORD)
     set(ARCHIVER_TEST_DATABASE_PASSWORD "testDatabasePassword")
 endif ()
 
-# Variables which will be replaced in test_config_template.json
-set(ARCHIVER_TEST_CONFIG_STAGE_DIRECTORY_MATCH "{StageDirectory}")
+# Variables which will be replaced
 set(ARCHIVER_TEST_CONFIG_STAGE_DIRECTORY_VALUE "${CMAKE_CURRENT_BINARY_DIR}/stage")
-set(ARCHIVER_TEST_CONFIG_ARCHIVE_DIRECTORY_MATCH "{ArchiveDirectory}")
 set(ARCHIVER_TEST_CONFIG_ARCHIVE_DIRECTORY_VALUE "${CMAKE_CURRENT_BINARY_DIR}/archive")
-set(ARCHIVER_TEST_CONFIG_ARCHIVE_TEMP_DIRECTORY_MATCH "{ArchiveTempDirectory}")
 set(ARCHIVER_TEST_CONFIG_ARCHIVE_TEMP_DIRECTORY_VALUE "${CMAKE_CURRENT_BINARY_DIR}/archive_temp")
-set(ARCHIVER_TEST_CONFIG_DATABASE_USERNAME_MATCH "{TestDatabaseUser}")
 set(ARCHIVER_TEST_CONFIG_DATABASE_USERNAME_VALUE ${ARCHIVER_TEST_DATABASE_USERNAME})
-set(ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD_MATCH "{TestDatabasePassword}")
 set(ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD_VALUE ${ARCHIVER_TEST_DATABASE_PASSWORD})
 
-list(APPEND ARCHIVER_TEST_CONFIG_VARIABLES_TO_REPLACE
-     ARCHIVER_TEST_CONFIG_STAGE_DIRECTORY
-     ARCHIVER_TEST_CONFIG_ARCHIVE_DIRECTORY
-     ARCHIVER_TEST_CONFIG_ARCHIVE_TEMP_DIRECTORY
-     ARCHIVER_TEST_CONFIG_DATABASE_USERNAME
-     ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD
-     )
-
-# Modify test_config_template.json and output it as test_config.json
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/test_config_template.json ARCHIVER_TEST_CONFIG_JSON)
-
-foreach (ARCHIVER_TEST_CONFIG_VARIABLE_TO_REPLACE ${ARCHIVER_TEST_CONFIG_VARIABLES_TO_REPLACE})
-    string(REPLACE "${${ARCHIVER_TEST_CONFIG_VARIABLE_TO_REPLACE}_MATCH}"
-           "${${ARCHIVER_TEST_CONFIG_VARIABLE_TO_REPLACE}_VALUE}" ARCHIVER_TEST_CONFIG_JSON ${ARCHIVER_TEST_CONFIG_JSON})
-endforeach ()
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_config.json ${ARCHIVER_TEST_CONFIG_JSON})
-
-# Modify config_template.cpp
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/config_template.cpp ARCHIVER_TEST_CONFIG_CPP)
-
-foreach (ARCHIVER_TEST_CONFIG_VARIABLE_TO_REPLACE ${ARCHIVER_TEST_CONFIG_VARIABLES_TO_REPLACE})
-    string(REPLACE "${${ARCHIVER_TEST_CONFIG_VARIABLE_TO_REPLACE}_MATCH}"
-           "${${ARCHIVER_TEST_CONFIG_VARIABLE_TO_REPLACE}_VALUE}" ARCHIVER_TEST_CONFIG_CPP "${ARCHIVER_TEST_CONFIG_CPP}")
-endforeach ()
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/config.cpp "${ARCHIVER_TEST_CONFIG_CPP}")
-
 # Copy additional files to output
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_incomplete1.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_incomplete1.json COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_incomplete2.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_incomplete2.json COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_empty.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_empty.json COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_incorrect_type.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_incorrect_type.json COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config_template.cpp ${CMAKE_CURRENT_BINARY_DIR}/config.cpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_template.json ${CMAKE_CURRENT_BINARY_DIR}/test_config.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_incomplete1.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_incomplete1.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_incomplete2.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_incomplete2.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_empty.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_empty.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_config_incorrect_type.json ${CMAKE_CURRENT_BINARY_DIR}/test_config_incorrect_type.json)
 
 # Add test source to target
 target_sources(Archiver-Tests PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/config.cpp)

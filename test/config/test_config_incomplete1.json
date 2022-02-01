@@ -5,14 +5,14 @@
   "stager": {
   },
   "archive": {
-    "archive_directory": "{ArchiveDirectory}",
-    "temp_archive_directory": "{ArchiveTempDirectory}",
+    "archive_directory": "${ARCHIVER_TEST_CONFIG_ARCHIVE_DIRECTORY_VALUE}",
+    "temp_archive_directory": "${ARCHIVER_TEST_CONFIG_ARCHIVE_TEMP_DIRECTORY_VALUE}",
     "target_size": 10240,
     "single_archive_size": 5120
   },
   "database": {
-    "user": "{TestDatabaseUser}",
-    "password": "{TestDatabasePassword}",
+    "user": "${ARCHIVER_TEST_CONFIG_DATABASE_USERNAME_VALUE}",
+    "password": "${ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD_VALUE}",
     "location": {
       "host": "127.0.0.1",
       "port": 33060,

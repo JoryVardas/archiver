@@ -7,15 +7,20 @@ TEST_CASE("Loading a complete config file", "[config]") {
 
   REQUIRE(config.archive.single_archive_size == 104857600);
 
-  REQUIRE(config.stager.stage_directory == "{StageDirectory}");
+  REQUIRE(config.stager.stage_directory ==
+          "${ARCHIVER_TEST_CONFIG_STAGE_DIRECTORY_VALUE}");
 
-  REQUIRE(config.archive.archive_directory == "{ArchiveDirectory}");
-  REQUIRE(config.archive.temp_archive_directory == "{ArchiveTempDirectory}");
+  REQUIRE(config.archive.archive_directory ==
+          "${ARCHIVER_TEST_CONFIG_ARCHIVE_DIRECTORY_VALUE}");
+  REQUIRE(config.archive.temp_archive_directory ==
+          "${ARCHIVER_TEST_CONFIG_ARCHIVE_TEMP_DIRECTORY_VALUE}");
   REQUIRE(config.archive.target_size == 10240);
   REQUIRE(config.archive.single_archive_size == 5120);
 
-  REQUIRE(config.database.user == "{TestDatabaseUser}");
-  REQUIRE(config.database.password == "{TestDatabasePassword}");
+  REQUIRE(config.database.user ==
+          "${ARCHIVER_TEST_CONFIG_DATABASE_USERNAME_VALUE}");
+  REQUIRE(config.database.password ==
+          "${ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD_VALUE}");
   REQUIRE(config.database.location.host == "127.0.0.1");
   REQUIRE(config.database.location.port == 33060);
   REQUIRE(config.database.location.schema == "archiver");
