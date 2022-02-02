@@ -8,8 +8,6 @@ TEST_CASE("Loading a complete config file", "[config]") {
   REQUIRE(config.general.fileReadSizes.size() == 1);
   REQUIRE(config.general.fileReadSizes.at(0) == 104857600);
 
-  REQUIRE(config.archive.single_archive_size == 104857600);
-
   REQUIRE(config.stager.stage_directory ==
           "${ARCHIVER_TEST_CONFIG_STAGE_DIRECTORY_VALUE}");
 
