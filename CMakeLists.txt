@@ -21,6 +21,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(Archiver_Compile_Flags -Wall
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+    -Werror>)
 
 # Build any libraries we may need
 
@@ -32,18 +35,14 @@ configure_file(src/config/version.h.in include/config/version.h)
 # Create an object library targets to allow for a single compilation pass
 add_library(Archiver_sources OBJECT "")
 
-target_compile_options(Archiver_sources PRIVATE -Wall
-                       $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-                       -Werror>)
+target_compile_options(Archiver_sources PRIVATE ${Archiver_Compile_Flags})
 
 target_include_directories(Archiver_sources PUBLIC lib/)
 
 # Settings for the app
 add_executable(Archiver $<TARGET_OBJECTS:Archiver_sources>)
 
-target_compile_options(Archiver PRIVATE -Wall
-                       $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-                       -Werror>)
+target_compile_options(Archiver PRIVATE ${Archiver_Compile_Flags})
 
 target_link_libraries(Archiver PRIVATE Archiver_sources)
 
