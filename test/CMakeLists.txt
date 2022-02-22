@@ -23,7 +23,7 @@ include(Catch)
 # Add all tests to CTest
 catch_discover_tests(Archiver-Tests)
 
-# Add test source to target
-target_sources(Archiver-Tests PRIVATE "")
+# Add source files which may be required by all tests
+target_sources(Archiver-Tests PRIVATE additional_matchers.cpp)
 
 add_subdirectory(config)
