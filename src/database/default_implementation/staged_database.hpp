@@ -5,6 +5,8 @@
 #include "../../app/raw_file.hpp"
 #include "../../app/staged_directory.h"
 #include "../../app/staged_file.hpp"
+#include "../staged_directory_database.hpp"
+#include "../staged_file_database.hpp"
 #include "archiver_database.h"
 #include "database.hpp"
 #include <optional>
