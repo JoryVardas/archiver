@@ -26,18 +26,17 @@ catch_discover_tests(Archiver-Tests)
 
 # Get random test files
 function(archiver_test_get_random_file size_to_download file_location output_sha_var output_blake_var output_size_var)
-    # Using Random.org is a good option by ultimately not viable due to quotas
-    # file(DOWNLOAD https://www.random.org/cgi-bin/randbyte?nbytes=${size_to_download}&format=f ${file_location})
-    # use urandom instead
-    execute_process(COMMAND head -c ${size_to_download} /dev/random OUTPUT_FILE ${file_location})
-    execute_process(COMMAND sha512sum -b ${file_location} OUTPUT_VARIABLE downloaded_file_sha_results)
-    execute_process(COMMAND b2sum -b ${file_location} OUTPUT_VARIABLE downloaded_file_blake_results)
-    string(FIND ${downloaded_file_sha_results} " *" downloaded_file_sha_end)
-    string(FIND ${downloaded_file_blake_results} " *" downloaded_file_blake_end)
-    string(SUBSTRING ${downloaded_file_sha_results} 0 ${downloaded_file_sha_end} downloaded_file_sha)
-    string(SUBSTRING ${downloaded_file_blake_results} 0 ${downloaded_file_blake_end} downloaded_file_blake)
-    set(${output_sha_var} ${downloaded_file_sha} PARENT_SCOPE)
-    set(${output_blake_var} ${downloaded_file_blake} PARENT_SCOPE)
+    execute_process(COMMAND python3 ${Archiver_Util_Path}/generate_test_file.py -n ${size_to_download} -o ${file_location} OUTPUT_VARIABLE file_hashes)
+
+    string(REGEX MATCH "(SHA512:)[^\n\r]*" file_sha_match_part ${file_hashes})
+    string(REGEX MATCH "(BLAKE2B:)[^\n\r]*" file_blake_match_part ${file_hashes})
+    string(REGEX MATCH ":.*" file_sha_match_part2 ${file_sha_match_part})
+    string(REGEX MATCH ":.*" file_blake_match_part2 ${file_blake_match_part})
+    string(REGEX MATCH "[A-Za-z0-9]+" file_sha_match ${file_sha_match_part2})
+    string(REGEX MATCH "[A-Za-z0-9]+" file_blake_match ${file_blake_match_part2})
+
+    set(${output_sha_var} ${file_sha_match} PARENT_SCOPE)
+    set(${output_blake_var} ${file_blake_match} PARENT_SCOPE)
     set(${output_size_var} ${size_to_download} PARENT_SCOPE)
 endfunction()
 

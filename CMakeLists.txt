@@ -25,6 +25,8 @@ set(Archiver_Compile_Flags -Wall
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
     -Werror>)
 
+set(Archiver_Util_Path ${CMAKE_CURRENT_SOURCE_DIR}/util)
+
 # Build any libraries we may need
 
 # Build our project
