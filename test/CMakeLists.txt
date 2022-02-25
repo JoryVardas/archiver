@@ -71,4 +71,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_constant_template.hpp ${CMAKE_CU
 # Add source files which may be required by all tests
 target_sources(Archiver-Tests PRIVATE additional_matchers.cpp)
 
+# Add config tests
 add_subdirectory(config)
+
+# Add database tests if a database connection is possible
+if (NOT DEFINED ARCHIVER_TEST_DATABASE_USERNAME OR NOT DEFINED ARCHIVER_TEST_DATABASE_PASSWORD)
+    message(WARNING
+            "ARCHIVER_TEST_DATABASE_USERNAME and/or ARCHIVER_TEST_DATABASE_PASSWORD"
+            " were not set and as such no connection to a database will be possible"
+            " and database tests will be omitted.")
+    target_sources(Archiver-Tests PRIVATE database_no_connection.cpp)
+else ()
+    target_sources(Archiver-Tests PRIVATE database.cpp)
+endif ()
