@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(Archiver_MSVC_Disabled_Warnings_Flags /wd4464)
+set(Archiver_MSVC_Disabled_Warnings_Flags /wd4464 /wd4820)
 
 set(Archiver_Compile_Flags -Wall
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
