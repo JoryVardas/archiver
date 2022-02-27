@@ -74,7 +74,7 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
     if (archivedDirectoryMap.contains(stagedDirectory.id()))
       continue;
     if (!stagedDirectory.parent()) {
-      throw ArchiverException(fmt::format(
+      throw ArchiverException(FORMAT_LIB::format(
         "Could not archive staged directory with ID {} since it is not "
         "the root directory and doesn't have a parent.",
         stagedDirectory.id()));
@@ -82,10 +82,10 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedDirectory.parent().value());
         parentArchivedDirectory == archivedDirectoryMap.end()) {
-      throw ArchiverException(
-        fmt::format("Could not archive staged directory with ID {} as its "
-                    "parent hasn't been archived",
-                    stagedDirectory.id()));
+      throw ArchiverException(FORMAT_LIB::format(
+        "Could not archive staged directory with ID {} as its "
+        "parent hasn't been archived",
+        stagedDirectory.id()));
     } else {
       const auto addedArchivedDirectory =
         archivedDirectoryDatabase->addDirectory(
@@ -107,9 +107,9 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
           archivedDirectoryMap.find(stagedFile.parent);
         parentArchivedDirectory == archivedDirectoryMap.end()) {
       throw ArchiverException(
-        fmt::format("Could not archive staged file with ID {} as its "
-                    "parent hasn't been archived",
-                    stagedFile.id));
+        FORMAT_LIB::format("Could not archive staged file with ID {} as its "
+                           "parent hasn't been archived",
+                           stagedFile.id));
     } else {
       const auto archive = [&]() -> Archive {
         if (stagedFile.size >= singleFileArchiveSize)
@@ -122,7 +122,7 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
 
       if (archivedFileType == ArchivedFileAddedType::NewRevision) {
         const auto archiveDirectory =
-          archiveLocation / fmt::format("{}", archive.id);
+          archiveLocation / FORMAT_LIB::format("{}", archive.id);
         if (!std::filesystem::exists(archiveDirectory))
           std::filesystem::create_directories(archiveDirectory);
 

@@ -16,13 +16,13 @@ StagedDatabase::~StagedDatabase() {
     if (std::uncaught_exceptions()) {
       // If there was another exception we should log that an error happened,
       // but eat it.
-      spdlog::error(
-        fmt::format("There was an error while trying to rollback changes to "
-                    "the staged database while destructing the staged database "
-                    "due to an exception: {}",
-                    err));
+      spdlog::error(FORMAT_LIB::format(
+        "There was an error while trying to rollback changes to "
+        "the staged database while destructing the staged database "
+        "due to an exception: {}",
+        err));
     } else {
-      throw DatabaseException(fmt::format(
+      throw DatabaseException(FORMAT_LIB::format(
         "There was an error while trying to rollback changes to "
         "the staged database while destructing the staged database: {}",
         err));
@@ -53,7 +53,7 @@ void StagedDatabase::startTransaction() {
     databaseConnection.start_transaction();
     hasTransaction = true;
   } catch (sqlpp::exception& err) {
-    throw DatabaseException(fmt::format(
+    throw DatabaseException(FORMAT_LIB::format(
       "Could not start a transaction on the staged database: {}"s, err));
   }
 }
@@ -63,7 +63,7 @@ void StagedDatabase::rollback() {
       databaseConnection.rollback_transaction(false);
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
-      throw DatabaseException(fmt::format(
+      throw DatabaseException(FORMAT_LIB::format(
         "Could not rollback the transaction on the staged database: {}"s, err));
     }
   }
@@ -74,7 +74,7 @@ void StagedDatabase::commit() {
       databaseConnection.commit_transaction();
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
-      throw DatabaseException(fmt::format(
+      throw DatabaseException(FORMAT_LIB::format(
         "Could not commit the transaction on the staged database: {}"s, err));
     }
   }
@@ -100,7 +100,7 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
     }
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(
-      fmt::format("Could not list staged files: {}"s, err));
+      FORMAT_LIB::format("Could not list staged files: {}"s, err));
   }
   return stagedFiles;
 }
@@ -110,7 +110,7 @@ void StagedDatabase::add(const RawFile& file,
   try {
     auto parentStagedDirectory = getStagedDirectory(stagePath.parent_path());
     if (!parentStagedDirectory) {
-      throw StagedFileDatabaseException(fmt::format(
+      throw StagedFileDatabaseException(FORMAT_LIB::format(
         "Could not add file to staged file database as the parent directory "
         "hasn't been added to the staged directory database"));
     }
@@ -124,8 +124,8 @@ void StagedDatabase::add(const RawFile& file,
         .set(stagedFileParentTable.fileId = stagedFileId,
              stagedFileParentTable.directoryId = parentStagedDirectory->id()));
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(
-      fmt::format("Could not add file to staged file database: {}"s, err));
+    throw StagedFileDatabaseException(FORMAT_LIB::format(
+      "Could not add file to staged file database: {}"s, err));
   }
 }
 
@@ -134,8 +134,8 @@ void StagedDatabase::remove(const StagedFile& stagedFile) {
     databaseConnection(remove_from(stagedFilesTable)
                          .where(stagedFilesTable.id == stagedFile.id));
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(
-      fmt::format("Could not remove file from staged file database: {}"s, err));
+    throw StagedFileDatabaseException(FORMAT_LIB::format(
+      "Could not remove file from staged file database: {}"s, err));
   }
 }
 
@@ -143,7 +143,7 @@ void StagedDatabase::removeAllFiles() {
   try {
     databaseConnection(remove_from(stagedFilesTable).unconditionally());
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(fmt::format(
+    throw StagedFileDatabaseException(FORMAT_LIB::format(
       "Could not remove files from staged file database: {}"s, err));
   }
 }
@@ -170,7 +170,7 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(
-      fmt::format("Could not list staged directories: {}"s, err));
+      FORMAT_LIB::format("Could not list staged directories: {}"s, err));
   }
   return stagedDirectories;
 }
@@ -202,7 +202,7 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
         .set(stagedDirectoryParentTable.parentId = parentStagedDirectory->id(),
              stagedDirectoryParentTable.childId = stagedDirectoryId));
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(fmt::format(
+    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not add directory to staged directory database: {}"s, err));
   }
 }
@@ -213,7 +213,7 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
       remove_from(stagedDirectoriesTable)
         .where(stagedDirectoriesTable.id == stagedDirectory.id()));
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(fmt::format(
+    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not remove directory from staged directory database: {}"s, err));
   }
 }
@@ -222,7 +222,7 @@ void StagedDatabase::removeAllDirectories() {
   try {
     databaseConnection(remove_from(stagedDirectoriesTable).unconditionally());
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(fmt::format(
+    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not remove directories from staged directory database: {}"s, err));
   }
 }
@@ -259,7 +259,7 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
                           : std::optional<ID>{row.parentId});
     }
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(fmt::format(
+    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not get directory from staged directory database: {}"s, err));
   }
 

@@ -37,21 +37,21 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
       try {
         stageFile(itemPath, removePrefix(itemPath));
       } catch (StagedFileDatabaseException& err) {
-        throw StagerException(fmt::format("Could not stage file \"{}\" : {}",
-                                          itemPath, err.what()));
+        throw StagerException(FORMAT_LIB::format(
+          "Could not stage file \"{}\" : {}", itemPath, err.what()));
       } catch (std::filesystem::filesystem_error& err) {
-        throw StagerException(fmt::format("Could not stage file \"{}\" : {}",
-                                          itemPath, err.what()));
+        throw StagerException(FORMAT_LIB::format(
+          "Could not stage file \"{}\" : {}", itemPath, err.what()));
       }
     } else if (isDirectory(itemPath))
       try {
         stageDirectory(itemPath, removePrefix(itemPath));
       } catch (StagedFileDatabaseException& err) {
-        throw StagerException(fmt::format(
+        throw StagerException(FORMAT_LIB::format(
           "Could not stage directory \"{}\" : {}", itemPath, err.what()));
       }
     else {
-      throw StagerException(fmt::format(
+      throw StagerException(FORMAT_LIB::format(
         "The provided path \"{}\" was neither a regular file or a directory",
         itemPath));
     }
@@ -83,8 +83,8 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
           stagePath);
       }
     } catch (StagerException& err) {
-      spdlog::error(fmt::format("Unable to stage \"{}\", skipping. {}",
-                                currentPath, err.what()));
+      spdlog::error(FORMAT_LIB::format("Unable to stage \"{}\", skipping. {}",
+                                       currentPath, err.what()));
       rollbackTransactions();
       continue;
     }

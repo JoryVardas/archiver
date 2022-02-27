@@ -17,13 +17,13 @@ ArchivedDatabase::~ArchivedDatabase() {
     if (std::uncaught_exceptions()) {
       // If there was another exception we should log that an error happened,
       // but eat it.
-      spdlog::error(fmt::format(
+      spdlog::error(FORMAT_LIB::format(
         "There was an error while trying to rollback changes to "
         "the archived database while destructing the staged database "
         "due to an exception: {}",
         err));
     } else {
-      throw DatabaseException(fmt::format(
+      throw DatabaseException(FORMAT_LIB::format(
         "There was an error while trying to rollback changes to "
         "the archived database while destructing the archived database: {}",
         err));
@@ -54,7 +54,7 @@ void ArchivedDatabase::startTransaction() {
     databaseConnection.start_transaction();
     hasTransaction = true;
   } catch (sqlpp::exception& err) {
-    throw DatabaseException(fmt::format(
+    throw DatabaseException(FORMAT_LIB::format(
       "Could not start a transaction on the archived database: {}"s, err));
   }
 }
@@ -64,7 +64,7 @@ void ArchivedDatabase::rollback() {
       databaseConnection.rollback_transaction(false);
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
-      throw DatabaseException(fmt::format(
+      throw DatabaseException(FORMAT_LIB::format(
         "Could not rollback the transaction on the archived database: {}"s,
         err));
     }
@@ -76,7 +76,7 @@ void ArchivedDatabase::commit() {
       databaseConnection.commit_transaction();
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
-      throw DatabaseException(fmt::format(
+      throw DatabaseException(FORMAT_LIB::format(
         "Could not commit the transaction on the archived database: {}"s, err));
     }
   }
@@ -104,11 +104,11 @@ auto ArchivedDatabase::getNextArchivePartNumber(const Archive& archive)
 
     if (archiveResults.empty())
       throw ArchiveDatabaseException(
-        fmt::format("Could not find archive with id {}"s, archive.id));
+        FORMAT_LIB::format("Could not find archive with id {}"s, archive.id));
     else
       return archiveResults.front().nextPartNumber;
   } catch (const sqlpp::exception& err) {
-    throw ArchiveDatabaseException(fmt::format(
+    throw ArchiveDatabaseException(FORMAT_LIB::format(
       "Could not get next archive part number for archive with id {}: {}"s,
       archive.id, err));
   }
@@ -121,11 +121,11 @@ void ArchivedDatabase::incrementNextArchivePartNumber(const Archive& archive) {
         .where(archivesTable.id == archive.id));
 
     if (rowsUpdated != 1)
-      throw ArchiveDatabaseException(fmt::format(
+      throw ArchiveDatabaseException(FORMAT_LIB::format(
         "Could not update next archive part number of archive with id {}"s,
         archive.id));
   } catch (const sqlpp::exception& err) {
-    throw ArchiveDatabaseException(fmt::format(
+    throw ArchiveDatabaseException(FORMAT_LIB::format(
       "Could not update next archive part number of archive with id {}"s,
       archive.id, err));
   }
@@ -148,7 +148,7 @@ auto ArchivedDatabase::getArchiveForExtension(std::string_view extension)
     else
       return {archiveResults.front().id, archiveResults.front().contents};
   } catch (const sqlpp::exception& err) {
-    throw ArchiveDatabaseException(fmt::format(
+    throw ArchiveDatabaseException(FORMAT_LIB::format(
       "Could not get archive for extension \"{}\": {}"s, extension, err));
   }
 }
@@ -165,7 +165,7 @@ auto ArchivedDatabase::addArchiveForExtension(std::string_view extension)
 
     return {archiveId, std::string(extension)};
   } catch (const sqlpp::exception& err) {
-    throw ArchiveDatabaseException(fmt::format(
+    throw ArchiveDatabaseException(FORMAT_LIB::format(
       "Could not add archive for extension \"{}\": {}"s, extension, err));
   }
 }
@@ -181,9 +181,9 @@ auto ArchivedDatabase::getArchiveSize(const Archive& archive) -> Size {
       .front()
       .sum;
   } catch (const sqlpp::exception& err) {
-    throw ArchiveDatabaseException(
-      fmt::format("Could not get archive size for archive with id {}: {}"s,
-                  archive.id, err));
+    throw ArchiveDatabaseException(FORMAT_LIB::format(
+      "Could not get archive size for archive with id {}: {}"s, archive.id,
+      err));
   }
 }
 
@@ -208,7 +208,7 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
     return childDirectories;
 
   } catch (const sqlpp::exception& err) {
-    throw ArchivedDirectoryDatabaseException(fmt::format(
+    throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not list child directories for archived directory with id {}: {}"s,
       directory.id(), err));
   }
@@ -238,8 +238,8 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
 
     return {directoryId, directory.name(), parent.id()};
   } catch (const sqlpp::exception& err) {
-    throw ArchivedDirectoryDatabaseException(
-      fmt::format("Could not add directory to archived directories: {}"s, err));
+    throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
+      "Could not add directory to archived directories: {}"s, err));
   }
 }
 
@@ -262,7 +262,7 @@ auto ArchivedDatabase::listChildFiles(const ArchivedDirectory& directory)
     return childFiles;
 
   } catch (const sqlpp::exception& err) {
-    throw ArchivedFileDatabaseException(fmt::format(
+    throw ArchivedFileDatabaseException(FORMAT_LIB::format(
       "Could not list child files for archived directory with id {}: {}"s,
       directory.id(), err));
   }
@@ -337,9 +337,9 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
     return revisions;
 
   } catch (const sqlpp::exception& err) {
-    throw ArchivedFileDatabaseException(
-      fmt::format("Could not list revisions for archived file with id {}: {}"s,
-                  fileId, err));
+    throw ArchivedFileDatabaseException(FORMAT_LIB::format(
+      "Could not list revisions for archived file with id {}: {}"s, fileId,
+      err));
   }
 }
 
@@ -399,7 +399,7 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
                                : ArchivedFileAddedType::NewRevision;
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(
-      fmt::format("Could not add file to archived files: {}"s, err));
+      FORMAT_LIB::format("Could not add file to archived files: {}"s, err));
   }
 }
 
@@ -418,9 +418,9 @@ auto ArchivedDatabase::getFileId(std::string_view name,
     return results.front().fileId;
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(
-      fmt::format("Could not find file with name \"{}\" and with parent "
-                  "directory id {}: {}",
-                  name, directory.id(), err));
+      FORMAT_LIB::format("Could not find file with name \"{}\" and with parent "
+                         "directory id {}: {}",
+                         name, directory.id(), err));
   }
 }
 auto ArchivedDatabase::findDuplicateRevisionId(const StagedFile& file)
@@ -435,9 +435,9 @@ auto ArchivedDatabase::findDuplicateRevisionId(const StagedFile& file)
       return std::nullopt;
     return results.front().id;
   } catch (const sqlpp::exception& err) {
-    throw ArchivedFileDatabaseException(
-      fmt::format("Could not find duplicate revision for staged file with id "
-                  "{}, name \"{}\", and hash \"{}\": {}",
-                  file.id, file.name, file.hash, err));
+    throw ArchivedFileDatabaseException(FORMAT_LIB::format(
+      "Could not find duplicate revision for staged file with id "
+      "{}, name \"{}\", and hash \"{}\": {}",
+      file.id, file.name, file.hash, err));
   }
 }

@@ -7,17 +7,17 @@
 RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
   if (!std::filesystem::exists(path)) {
     throw FileDoesNotExist(
-      fmt::format("The file \"{}\" could not be found", path));
+      FORMAT_LIB::format("The file \"{}\" could not be found", path));
   }
   if (!isFile(path)) {
-    throw NotAFile(fmt::format("The path \"{}\" is not a file", path));
+    throw NotAFile(FORMAT_LIB::format("The path \"{}\" is not a file", path));
   }
 
   std::basic_ifstream<uint8_t> inputStream(path);
 
   if (inputStream.bad() || !inputStream.is_open()) {
-    throw FileException(
-      fmt::format("There was an error opening \"{}\" for reading", path));
+    throw FileException(FORMAT_LIB::format(
+      "There was an error opening \"{}\" for reading", path));
   }
 
   Chocobo1::SHA3_512 sha3;
@@ -28,7 +28,7 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
 
     if (inputStream.bad()) {
       throw FileException(
-        fmt::format("There was an error reading \"{}\"", path));
+        FORMAT_LIB::format("There was an error reading \"{}\"", path));
     }
 
     Size read = inputStream.gcount();

@@ -11,12 +11,15 @@
 // library.
 //  Please update the usage from fmt::format and fmt::formatter to std::format
 //  and std::formatter.
-#define fmt std
+#define FORMAT_LIB std
+#define SPDLOG_USE_STD_FORMAT
 #else
 //#define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
 #include <fmt/chrono.h>
+
+#define FORMAT_LIB fmt
 #endif
 
 #include <filesystem>
@@ -36,11 +39,12 @@ using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
 
 #define _make_formatter_for_exception_(type)                                   \
   template <typename CharT>                                                    \
-  struct fmt::formatter<type, CharT>                                           \
-    : public fmt::formatter<const char*, CharT> {                              \
+  struct FORMAT_LIB::formatter<type, CharT>                                    \
+    : public FORMAT_LIB::formatter<const char*, CharT> {                       \
     template <typename FormatContext>                                          \
     auto format(const type& err, FormatContext& fc) {                          \
-      return fmt::formatter<const char*, CharT>::format(err.what(), fc);       \
+      return FORMAT_LIB::formatter<const char*, CharT>::format(err.what(),     \
+                                                               fc);            \
     };                                                                         \
   }
 
@@ -65,11 +69,11 @@ using namespace std::string_literals;
 _make_formatter_for_exception_(std::exception);
 
 template <typename CharT>
-struct fmt::formatter<std::filesystem::path, CharT>
-  : public fmt::formatter<std::string, CharT> {
+struct FORMAT_LIB::formatter<std::filesystem::path, CharT>
+  : public FORMAT_LIB::formatter<std::string, CharT> {
   template <typename FormatContext>
   auto format(const std::filesystem::path& path, FormatContext& fc) {
-    return fmt::formatter<std::string, CharT>::format(path.string(), fc);
+    return FORMAT_LIB::formatter<std::string, CharT>::format(path.string(), fc);
   };
 };
 

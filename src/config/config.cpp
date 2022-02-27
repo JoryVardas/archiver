@@ -12,8 +12,8 @@ Config::Config(const std::filesystem::path& path) {
 
   std::ifstream configFile(path);
   if (!configFile.is_open())
-    throw ConfigError(
-      fmt::format("Could not open the configuration file \"{}\".", path));
+    throw ConfigError(FORMAT_LIB::format(
+      "Could not open the configuration file \"{}\".", path));
 
   json configuration;
 
@@ -21,9 +21,9 @@ Config::Config(const std::filesystem::path& path) {
     configFile >> configuration;
   } catch (json::parse_error& e) {
     throw ConfigError(
-      fmt::format("The following error occured while reading the "
-                  "configuration file:\n\t{}.",
-                  e));
+      FORMAT_LIB::format("The following error occured while reading the "
+                         "configuration file:\n\t{}.",
+                         e));
   }
 
   configFile.close();
@@ -34,7 +34,7 @@ Config::Config(const std::filesystem::path& path) {
     } catch (const json::out_of_range& err) {
       auto jsonPointerView = std::string_view{jsonPointer};
       jsonPointerView.remove_prefix(1);
-      throw ConfigError(fmt::format(
+      throw ConfigError(FORMAT_LIB::format(
         "Config file is missing a required entry \"{}\"", jsonPointerView));
     }
   };
