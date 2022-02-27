@@ -55,8 +55,11 @@ using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
   _make_formatter_for_exception_(name)
 
 bool isDirectory(const std::string& path);
+bool isDirectory(const std::filesystem::path& path);
 bool isFile(const std::string& path);
+bool isFile(const std::filesystem::path& path);
 bool pathExists(const std::string& path);
+bool pathExists(const std::filesystem::path& path);
 
 std::string toString(const TimeStamp& timestamp);
 TimeStamp toTimestamp(const std::string& str);
