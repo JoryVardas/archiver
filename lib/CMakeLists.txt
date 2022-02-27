@@ -14,3 +14,10 @@ target_include_directories(Archiver_sources SYSTEM PUBLIC ${MySQL_INCLUDE_DIR})
 target_link_libraries(Archiver_sources ${MySQL_LIBRARY})
 
 add_subdirectory(sqlpp11)
+
+# The above includes are marked as SYSTEM to prevent warnings, but CMAKE can't
+# enforce that on MSVC since the compiler flags are new, so manually add them
+# if MSVC is the compiler.
+if (MSVC)
+    target_compile_options(Archiver_sources PRIVATE /external:anglebrackets /external:W0)
+endif ()
