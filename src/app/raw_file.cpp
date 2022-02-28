@@ -5,6 +5,11 @@
 #include <fstream>
 
 RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
+  if (buffer.size() >
+      static_cast<std::size_t>(std::numeric_limits<std::streamsize>::max()))
+    throw std::logic_error(
+      "Could not construct RawFile as the given buffer is larger than the "
+      "maximum input read stream input size.");
   if (!std::filesystem::exists(path)) {
     throw FileDoesNotExist(
       FORMAT_LIB::format("The file \"{}\" could not be found", path));
@@ -24,7 +29,8 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
   Chocobo1::Blake2 blake2B;
 
   while (!inputStream.eof()) {
-    inputStream.read(buffer.data(), buffer.size());
+    inputStream.read(buffer.data(),
+                     static_cast<std::streamsize>(buffer.size()));
 
     if (inputStream.bad()) {
       throw FileException(
