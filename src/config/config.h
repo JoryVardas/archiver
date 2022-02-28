@@ -24,7 +24,7 @@ public:
     std::string password;
     struct Location {
       std::string host;
-      uint64_t port;
+      unsigned int port;
       std::string schema;
     } location;
     std::vector<std::string> options;
