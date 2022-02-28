@@ -19,8 +19,8 @@ getFileReadBuffer(const Config& config) {
   }
   // If none of the sizes could be allocated then throw an error.
   throw std::runtime_error(FORMAT_LIB::format(
-    "Unable to allocate a file read buffer of any of the given sizes: {}"s,
-    FORMAT_LIB::join(config.general.fileReadSizes, ","s)));
+    "Unable to allocate a file read buffer of any of the given sizes: {:,}"s,
+    config.general.fileReadSizes));
 }
 }
 

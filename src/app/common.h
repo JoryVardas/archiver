@@ -80,4 +80,36 @@ struct FORMAT_LIB::formatter<std::filesystem::path, CharT>
   };
 };
 
+// Format vectors, the first character in the format specifier is the separator.
+template <typename T, typename CharT>
+struct FORMAT_LIB::formatter<std::vector<T>, CharT>
+  : public FORMAT_LIB::formatter<T, CharT> {
+
+  auto parse(std::format_parse_context& ctx) {
+    // Get the separator
+    auto it = std::begin(ctx);
+    if (it == std::end(ctx) || *it == '}')
+      return it;
+    separator = *std::begin(ctx);
+    ctx.advance_to(++std::begin(ctx));
+
+    // Pass the rest of the format string to formatter for the individual type.
+    return FORMAT_LIB::formatter<T, CharT>::parse(ctx);
+  }
+
+  template <typename FormatContext>
+  auto format(const std::vector<T>& vector, FormatContext& fc) {
+    auto it = std::begin(vector);
+    FORMAT_LIB::formatter<T, CharT>::format(*it, fc);
+    for (++it; it != std::end(vector); ++it) {
+      fc.out() = separator;
+      FORMAT_LIB::formatter<T, CharT>::format(*it, fc);
+    }
+    return fc.out();
+  };
+
+private:
+  char separator;
+};
+
 #endif
