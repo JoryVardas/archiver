@@ -37,7 +37,7 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
         FORMAT_LIB::format("There was an error reading \"{}\"", path));
     }
 
-    Size read = inputStream.gcount();
+    Size read = static_cast<Size>(inputStream.gcount());
 
     sha3.addData(buffer.data(), read);
     blake2B.addData(buffer.data(), read);
