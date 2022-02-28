@@ -71,27 +71,20 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
               ArchiveDatabase>::
   archiveDirectories(const std::vector<StagedDirectory>& stagedDirectories) {
   for (const auto& stagedDirectory : stagedDirectories) {
-    if (archivedDirectoryMap.contains(stagedDirectory.id()))
+    if (archivedDirectoryMap.contains(stagedDirectory.id))
       continue;
-    if (!stagedDirectory.parent()) {
-      throw ArchiverException(FORMAT_LIB::format(
-        "Could not archive staged directory with ID {} since it is not "
-        "the root directory and doesn't have a parent.",
-        stagedDirectory.id()));
-    }
     if (const auto parentArchivedDirectory =
-          archivedDirectoryMap.find(stagedDirectory.parent().value());
+          archivedDirectoryMap.find(stagedDirectory.parent);
         parentArchivedDirectory == archivedDirectoryMap.end()) {
       throw ArchiverException(FORMAT_LIB::format(
         "Could not archive staged directory with ID {} as its "
         "parent hasn't been archived",
-        stagedDirectory.id()));
+        stagedDirectory.id));
     } else {
       const auto addedArchivedDirectory =
         archivedDirectoryDatabase->addDirectory(
           stagedDirectory, parentArchivedDirectory->second);
-      archivedDirectoryMap.insert(
-        {stagedDirectory.id(), addedArchivedDirectory});
+      archivedDirectoryMap.insert({stagedDirectory.id, addedArchivedDirectory});
     }
   }
 }

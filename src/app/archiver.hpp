@@ -43,7 +43,10 @@ private:
   std::set<Archive> modifiedArchives;
 
   std::map<StagedDirectoryID, ArchivedDirectory> archivedDirectoryMap = {
-    {StagedDirectory::RootDirectoryID, ArchivedDirectory::getRootDirectory()}};
+    {StagedDirectory::RootDirectoryID,
+     {ArchivedDirectory::RootDirectoryID,
+      std::string{ArchivedDirectory::RootDirectoryName},
+      ArchivedDirectory::RootDirectoryID}}};
 
   using path = std::filesystem::path;
 

@@ -94,9 +94,9 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
             .from(stagedFileParentTable)
             .where(stagedFileParentTable.fileId == stagedFile.id))
           .front();
-      stagedFiles.emplace_back(stagedFile.id, stagedFileParent.directoryId,
-                               stagedFile.name, stagedFile.size,
-                               stagedFile.hash);
+      stagedFiles.push_back({stagedFile.id, stagedFileParent.directoryId,
+                             stagedFile.name, stagedFile.size,
+                             stagedFile.hash});
     }
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(
@@ -122,7 +122,7 @@ void StagedDatabase::add(const RawFile& file,
     databaseConnection(
       insert_into(stagedFileParentTable)
         .set(stagedFileParentTable.fileId = stagedFileId,
-             stagedFileParentTable.directoryId = parentStagedDirectory->id()));
+             stagedFileParentTable.directoryId = parentStagedDirectory->id));
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(FORMAT_LIB::format(
       "Could not add file to staged file database: {}"s, err));
@@ -162,11 +162,8 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
             .from(stagedDirectoryParentTable)
             .where(stagedDirectoryParentTable.childId == stagedDirectory.id))
           .front();
-      stagedDirectories.emplace_back(
-        stagedDirectory.id, stagedDirectory.name,
-        stagedDirectoryParent.parentId == StagedDirectory::RootDirectoryID
-          ? std::optional<ID>{std::nullopt}
-          : std::optional<ID>{stagedDirectoryParent.parentId});
+      stagedDirectories.push_back({stagedDirectory.id, stagedDirectory.name,
+                                   stagedDirectoryParent.parentId});
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(
@@ -199,7 +196,7 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
         .set(stagedDirectoriesTable.name = pathToStage.filename().string()));
     databaseConnection(
       insert_into(stagedDirectoryParentTable)
-        .set(stagedDirectoryParentTable.parentId = parentStagedDirectory->id(),
+        .set(stagedDirectoryParentTable.parentId = parentStagedDirectory->id,
              stagedDirectoryParentTable.childId = stagedDirectoryId));
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
@@ -211,7 +208,7 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
   try {
     databaseConnection(
       remove_from(stagedDirectoriesTable)
-        .where(stagedDirectoriesTable.id == stagedDirectory.id()));
+        .where(stagedDirectoriesTable.id == stagedDirectory.id));
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not remove directory from staged directory database: {}"s, err));
@@ -229,7 +226,10 @@ void StagedDatabase::removeAllDirectories() {
 
 auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
   -> std::optional<StagedDirectory> {
-  StagedDirectory foundStagedDirectory = StagedDirectory::getRootDirectory();
+  StagedDirectory foundStagedDirectory = {
+    StagedDirectory::RootDirectoryID,
+    std::string{StagedDirectory::RootDirectoryName},
+    StagedDirectory::RootDirectoryID};
 
   try {
     ID currentId = StagedDirectory::RootDirectoryID;
@@ -252,11 +252,7 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
 
       const auto& row = results.front();
       currentId = row.id;
-      foundStagedDirectory =
-        StagedDirectory(row.id, row.name,
-                        row.parentId == StagedDirectory::RootDirectoryID
-                          ? std::optional<ID>{std::nullopt}
-                          : std::optional<ID>{row.parentId});
+      foundStagedDirectory = StagedDirectory{row.id, row.name, row.parentId};
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(FORMAT_LIB::format(

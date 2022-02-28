@@ -194,15 +194,12 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
       select(all_of(directoriesTable))
         .from(directoriesTable.join(directoryParentTable)
                 .on(directoriesTable.id == directoryParentTable.childId))
-        .where(directoryParentTable.parentId == directory.id()));
+        .where(directoryParentTable.parentId == directory.id));
 
     std::vector<ArchivedDirectory> childDirectories;
 
     for (const auto& row : results) {
-      if (directory.isRoot())
-        childDirectories.emplace_back(row.id, row.name.value(), std::nullopt);
-      else
-        childDirectories.emplace_back(row.id, row.name.value(), directory.id());
+      childDirectories.push_back({row.id, row.name.value(), directory.id});
     }
 
     return childDirectories;
@@ -210,33 +207,35 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
   } catch (const sqlpp::exception& err) {
     throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not list child directories for archived directory with id {}: {}"s,
-      directory.id(), err));
+      directory.id, err));
   }
 }
 auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
                                     const ArchivedDirectory& parent)
   -> ArchivedDirectory {
-  if (directory.isRoot())
-    return ArchivedDirectory::getRootDirectory();
+  if (directory.id == ArchivedDirectory::RootDirectoryID)
+    return {ArchivedDirectory::RootDirectoryID,
+            std::string{ArchivedDirectory::RootDirectoryName},
+            ArchivedDirectory::RootDirectoryID};
   try {
     auto matchingDirectory = databaseConnection(
       select(directoriesTable.id)
         .from(directoryParentTable.join(directoriesTable)
                 .on(directoryParentTable.childId == directoriesTable.id))
-        .where(directoryParentTable.parentId == parent.id() and
-               directoriesTable.name == directory.name()));
+        .where(directoryParentTable.parentId == parent.id and
+               directoriesTable.name == directory.name));
     if (!matchingDirectory.empty()) {
-      return {matchingDirectory.front().id, directory.name(), parent.id()};
+      return {matchingDirectory.front().id, directory.name, parent.id};
     }
 
     auto directoryId =
       databaseConnection(insert_into(directoriesTable)
-                           .set(directoriesTable.name = directory.name()));
+                           .set(directoriesTable.name = directory.name));
     databaseConnection(insert_into(directoryParentTable)
-                         .set(directoryParentTable.parentId = parent.id(),
+                         .set(directoryParentTable.parentId = parent.id,
                               directoryParentTable.childId = directoryId));
 
-    return {directoryId, directory.name(), parent.id()};
+    return {directoryId, directory.name, parent.id};
   } catch (const sqlpp::exception& err) {
     throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not add directory to archived directories: {}"s, err));
@@ -246,11 +245,11 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
 auto ArchivedDatabase::listChildFiles(const ArchivedDirectory& directory)
   -> std::vector<ArchivedFile> {
   try {
-    auto results = databaseConnection(
-      select(all_of(filesTable))
-        .from(filesTable.join(fileParentTable)
-                .on(filesTable.id == fileParentTable.fileId))
-        .where(fileParentTable.directoryId == directory.id()));
+    auto results =
+      databaseConnection(select(all_of(filesTable))
+                           .from(filesTable.join(fileParentTable)
+                                   .on(filesTable.id == fileParentTable.fileId))
+                           .where(fileParentTable.directoryId == directory.id));
 
     std::vector<ArchivedFile> childFiles;
 
@@ -264,7 +263,7 @@ auto ArchivedDatabase::listChildFiles(const ArchivedDirectory& directory)
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(FORMAT_LIB::format(
       "Could not list child files for archived directory with id {}: {}"s,
-      directory.id(), err));
+      directory.id, err));
   }
 }
 
@@ -353,10 +352,9 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
       if (!existingFile) {
         auto newFileId = databaseConnection(
           insert_into(filesTable).set(filesTable.name = file.name));
-        databaseConnection(
-          insert_into(fileParentTable)
-            .set(fileParentTable.fileId = newFileId,
-                 fileParentTable.directoryId = directory.id()));
+        databaseConnection(insert_into(fileParentTable)
+                             .set(fileParentTable.fileId = newFileId,
+                                  fileParentTable.directoryId = directory.id));
         return newFileId;
       }
       return existingFile.value();
@@ -407,12 +405,12 @@ auto ArchivedDatabase::getFileId(std::string_view name,
                                  const ArchivedDirectory& directory)
   -> std::optional<ArchivedFileID> {
   try {
-    auto results = databaseConnection(
-      select(fileParentTable.fileId)
-        .from(filesTable.join(fileParentTable)
-                .on(filesTable.id == fileParentTable.fileId))
-        .where(filesTable.name == name and
-               fileParentTable.directoryId == directory.id()));
+    auto results =
+      databaseConnection(select(fileParentTable.fileId)
+                           .from(filesTable.join(fileParentTable)
+                                   .on(filesTable.id == fileParentTable.fileId))
+                           .where(filesTable.name == name and
+                                  fileParentTable.directoryId == directory.id));
     if (results.empty())
       return std::nullopt;
     return results.front().fileId;
@@ -420,7 +418,7 @@ auto ArchivedDatabase::getFileId(std::string_view name,
     throw ArchivedFileDatabaseException(
       FORMAT_LIB::format("Could not find file with name \"{}\" and with parent "
                          "directory id {}: {}",
-                         name, directory.id(), err));
+                         name, directory.id, err));
   }
 }
 auto ArchivedDatabase::findDuplicateRevisionId(const StagedFile& file)
