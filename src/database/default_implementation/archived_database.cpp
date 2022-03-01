@@ -84,7 +84,8 @@ void ArchivedDatabase::commit() {
 
 auto ArchivedDatabase::getArchiveForFile(const StagedFile& file) -> Archive {
   const std::string_view fileName = file.name;
-  const auto fileExtension = fileName.substr(fileName.find_last_of('.'));
+  const auto fileExtension =
+    std::string{fileName.substr(fileName.find_last_of('.'))};
   auto archiveForExtension = getArchiveForExtension(fileExtension);
 
   if (getArchiveSize(archiveForExtension) >= targetSize) {
@@ -131,42 +132,44 @@ void ArchivedDatabase::incrementNextArchivePartNumber(const Archive& archive) {
   }
 }
 
-auto ArchivedDatabase::getArchiveForExtension(std::string_view extension)
+auto ArchivedDatabase::getArchiveForExtension(const std::string& extension)
   -> Archive {
+  std::string extensionName = extension;
   try {
     if (extension.empty()) {
-      extension = noExtensionArchiveContents;
+      extensionName = noExtensionArchiveContents;
     }
     auto archiveResults =
       databaseConnection(select(all_of(archivesTable))
                            .from(archivesTable)
-                           .where(archivesTable.contents == extension)
+                           .where(archivesTable.contents == extensionName)
                            .limit(1u));
 
     if (archiveResults.empty())
-      return addArchiveForExtension(extension);
+      return addArchiveForExtension(extensionName);
     else
       return {archiveResults.front().id, archiveResults.front().contents};
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not get archive for extension \"{}\": {}"s, extension, err));
+      "Could not get archive for extension \"{}\": {}"s, extensionName, err));
   }
 }
 
-auto ArchivedDatabase::addArchiveForExtension(std::string_view extension)
+auto ArchivedDatabase::addArchiveForExtension(const std::string& extension)
   -> Archive {
+  std::string extensionName = extension;
   try {
     if (extension.empty()) {
-      extension = noExtensionArchiveContents;
+      extensionName = noExtensionArchiveContents;
     }
 
     auto archiveId = databaseConnection(
-      insert_into(archivesTable).set(archivesTable.contents = extension));
+      insert_into(archivesTable).set(archivesTable.contents = extensionName));
 
-    return {archiveId, std::string(extension)};
+    return {archiveId, extensionName};
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not add archive for extension \"{}\": {}"s, extension, err));
+      "Could not add archive for extension \"{}\": {}"s, extensionName, err));
   }
 }
 
@@ -401,7 +404,7 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
   }
 }
 
-auto ArchivedDatabase::getFileId(std::string_view name,
+auto ArchivedDatabase::getFileId(const std::string& name,
                                  const ArchivedDirectory& directory)
   -> std::optional<ArchivedFileID> {
   try {

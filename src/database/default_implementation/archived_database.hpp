@@ -65,12 +65,12 @@ private:
 
   static const std::string noExtensionArchiveContents;
 
-  auto getArchiveForExtension(std::string_view extension) -> Archive;
-  auto addArchiveForExtension(std::string_view extension) -> Archive;
+  auto getArchiveForExtension(const std::string& extension) -> Archive;
+  auto addArchiveForExtension(const std::string& extension) -> Archive;
   auto getArchiveSize(const Archive& archive) -> Size;
   auto getFileRevisionsForFile(ArchivedFileID fileId)
     -> std::vector<ArchivedFileRevision>;
-  auto getFileId(std::string_view name, const ArchivedDirectory& directory)
+  auto getFileId(const std::string& name, const ArchivedDirectory& directory)
     -> std::optional<ArchivedFileID>;
   //  auto addNewFile(std::string_view name, const ArchivedDirectory& directory)
   //    -> ArchivedFile;
