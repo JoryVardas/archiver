@@ -57,7 +57,7 @@ VALUES ("<SINGLE>");
 CREATE TABLE `file_revision`
 (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `hash`         CHAR(256),
+    `hash`         TEXT(256),
     `size`         BIGINT UNSIGNED,
     `archive_time` DATETIME(2)     NOT NULL,
     PRIMARY KEY (`id`)
@@ -110,7 +110,7 @@ CREATE TABLE `staged_file`
 (
     `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(1024)   NOT NULL,
-    `hash` CHAR(256)       NOT NULL,
+    `hash` TEXT(256)       NOT NULL,
     `size` BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (`id`)
 );
