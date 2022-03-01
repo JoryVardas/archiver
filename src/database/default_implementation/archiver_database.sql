@@ -1,11 +1,8 @@
-DROP
-    DATABASE IF EXISTS `archiver`;
+DROP DATABASE IF EXISTS `archiver`;
 
-CREATE
-    DATABASE `archiver`;
+CREATE DATABASE `archiver`;
 
-USE
-    `archiver`;
+USE `archiver`;
 
 CREATE TABLE `directory`
 (
