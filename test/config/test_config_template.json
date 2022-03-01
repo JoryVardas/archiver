@@ -17,8 +17,8 @@
     "user": "${ARCHIVER_TEST_CONFIG_DATABASE_USERNAME_VALUE}",
     "password": "${ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD_VALUE}",
     "location": {
-      "host": "127.0.0.1",
-      "port": 33060,
+      "host": "${ARCHIVER_TEST_CONFIG_DATABASE_HOST_VALUE}",
+      "port": ${ARCHIVER_TEST_CONFIG_DATABASE_PORT_VALUE},
       "schema": "archiver"
     },
     "options": [

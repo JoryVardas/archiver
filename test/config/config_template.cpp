@@ -22,8 +22,10 @@ TEST_CASE("Loading a complete config file", "[config]") {
           "${ARCHIVER_TEST_CONFIG_DATABASE_USERNAME_VALUE}");
   REQUIRE(config.database.password ==
           "${ARCHIVER_TEST_CONFIG_DATABASE_PASSWORD_VALUE}");
-  REQUIRE(config.database.location.host == "127.0.0.1");
-  REQUIRE(config.database.location.port == 33060);
+  REQUIRE(config.database.location.host ==
+          "${ARCHIVER_TEST_CONFIG_DATABASE_HOST_VALUE}");
+  REQUIRE(config.database.location.port ==
+          ${ARCHIVER_TEST_CONFIG_DATABASE_PORT_VALUE});
   REQUIRE(config.database.location.schema == "archiver");
   REQUIRE(config.database.options.size() == 1);
   REQUIRE(config.database.options.at(0) == "parseTime=true");
