@@ -47,6 +47,7 @@ TEST_CASE("Loading a config file missing an entire section", "[config]") {
                       "Config file is missing a required entry \"aws\"");
 }
 
+using Catch::Matchers::ContainsSubstring;
 using Catch::Matchers::StartsWith;
 
 TEST_CASE("Loading an empty config file", "[config]") {
@@ -67,6 +68,8 @@ TEST_CASE("Loading a config file which doesn't exist", "[config]") {
 TEST_CASE("Loading a config file with an incorrect value type", "[config]") {
   REQUIRE_THROWS_AS(Config("./config/test_config_incorrect_type.json"),
                     ConfigError);
-  REQUIRE_THROWS_WITH(Config("./config/test_config_incorrect_type.json"),
-                      StartsWith("Config file has value of incorrect type"));
+  REQUIRE_THROWS_WITH(
+    Config("./config/test_config_incorrect_type.json"),
+    StartsWith("Config file could not be loaded as a required ") &&
+      ContainsSubstring("is of an incorrect type"));
 }

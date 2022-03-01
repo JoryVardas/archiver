@@ -39,37 +39,50 @@ Config::Config(const std::filesystem::path& path) {
     }
   };
 
+  const auto getRequiredValue = [&](const std::string& jsonPointer, auto& var) {
+    try {
+      getRequired(jsonPointer).get_to(var);
+    } catch (const json::type_error& err) {
+      auto jsonPointerView = std::string_view{jsonPointer};
+      jsonPointerView.remove_prefix(1);
+      throw ConfigError(
+        FORMAT_LIB::format("Config file could not be loaded as a required "
+                           "entry \"{}\" is of an incorrect type: {}",
+                           jsonPointerView, err.what()));
+    }
+  };
+
   // Call getRequired with on objects even though their values need to be
   // retrieved separately, this is so that an error is generated if the section
   // does not exist.
 
   getRequired("/general"s);
-  getRequired("/general/file_read_sizes"s).get_to(this->general.fileReadSizes);
+  getRequiredValue("/general/file_read_sizes"s, this->general.fileReadSizes);
 
   getRequired("/stager"s);
-  getRequired("/stager/stage_directory"s).get_to(this->stager.stage_directory);
+  getRequiredValue("/stager/stage_directory"s, this->stager.stage_directory);
 
   getRequired("/archive"s);
-  getRequired("/archive/archive_directory"s)
-    .get_to(this->archive.archive_directory);
-  getRequired("/archive/temp_archive_directory"s)
-    .get_to(this->archive.temp_archive_directory);
-  getRequired("/archive/target_size"s).get_to(this->archive.target_size);
-  getRequired("/archive/single_archive_size"s)
-    .get_to(this->archive.single_archive_size);
+  getRequiredValue("/archive/archive_directory"s,
+                   this->archive.archive_directory);
+  getRequiredValue("/archive/temp_archive_directory"s,
+                   this->archive.temp_archive_directory);
+  getRequiredValue("/archive/target_size"s, this->archive.target_size);
+  getRequiredValue("/archive/single_archive_size"s,
+                   this->archive.single_archive_size);
 
   getRequired("/database"s);
-  getRequired("/database/user"s).get_to(this->database.user);
-  getRequired("/database/password"s).get_to(this->database.password);
-  getRequired("/database/options"s).get_to(this->database.options);
+  getRequiredValue("/database/user"s, this->database.user);
+  getRequiredValue("/database/password"s, this->database.password);
+  getRequiredValue("/database/options"s, this->database.options);
 
   getRequired("/database/location"s);
-  getRequired("/database/location/host"s).get_to(this->database.location.host);
-  getRequired("/database/location/port"s).get_to(this->database.location.port);
-  getRequired("/database/location/schema"s)
-    .get_to(this->database.location.schema);
+  getRequiredValue("/database/location/host"s, this->database.location.host);
+  getRequiredValue("/database/location/port"s, this->database.location.port);
+  getRequiredValue("/database/location/schema"s,
+                   this->database.location.schema);
 
   getRequired("/aws"s);
-  getRequired("/aws/access_key"s).get_to(this->aws.access_key);
-  getRequired("/aws/secret_key"s).get_to(this->aws.secret_key);
+  getRequiredValue("/aws/access_key"s, this->aws.access_key);
+  getRequiredValue("/aws/secret_key"s, this->aws.secret_key);
 }
