@@ -183,10 +183,20 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
     if (getStagedDirectory(pathToStage))
       return;
 
+    if (pathToStage.string() == StagedDirectory::RootDirectoryName) {
+      auto rootDirectoryID =
+        databaseConnection(insert_into(stagedDirectoriesTable)
+                             .set(stagedDirectoriesTable.name = std::string{
+                                    StagedDirectory::RootDirectoryName}));
+      databaseConnection(
+        insert_into(stagedDirectoryParentTable)
+          .set(stagedDirectoryParentTable.parentId = rootDirectoryID,
+               stagedDirectoryParentTable.childId = rootDirectoryID));
+      return;
+    }
+
     auto parentStagedDirectory = getStagedDirectory(pathToStage.parent_path());
     if (!parentStagedDirectory) {
-      // The database is guaranteed to have at lest "/" as an entry, so there is
-      // an endpoint to the recursive call.
       add(pathToStage.parent_path());
     }
     parentStagedDirectory = getStagedDirectory(pathToStage.parent_path());
@@ -218,41 +228,56 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
 void StagedDatabase::removeAllDirectories() {
   try {
     databaseConnection(remove_from(stagedDirectoriesTable).unconditionally());
+    databaseConnection.execute(
+      FORMAT_LIB::format("ALTER TABLE {} AUTO_INCREMENT = 1",
+                         decltype(stagedDirectoriesTable)::_alias_t::_literal));
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not remove directories from staged directory database: {}"s, err));
   }
 }
 
+auto StagedDatabase::getRootDirectory() -> std::optional<StagedDirectory> {
+  return getStagedDirectory(StagedDirectory::RootDirectoryName);
+};
+
 auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
   -> std::optional<StagedDirectory> {
-  StagedDirectory foundStagedDirectory = {
-    StagedDirectory::RootDirectoryID,
-    std::string{StagedDirectory::RootDirectoryName},
-    StagedDirectory::RootDirectoryID};
+
+  StagedDirectory foundStagedDirectory;
+  ID currentId;
 
   try {
-    ID currentId = StagedDirectory::RootDirectoryID;
-
     for (const auto& name : stagePath) {
-      if (name == StagedDirectory::RootDirectoryName)
-        continue;
+      if (name == StagedDirectory::RootDirectoryName) {
+        const auto& results = databaseConnection(
+          select(all_of(stagedDirectoriesTable))
+            .from(stagedDirectoriesTable)
+            .where(stagedDirectoriesTable.name == name.string()));
+        if (results.empty()) {
+          return std::nullopt;
+        }
 
-      const auto& results = databaseConnection(
-        select(all_of(stagedDirectoriesTable),
-               stagedDirectoryParentTable.parentId)
-          .from(stagedDirectoriesTable.join(stagedDirectoryParentTable)
-                  .on(stagedDirectoriesTable.id ==
-                      stagedDirectoryParentTable.childId))
-          .where(stagedDirectoryParentTable.parentId == currentId and
-                 stagedDirectoriesTable.name == name.string()));
-      if (results.empty()) {
-        return std::nullopt;
+        const auto& row = results.front();
+        currentId = row.id;
+        foundStagedDirectory = StagedDirectory{row.id, row.name, row.id};
+      } else {
+        const auto& results = databaseConnection(
+          select(all_of(stagedDirectoriesTable),
+                 stagedDirectoryParentTable.parentId)
+            .from(stagedDirectoriesTable.join(stagedDirectoryParentTable)
+                    .on(stagedDirectoriesTable.id ==
+                        stagedDirectoryParentTable.childId))
+            .where(stagedDirectoryParentTable.parentId == currentId and
+                   stagedDirectoriesTable.name == name.string()));
+        if (results.empty()) {
+          return std::nullopt;
+        }
+
+        const auto& row = results.front();
+        currentId = row.id;
+        foundStagedDirectory = StagedDirectory{row.id, row.name, row.parentId};
       }
-
-      const auto& row = results.front();
-      currentId = row.id;
-      foundStagedDirectory = StagedDirectory{row.id, row.name, row.parentId};
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(FORMAT_LIB::format(

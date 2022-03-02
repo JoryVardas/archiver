@@ -11,7 +11,6 @@ struct ArchivedDirectory {
   std::string name;
   ArchivedDirectoryID parent;
 
-  static constexpr ArchivedDirectoryID RootDirectoryID = 1;
   static constexpr std::string_view RootDirectoryName = "/";
 };
 

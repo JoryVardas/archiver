@@ -43,6 +43,7 @@ public:
     -> std::vector<ArchivedDirectory>;
   auto addDirectory(const StagedDirectory& directory,
                     const ArchivedDirectory& parent) -> ArchivedDirectory;
+  auto getRootDirectory() -> ArchivedDirectory;
 
   auto listChildFiles(const ArchivedDirectory& directory)
     -> std::vector<ArchivedFile>;

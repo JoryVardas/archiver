@@ -38,6 +38,7 @@ public:
   void add(const std::filesystem::path& stagePath);
   void remove(const StagedDirectory& stagedDirectory);
   void removeAllDirectories();
+  auto getRootDirectory() -> std::optional<StagedDirectory>;
 
 private:
   sqlpp::mysql::connection databaseConnection;

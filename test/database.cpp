@@ -27,16 +27,14 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
     std::make_shared<StagedDatabase>(databaseConnectionConfig);
   auto archivedDatabase = std::make_shared<ArchivedDatabase>(
     databaseConnectionConfig, config.archive.target_size);
-  const ArchivedDirectory archivedRootDirectory{
-    ArchivedDirectory::RootDirectoryID,
-    std::string{ArchivedDirectory::RootDirectoryName},
-    ArchivedDirectory::RootDirectoryID};
+  const ArchivedDirectory archivedRootDirectory =
+    archivedDatabase->getRootDirectory();
 
   // Require that all the databases are empty
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
   REQUIRE(
-    archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
+    archivedDatabase->listChildDirectories(archivedRootDirectory).size() == 1);
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
 
   SECTION("Staged directory database") {
@@ -53,26 +51,20 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
       auto addedDirectories = stagedDatabase->listAllDirectories();
       REQUIRE(addedDirectories.size() == 19);
 
-      REQUIRE(addedDirectories.at(0).id == StagedDirectory::RootDirectoryID);
-      REQUIRE(addedDirectories.at(0).parent ==
-              ArchivedDirectory::RootDirectoryID);
+      REQUIRE(addedDirectories.at(0).parent == addedDirectories.at(0).id);
 
-      REQUIRE(addedDirectories.at(1).id != StagedDirectory::RootDirectoryID);
       REQUIRE(addedDirectories.at(1).id > addedDirectories.at(0).id);
       REQUIRE(addedDirectories.at(1).name == "dirTest");
       REQUIRE(addedDirectories.at(1).parent == addedDirectories.at(0).id);
 
-      REQUIRE(addedDirectories.at(2).id != StagedDirectory::RootDirectoryID);
       REQUIRE(addedDirectories.at(2).id > addedDirectories.at(1).id);
       REQUIRE(addedDirectories.at(2).name == "dirTest2");
       REQUIRE(addedDirectories.at(2).parent == addedDirectories.at(0).id);
 
-      REQUIRE(addedDirectories.at(18).id != StagedDirectory::RootDirectoryID);
       REQUIRE(addedDirectories.at(18).id > addedDirectories.at(17).id);
       REQUIRE(addedDirectories.at(18).name == "p");
       REQUIRE(addedDirectories.at(18).parent == addedDirectories.at(17).id);
 
-      REQUIRE(addedDirectories.at(8).id != StagedDirectory::RootDirectoryID);
       REQUIRE(addedDirectories.at(8).id > addedDirectories.at(7).id);
       REQUIRE(addedDirectories.at(8).name == "f");
       REQUIRE(addedDirectories.at(8).parent == addedDirectories.at(7).id);
@@ -202,6 +194,6 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
   REQUIRE(
-    archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
+    archivedDatabase->listChildDirectories(archivedRootDirectory).size() == 1);
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
 }

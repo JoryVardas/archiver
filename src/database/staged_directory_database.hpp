@@ -15,6 +15,7 @@ concept StagedDirectoryDatabase = Database<T> &&
   t.add(stagePath);
   t.remove(directory);
   t.removeAllDirectories();
+  { t.getRootDirectory() } -> std::same_as<std::optional<StagedDirectory>>;
 };
 
 _make_exception_(StagedDirectoryDatabaseException);

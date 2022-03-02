@@ -216,10 +216,8 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
 auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
                                     const ArchivedDirectory& parent)
   -> ArchivedDirectory {
-  if (directory.id == ArchivedDirectory::RootDirectoryID)
-    return {ArchivedDirectory::RootDirectoryID,
-            std::string{ArchivedDirectory::RootDirectoryName},
-            ArchivedDirectory::RootDirectoryID};
+  if (directory.name == ArchivedDirectory::RootDirectoryName)
+    return getRootDirectory();
   try {
     auto matchingDirectory = databaseConnection(
       select(directoriesTable.id)
@@ -242,6 +240,20 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
   } catch (const sqlpp::exception& err) {
     throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
       "Could not add directory to archived directories: {}"s, err));
+  }
+}
+auto ArchivedDatabase::getRootDirectory() -> ArchivedDirectory {
+  try {
+    auto result = databaseConnection(
+      select(all_of(directoriesTable))
+        .from(directoriesTable)
+        .where(directoriesTable.name ==
+               std::string{ArchivedDirectory::RootDirectoryName}));
+    const auto& rootDirectory = result.front();
+    return {rootDirectory.id, rootDirectory.name, rootDirectory.id};
+  } catch (const sqlpp::exception& err) {
+    throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
+      "Could not get the root archived directory: {}"s, err));
   }
 }
 

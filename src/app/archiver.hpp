@@ -42,11 +42,7 @@ private:
   Size singleFileArchiveSize;
   std::set<Archive> modifiedArchives;
 
-  std::map<StagedDirectoryID, ArchivedDirectory> archivedDirectoryMap = {
-    {StagedDirectory::RootDirectoryID,
-     {ArchivedDirectory::RootDirectoryID,
-      std::string{ArchivedDirectory::RootDirectoryName},
-      ArchivedDirectory::RootDirectoryID}}};
+  std::map<StagedDirectoryID, ArchivedDirectory> archivedDirectoryMap;
 
   using path = std::filesystem::path;
 

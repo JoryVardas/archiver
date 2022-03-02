@@ -18,6 +18,7 @@ concept ArchivedDirectoryDatabase = Database<T> &&
   {
     t.addDirectory(stagedDirectory, archivedParent)
     } -> std::same_as<ArchivedDirectory>;
+  { t.getRootDirectory() } -> std::same_as<ArchivedDirectory>;
 };
 
 _make_exception_(ArchivedDirectoryDatabaseException);

@@ -11,7 +11,6 @@ struct StagedDirectory {
   std::string name;
   StagedDirectoryID parent;
 
-  static constexpr StagedDirectoryID RootDirectoryID = 1;
   static constexpr std::string_view RootDirectoryName = "/";
 };
 

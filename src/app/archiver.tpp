@@ -73,6 +73,11 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
   for (const auto& stagedDirectory : stagedDirectories) {
     if (archivedDirectoryMap.contains(stagedDirectory.id))
       continue;
+    if (stagedDirectory.name == StagedDirectory::RootDirectoryName) {
+      archivedDirectoryMap.insert(
+        {stagedDirectory.id, archiveDatabase->getRootDirectory()});
+      continue;
+    }
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedDirectory.parent);
         parentArchivedDirectory == archivedDirectoryMap.end()) {
