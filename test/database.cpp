@@ -169,7 +169,7 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
 
         auto updatedStagedFiles = stagedDatabase->listAllFiles();
 
-        REQUIRE(updatedStagedFiles.size() == 1);
+        REQUIRE(updatedStagedFiles.size() == 2);
         REQUIRE(updatedStagedFiles.at(0).id == stagedFiles.at(1).id);
       }
       SECTION("Can't remove a staged file that is already removed") {
