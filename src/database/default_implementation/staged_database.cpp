@@ -159,14 +159,18 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
                                         .unconditionally());
 
     for (const auto& stagedDirectory : results) {
-      const auto& stagedDirectoryParent =
-        databaseConnection(
-          select(stagedDirectoryParentTable.parentId)
-            .from(stagedDirectoryParentTable)
-            .where(stagedDirectoryParentTable.childId == stagedDirectory.id))
-          .front();
-      stagedDirectories.push_back({stagedDirectory.id, stagedDirectory.name,
-                                   stagedDirectoryParent.parentId});
+      const auto& stagedDirectoryParentResult = databaseConnection(
+        select(stagedDirectoryParentTable.parentId)
+          .from(stagedDirectoryParentTable)
+          .where(stagedDirectoryParentTable.childId == stagedDirectory.id));
+      if (stagedDirectoryParentResult.empty()) {
+        stagedDirectories.push_back(
+          {stagedDirectory.id, stagedDirectory.name, stagedDirectory.id});
+      } else {
+        stagedDirectories.push_back(
+          {stagedDirectory.id, stagedDirectory.name,
+           stagedDirectoryParentResult.front().parentId});
+      }
     }
   } catch (const sqlpp::exception& err) {
     throw StagedDirectoryDatabaseException(
@@ -187,14 +191,9 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
       return;
 
     if (pathToStage.string() == StagedDirectory::RootDirectoryName) {
-      auto rootDirectoryID =
-        databaseConnection(insert_into(stagedDirectoriesTable)
-                             .set(stagedDirectoriesTable.name = std::string{
-                                    StagedDirectory::RootDirectoryName}));
-      databaseConnection(
-        insert_into(stagedDirectoryParentTable)
-          .set(stagedDirectoryParentTable.parentId = rootDirectoryID,
-               stagedDirectoryParentTable.childId = rootDirectoryID));
+      databaseConnection(insert_into(stagedDirectoriesTable)
+                           .set(stagedDirectoriesTable.name = std::string{
+                                  StagedDirectory::RootDirectoryName}));
       return;
     }
 

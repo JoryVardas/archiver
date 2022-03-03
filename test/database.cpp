@@ -34,7 +34,7 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
   REQUIRE(
-    archivedDatabase->listChildDirectories(archivedRootDirectory).size() == 1);
+    archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
 
   SECTION("Staged directory database") {
@@ -189,6 +189,6 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
   REQUIRE(
-    archivedDatabase->listChildDirectories(archivedRootDirectory).size() == 1);
+    archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
 }

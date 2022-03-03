@@ -22,10 +22,6 @@ CREATE TABLE `directory_parent`
 
 INSERT INTO `directory` (`name`)
 VALUES ("/");
-INSERT INTO `directory_parent` (`parent_id`, `child_id`)
-SELECT `id` AS `parent`, `id` AS `child`
-FROM `directory`
-LIMIT 1;
 
 CREATE TABLE `file`
 (
