@@ -106,13 +106,10 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
       REQUIRE_NOTHROW(stagedDatabase->remove(stagedDirectories.at(18)));
       REQUIRE(stagedDatabase->listAllDirectories().size() == 18);
 
-      SECTION(
-        "Can't remove a staged directory which has already been removed") {
-        REQUIRE_THROWS_MATCHES(
-          stagedDatabase->remove(stagedDirectories.at(18)),
-          StagedDirectoryDatabaseException,
-          MessageStartsWith(
-            "Could not remove directory from staged directory database"));
+      SECTION("Removal of a staged directory which has already been removed "
+              "does nothing") {
+        REQUIRE_NOTHROW(stagedDatabase->remove(stagedDirectories.at(18)));
+        REQUIRE(stagedDatabase->listAllDirectories().size() == 18);
       }
 
       REQUIRE_NOTHROW(stagedDatabase->removeAllDirectories());
