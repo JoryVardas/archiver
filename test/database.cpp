@@ -173,10 +173,8 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
         REQUIRE(updatedStagedFiles.at(0).id == stagedFiles.at(1).id);
       }
       SECTION("Can't remove a staged file that is already removed") {
-        REQUIRE_THROWS_MATCHES(
-          stagedDatabase->remove(stagedFiles.at(0)),
-          StagedFileDatabaseException,
-          MessageStartsWith("Could not remove file from staged file database"));
+        REQUIRE_NOTHROW(stagedDatabase->remove(stagedFiles.at(0)));
+        REQUIRE(stagedFiles.size() == 3);
       }
       SECTION("Removing all staged files") {
         REQUIRE_NOTHROW(stagedDatabase->removeAllFiles());
