@@ -131,6 +131,8 @@ void StagedDatabase::add(const RawFile& file,
 
 void StagedDatabase::remove(const StagedFile& stagedFile) {
   try {
+    databaseConnection(remove_from(stagedFileParentTable)
+                         .where(stagedFileParentTable.fileId == stagedFile.id));
     databaseConnection(remove_from(stagedFilesTable)
                          .where(stagedFilesTable.id == stagedFile.id));
   } catch (const sqlpp::exception& err) {
@@ -141,6 +143,7 @@ void StagedDatabase::remove(const StagedFile& stagedFile) {
 
 void StagedDatabase::removeAllFiles() {
   try {
+    databaseConnection(remove_from(stagedFileParentTable).unconditionally());
     databaseConnection(remove_from(stagedFilesTable).unconditionally());
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(FORMAT_LIB::format(
