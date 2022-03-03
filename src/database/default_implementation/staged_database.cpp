@@ -216,6 +216,21 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
 
 void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
   try {
+    const Size numberOfChildren =
+      databaseConnection(
+        select(count(1))
+          .from(stagedDirectoryParentTable)
+          .where(stagedDirectoryParentTable.parentId == stagedDirectory.id))
+        .front()
+        .count;
+    if (numberOfChildren != 0) {
+      throw StagedDirectoryDatabaseException(
+        "Can not remove staged directory which is the parent of other staged "
+        "directories.");
+    }
+    databaseConnection(
+      remove_from(stagedDirectoryParentTable)
+        .where(stagedDirectoryParentTable.childId == stagedDirectory.id));
     databaseConnection(
       remove_from(stagedDirectoriesTable)
         .where(stagedDirectoriesTable.id == stagedDirectory.id));
@@ -227,6 +242,8 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
 
 void StagedDatabase::removeAllDirectories() {
   try {
+    databaseConnection(
+      remove_from(stagedDirectoryParentTable).unconditionally());
     databaseConnection(remove_from(stagedDirectoriesTable).unconditionally());
     databaseConnection.execute(
       FORMAT_LIB::format("ALTER TABLE {} AUTO_INCREMENT = 1",

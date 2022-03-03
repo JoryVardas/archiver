@@ -98,8 +98,8 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
         REQUIRE_THROWS_MATCHES(
           stagedDatabase->remove(stagedDirectories.at(0)),
           StagedDirectoryDatabaseException,
-          MessageStartsWith(
-            "Could not remove directory from staged directory database"));
+          MessageStartsWith("Can not remove staged directory which is the "
+                            "parent of other staged directories."));
         REQUIRE(stagedDatabase->listAllDirectories().size() == 19);
       }
 
