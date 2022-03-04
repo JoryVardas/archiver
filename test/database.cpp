@@ -149,7 +149,7 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
       REQUIRE(stagedFiles.at(0).size == ArchiverTest::TestData1::size);
       REQUIRE(stagedFiles.at(0).hash == ArchiverTest::TestData1::hash);
       REQUIRE(stagedFiles.at(0).name == "TestData1.test");
-      REQUIRE(stagedFiles.at(1).parent == stagedDirectories.at(3).id);
+      REQUIRE(stagedFiles.at(1).parent == stagedDirectories.at(2).id);
       REQUIRE(stagedFiles.at(1).size == ArchiverTest::TestDataSingle::size);
       REQUIRE(stagedFiles.at(1).hash == ArchiverTest::TestDataSingle::hash);
       REQUIRE(stagedFiles.at(1).name == "TestData2.test");
