@@ -18,7 +18,7 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
     throw NotAFile(FORMAT_LIB::format("The path \"{}\" is not a file", path));
   }
 
-  std::basic_ifstream<uint8_t> inputStream(path);
+  std::basic_ifstream<uint8_t> inputStream(path, std::ios_base::binary);
 
   if (inputStream.bad() || !inputStream.is_open()) {
     throw FileException(FORMAT_LIB::format(
