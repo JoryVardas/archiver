@@ -185,6 +185,83 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
     REQUIRE_NOTHROW(stagedDatabase->rollback());
   }
 
+  SECTION("Archived directory, file, and archive databases") {
+    REQUIRE_NOTHROW(archivedDatabase->startTransaction());
+    REQUIRE_NOTHROW(stagedDatabase->startTransaction());
+
+    REQUIRE_NOTHROW(stagedDatabase->add("/"));
+    REQUIRE_NOTHROW(stagedDatabase->add("/dirTest"));
+    REQUIRE_NOTHROW(stagedDatabase->add("/dirTest2/"));
+    REQUIRE_NOTHROW(
+      stagedDatabase->add("/dirTest/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p"));
+
+    auto stagedDirectories = stagedDatabase->listAllDirectories();
+
+    SECTION("Archived directory database") {
+      REQUIRE(archivedDatabase->getRootDirectory().name ==
+              ArchivedDirectory::RootDirectoryName);
+
+      SECTION("Adding a directory which already exists shouldn't do anything") {
+        auto archivedDirectory1 = archivedDatabase->addDirectory(
+          stagedDirectories.at(0), archivedRootDirectory);
+        REQUIRE(archivedDirectory1.id == archivedRootDirectory.id);
+        REQUIRE(archivedDirectory1.name == archivedRootDirectory.name);
+        REQUIRE(archivedDirectory1.parent == archivedRootDirectory.parent);
+      }
+
+      auto archivedDirectory2 = archivedDatabase->addDirectory(
+        stagedDirectories.at(1), archivedRootDirectory);
+      REQUIRE(archivedDirectory2.id >= archivedRootDirectory.id);
+      REQUIRE(archivedDirectory2.name == stagedDirectories.at(1).name);
+      REQUIRE(archivedDirectory2.parent == archivedRootDirectory.id);
+
+      auto archivedDirectory3 = archivedDatabase->addDirectory(
+        stagedDirectories.at(2), archivedRootDirectory);
+      REQUIRE(archivedDirectory2.id >= archivedDirectory2.id);
+      REQUIRE(archivedDirectory2.name == stagedDirectories.at(1).name);
+      REQUIRE(archivedDirectory2.parent == archivedRootDirectory.id);
+
+      auto archivedDirectory4 = archivedDatabase->addDirectory(
+        stagedDirectories.at(3), archivedDirectory2);
+      REQUIRE(archivedDirectory4.id >= archivedDirectory3.id);
+      REQUIRE(archivedDirectory4.name == stagedDirectories.at(3).name);
+      REQUIRE(archivedDirectory4.parent == archivedDirectory2.id);
+
+      SECTION("Adding a directory to a parent it wasn't staged to doesn't "
+              "produce an error") {
+        auto archivedDirectory18 = archivedDatabase->addDirectory(
+          stagedDirectories.at(18), archivedRootDirectory);
+        REQUIRE(archivedDirectory18.id >= archivedDirectory4.id);
+        REQUIRE(archivedDirectory18.name == stagedDirectories.at(18).name);
+        REQUIRE(archivedDirectory18.parent == archivedRootDirectory.id);
+      }
+
+      SECTION("Listing archived directories") {
+        auto directoriesUnderRoot =
+          archivedDatabase->listChildDirectories(archivedRootDirectory);
+
+        REQUIRE(directoriesUnderRoot.size() == 2);
+        REQUIRE(directoriesUnderRoot.at(0).id == archivedDirectory2.id);
+        REQUIRE(directoriesUnderRoot.at(0).name == archivedDirectory2.name);
+        REQUIRE(directoriesUnderRoot.at(0).parent == archivedDirectory2.parent);
+        REQUIRE(directoriesUnderRoot.at(1).id == archivedDirectory3.id);
+        REQUIRE(directoriesUnderRoot.at(1).name == archivedDirectory3.name);
+        REQUIRE(directoriesUnderRoot.at(1).parent == archivedDirectory3.parent);
+
+        auto directoriesUnderSecond =
+          archivedDatabase->listChildDirectories(archivedDirectory2);
+
+        REQUIRE(directoriesUnderSecond.size() == 1);
+        REQUIRE(directoriesUnderSecond.at(0).id == archivedDirectory4.id);
+        REQUIRE(directoriesUnderSecond.at(0).name == archivedDirectory4.name);
+        REQUIRE(directoriesUnderSecond.at(0).parent ==
+                archivedDirectory4.parent);
+      }
+    }
+  }
+  REQUIRE_NOTHROW(archivedDatabase->rollback());
+  REQUIRE_NOTHROW(stagedDatabase->rollback());
+
   // Require that all the databases are empty
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
