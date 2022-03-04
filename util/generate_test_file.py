@@ -22,7 +22,7 @@ for opt, arg in opts:
 with open(outfile, 'wb') as file:
     file.write(os.urandom(number_bytes))
 
-sha = hashlib.sha512()
+sha = hashlib.sha3_512()
 blake = hashlib.blake2b()
 buffer_size = 1048576
 
