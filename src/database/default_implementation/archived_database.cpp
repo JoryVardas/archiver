@@ -88,7 +88,7 @@ auto ArchivedDatabase::getArchiveForFile(const StagedFile& file) -> Archive {
     std::string{fileName.substr(fileName.find_last_of('.'))};
   auto archiveForExtension = getArchiveForExtension(fileExtension);
 
-  if (getArchiveSize(archiveForExtension) >= targetSize) {
+  if (getArchiveSize(archiveForExtension) < targetSize) {
     return archiveForExtension;
   }
 
