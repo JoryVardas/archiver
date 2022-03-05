@@ -325,7 +325,8 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
                .as(revisionSize),
              relevantFileRevisions.archiveTime.as(revisionArchiveTime))
         .from(relevantFileRevisions.left_outer_join(duplicateRevisionTable)
-                .on(relevantFileRevisions.id == duplicateRevisionTable.id))
+                .on(relevantFileRevisions.originalRevisionId ==
+                    duplicateRevisionTable.id))
         .unconditionally()
         .as(RelevantRevisionWithDuplicateTable);
     auto relevantFileRevisionsWithDuplicateAndArchiveInfo =
