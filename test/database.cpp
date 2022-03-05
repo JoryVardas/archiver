@@ -423,8 +423,6 @@ TEST_CASE("Connecting to, modifying, and retrieving data from the default "
                   stagedFiles.at(4).size);
           REQUIRE(archivedFilesDirectory2.at(0).revisions.at(1).hash ==
                   stagedFiles.at(4).hash);
-          REQUIRE(archivedFilesDirectory2.at(0).revisions.at(0).archiveTime !=
-                  archivedFilesDirectory2.at(0).revisions.at(1).archiveTime);
         }
 
         auto archivedFilesRoot =
