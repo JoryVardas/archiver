@@ -1,5 +1,5 @@
-#ifndef ARCHIVER_ARCHIVED_DATABASE_HPP
-#define ARCHIVER_ARCHIVED_DATABASE_HPP
+#ifndef ARCHIVER_MYSQL_ARCHIVED_DATABASE_HPP
+#define ARCHIVER_MYSQL_ARCHIVED_DATABASE_HPP
 
 #include "../../app/archived_directory.hpp"
 #include "../../app/archived_file.hpp"
@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+namespace database::mysql {
 class ArchivedDatabase {
 public:
   using ConnectionConfig = sqlpp::mysql::connection_config;
@@ -78,5 +79,5 @@ private:
   auto findDuplicateRevisionId(const StagedFile& file)
     -> std::optional<ArchivedFileRevisionID>;
 };
-
+}
 #endif

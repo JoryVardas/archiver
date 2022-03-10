@@ -3,6 +3,7 @@
 using namespace sqlpp;
 using namespace std::string_literals;
 
+namespace database::mysql {
 const std::string ArchivedDatabase::noExtensionArchiveContents = "<BLANK>"s;
 
 ArchivedDatabase::ArchivedDatabase(
@@ -454,4 +455,5 @@ auto ArchivedDatabase::findDuplicateRevisionId(const StagedFile& file)
       "{}, name \"{}\", and hash \"{}\": {}",
       file.id, file.name, file.hash, err));
   }
+}
 }

@@ -87,5 +87,5 @@ if (NOT DEFINED ARCHIVER_TEST_DATABASE_USERNAME OR NOT DEFINED ARCHIVER_TEST_DAT
             " and database tests will be omitted.")
     target_sources(Archiver-Tests PRIVATE database_no_connection.cpp)
 else ()
-    target_sources(Archiver-Tests PRIVATE database.cpp)
+    target_sources(Archiver-Tests PRIVATE mysql_database.cpp)
 endif ()

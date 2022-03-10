@@ -2,11 +2,12 @@
 #include <catch2/catch_all.hpp>
 #include <src/app/util/get_file_read_buffer.hpp>
 #include <src/config/config.h>
-#include <src/database/default_implementation/archived_database.hpp>
-#include <src/database/default_implementation/staged_database.hpp>
+#include <src/database/mysql_implementation/archived_database.hpp>
+#include <src/database/mysql_implementation/staged_database.hpp>
 #include <test/test_constant.hpp>
 
 using Catch::Matchers::StartsWith;
+using namespace database::mysql;
 
 TEST_CASE("Connecting to, modifying, and retrieving data from the default "
           "implementations of the staged/archived directory/file database") {

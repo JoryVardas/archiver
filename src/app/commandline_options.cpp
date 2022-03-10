@@ -1,7 +1,7 @@
 #include "commandline_options.hpp"
 #include "../config/config.h"
-#include "../database/default_implementation/archived_database.hpp"
-#include "../database/default_implementation/staged_database.hpp"
+#include "../database/mysql_implementation/archived_database.hpp"
+#include "../database/mysql_implementation/staged_database.hpp"
 #include "archiver.hpp"
 #include "stager.hpp"
 #include "util/get_file_read_buffer.hpp"
@@ -12,6 +12,7 @@
 #include <spdlog/spdlog.h>
 
 namespace ranges = std::ranges;
+using namespace database::mysql;
 
 StageCommand::StageCommand()
   : cxxsubs::IOptions({"stage"}, "Stage files to be archived") {

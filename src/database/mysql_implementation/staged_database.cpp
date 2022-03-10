@@ -5,6 +5,7 @@
 
 using namespace sqlpp;
 
+namespace database::mysql {
 StagedDatabase::StagedDatabase(
   std::shared_ptr<StagedDatabase::ConnectionConfig>& config)
   : databaseConnection(config) {}
@@ -304,4 +305,5 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
   }
 
   return foundStagedDirectory;
+}
 }

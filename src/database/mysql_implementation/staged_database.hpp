@@ -1,5 +1,5 @@
-#ifndef ARCHIVER_STAGED_DATABASE_HPP
-#define ARCHIVER_STAGED_DATABASE_HPP
+#ifndef ARCHIVER_MYSQL_STAGED_DATABASE_HPP
+#define ARCHIVER_MYSQL_STAGED_DATABASE_HPP
 
 #include "../../app/common.h"
 #include "../../app/raw_file.hpp"
@@ -12,6 +12,7 @@
 #include <optional>
 #include <vector>
 
+namespace database::mysql {
 class StagedDatabase {
 public:
   using ConnectionConfig = sqlpp::mysql::connection_config;
@@ -51,5 +52,6 @@ private:
   auto getStagedDirectory(const std::filesystem::path& stagePath)
     -> std::optional<StagedDirectory>;
 };
+}
 
 #endif
