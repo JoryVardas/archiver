@@ -89,3 +89,7 @@ if (NOT DEFINED ARCHIVER_TEST_DATABASE_USERNAME OR NOT DEFINED ARCHIVER_TEST_DAT
 else ()
     target_sources(Archiver-Tests PRIVATE mysql_database.cpp)
 endif ()
+
+# Add mock database
+add_subdirectory(database/mock_implementation)
+target_link_libraries(Archiver-Tests PRIVATE Archiver_mock_database)
