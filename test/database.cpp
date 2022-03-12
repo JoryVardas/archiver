@@ -116,8 +116,8 @@ TEMPLATE_TEST_CASE(
     REQUIRE_NOTHROW(stagedDatabase->add("/dirTest"));
     REQUIRE_NOTHROW(stagedDatabase->add("/dirTest2/"));
 
-    RawFile testFile1{"TestData1.test", readBuffer};
-    RawFile testFile2{"TestData_Single.test", readBuffer};
+    RawFile testFile1{"test_data/TestData1.test", readBuffer};
+    RawFile testFile2{"test_data/TestData_Single.test", readBuffer};
 
     SECTION("Adding and listing entries to/from the staged file database") {
       SECTION(
@@ -253,11 +253,13 @@ TEMPLATE_TEST_CASE(
       }
     }
     SECTION("Archived file database and archive database") {
-      RawFile testFile1{"TestData1.test", readBuffer};
-      RawFile testFileSingle{"TestData_Single.test", readBuffer};
-      RawFile testFileSingleExact{"TestData_Single_Exact.test", readBuffer};
-      RawFile testFileCopy{"TestData_Copy.test", readBuffer};
-      RawFile testFileNotSingle{"TestData_Not_Single.test", readBuffer};
+      RawFile testFile1{"test_data/TestData1.test", readBuffer};
+      RawFile testFileSingle{"test_data/TestData_Single.test", readBuffer};
+      RawFile testFileSingleExact{"test_data/TestData_Single_Exact.test",
+                                  readBuffer};
+      RawFile testFileCopy{"test_data/TestData_Copy.test", readBuffer};
+      RawFile testFileNotSingle{"test_data/TestData_Not_Single.test",
+                                readBuffer};
 
       stagedDatabase->add(testFile1, "/TestData1.test");
       stagedDatabase->add(testFileSingle, "/dirTest/TestData_Single.test");

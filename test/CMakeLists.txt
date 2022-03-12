@@ -45,27 +45,29 @@ function(archiver_test_get_random_file size_to_download file_location output_sha
     set(${output_size_var} ${size_to_download} PARENT_SCOPE)
 endfunction()
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_data)
+
 archiver_test_get_random_file(1024
-        ${CMAKE_CURRENT_BINARY_DIR}/TestData1.test
+        ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData1.test
         ARCHIVER_TEST_TEST_DATA_1_SHA
         ARCHIVER_TEST_TEST_DATA_1_BLAKE2B
         ARCHIVER_TEST_TEST_DATA_1_SIZE)
 archiver_test_get_random_file(5120
-        ${CMAKE_CURRENT_BINARY_DIR}/TestData_Single_Exact.test
+        ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData_Single_Exact.test
         ARCHIVER_TEST_TEST_DATA_SINGLE_EXACT_SHA
         ARCHIVER_TEST_TEST_DATA_SINGLE_EXACT_BLAKE2B
         ARCHIVER_TEST_TEST_DATA_SINGLE_EXACT_SIZE)
 archiver_test_get_random_file(5121
-        ${CMAKE_CURRENT_BINARY_DIR}/TestData_Single.test
+        ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData_Single.test
         ARCHIVER_TEST_TEST_DATA_SINGLE_SHA
         ARCHIVER_TEST_TEST_DATA_SINGLE_BLAKE2B
         ARCHIVER_TEST_TEST_DATA_SINGLE_SIZE)
 archiver_test_get_random_file(5119
-        ${CMAKE_CURRENT_BINARY_DIR}/TestData_Not_Single.test
+        ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData_Not_Single.test
         ARCHIVER_TEST_TEST_DATA_NOT_SINGLE_SHA
         ARCHIVER_TEST_TEST_DATA_NOT_SINGLE_BLAKE2B
         ARCHIVER_TEST_TEST_DATA_NOT_SINGLE_SIZE)
-file(COPY_FILE ${CMAKE_CURRENT_BINARY_DIR}/TestData_Not_Single.test ${CMAKE_CURRENT_BINARY_DIR}/TestData_Copy.test)
+file(COPY_FILE ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData_Not_Single.test ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData_Copy.test)
 set(ARCHIVER_TEST_TEST_DATA_COPY_SHA ${ARCHIVER_TEST_TEST_DATA_NOT_SINGLE_SHA})
 set(ARCHIVER_TEST_TEST_DATA_COPY_BLAKE2B ${ARCHIVER_TEST_TEST_DATA_NOT_SINGLE_BLAKE2B})
 set(ARCHIVER_TEST_TEST_DATA_COPY_SIZE ${ARCHIVER_TEST_TEST_DATA_NOT_SINGLE_SIZE})
