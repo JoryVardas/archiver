@@ -123,9 +123,11 @@ auto ArchivedDatabase::getArchiveSize(const Archive& archive) -> Size {
 auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
   -> std::vector<ArchivedDirectory> {
   std::vector<ArchivedDirectory> ret;
-  ranges::copy_if(
-    getDirectoryVector(), std::back_inserter(ret),
-    [&](const auto& dir) { return dir.parent == directory.parent; });
+  ranges::copy_if(getDirectoryVector(), std::back_inserter(ret),
+                  [&](const auto& dir) {
+                    return dir.parent == directory.parent &&
+                           dir.name != ArchivedDirectory::RootDirectoryName;
+                  });
   return ret;
 }
 auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
