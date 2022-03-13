@@ -35,7 +35,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
     archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
 
-  REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "/test_data"));
+  REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "."));
 
   auto stagedDirectories = stagedDatabase->listAllDirectories();
   auto stagedFiles = stagedDatabase->listAllFiles();

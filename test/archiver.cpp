@@ -42,7 +42,7 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
     archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
 
-  REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "/test_data"));
+  REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "."));
   REQUIRE_NOTHROW(
     archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted()));
 
