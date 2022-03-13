@@ -33,18 +33,36 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
                                           stagedFiles) {
   const auto startTransactions = [&]() {
     archivedDirectoryDatabase->startTransaction();
-    archivedFileDatabase->startTransaction();
-    archiveDatabase->startTransaction();
+    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
+                        decltype(archivedFileDatabase)>)
+      archivedFileDatabase->startTransaction();
+    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
+                        decltype(archiveDatabase)> &&
+        !std::is_same_v<decltype(archivedFileDatabase),
+                        decltype(archiveDatabase)>)
+      archiveDatabase->startTransaction();
   };
   const auto commitTransactions = [&]() {
     archivedDirectoryDatabase->commit();
-    archivedFileDatabase->commit();
-    archiveDatabase->commit();
+    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
+                        decltype(archivedFileDatabase)>)
+      archivedFileDatabase->commit();
+    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
+                        decltype(archiveDatabase)> &&
+        !std::is_same_v<decltype(archivedFileDatabase),
+                        decltype(archiveDatabase)>)
+      archiveDatabase->commit();
   };
   const auto rollbackTransactions = [&]() {
     archivedDirectoryDatabase->rollback();
-    archivedFileDatabase->rollback();
-    archiveDatabase->rollback();
+    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
+                        decltype(archivedFileDatabase)>)
+      archivedFileDatabase->rollback();
+    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
+                        decltype(archiveDatabase)> &&
+        !std::is_same_v<decltype(archivedFileDatabase),
+                        decltype(archiveDatabase)>)
+      archiveDatabase->rollback();
   };
 
   try {

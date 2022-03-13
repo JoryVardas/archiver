@@ -59,15 +59,21 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
 
   const auto startTransactions = [&]() {
     stagedDirectoryDatabase->startTransaction();
-    stagedFileDatabase->startTransaction();
+    if (!std::is_same_v<decltype(stagedDirectoryDatabase),
+                        decltype(stagedFileDatabase)>)
+      stagedFileDatabase->startTransaction();
   };
   const auto commitTransactions = [&]() {
     stagedDirectoryDatabase->commit();
-    stagedFileDatabase->commit();
+    if (!std::is_same_v<decltype(stagedDirectoryDatabase),
+                        decltype(stagedFileDatabase)>)
+      stagedFileDatabase->commit();
   };
   const auto rollbackTransactions = [&]() {
     stagedDirectoryDatabase->rollback();
-    stagedFileDatabase->rollback();
+    if (!std::is_same_v<decltype(stagedDirectoryDatabase),
+                        decltype(stagedFileDatabase)>)
+      stagedFileDatabase->rollback();
   };
 
   for (const auto& currentPath : paths) {
