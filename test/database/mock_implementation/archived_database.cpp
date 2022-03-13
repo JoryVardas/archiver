@@ -195,14 +195,11 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
     addedFile.revisions.push_back(
       {nextFileRevisionId++, stagedFile.hash, stagedFile.size,
        std::chrono::system_clock::now(), archive.id});
+    return ArchivedFileAddedType::NewRevision;
   } else {
     addedFile.revisions.push_back(*duplicateRevision);
-  }
-
-  if (existingFile == ranges::end(getFileVector()))
     return ArchivedFileAddedType::DuplicateRevision;
-  else
-    return ArchivedFileAddedType::NewRevision;
+  }
 }
 
 auto ArchivedDatabase::getFileVector() -> decltype(archivedFiles)& {
