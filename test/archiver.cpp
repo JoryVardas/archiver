@@ -92,7 +92,6 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
     {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
                         testDataCopy->revisions.at(0).containingArchiveId,
                         testDataCopy->revisions.at(0).id)}));
-  REQUIRE(testDataCopy->revisions.at(0).id == testData->revisions.at(0).id);
 
   auto testDataNotSingle = ranges::find(
     archivedFilesTestData, "TestData_Not_Single.test", &ArchivedFile::name);
@@ -109,6 +108,8 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
     {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
                         testDataNotSingle->revisions.at(0).containingArchiveId,
                         testDataNotSingle->revisions.at(0).id)}));
+  REQUIRE(testDataNotSingle->revisions.at(0).id ==
+          testDataCopy->revisions.at(0).id);
 
   auto testDataSingle = ranges::find(
     archivedFilesTestData, "TestData_Single.test", &ArchivedFile::name);
