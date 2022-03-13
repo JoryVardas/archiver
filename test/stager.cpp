@@ -102,14 +102,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(sortedDirectories.at(1).id > sortedDirectories.at(0).id);
   REQUIRE(sortedDirectories.at(1).parent == sortedDirectories.at(0).id);
 
-  auto sortedFiles = stager.getFilesSorted();
-  for (auto file = ranges::begin(sortedFiles); file != ranges::end(sortedFiles);
-       ++file) {
-    REQUIRE(
-      ranges::find_if(file + 1, ranges::end(sortedFiles), [&](const auto& cur) {
-        return cur.id == file->parent;
-      }) == ranges::end(sortedFiles));
-  }
+  REQUIRE(ranges::is_sorted(stager.getFilesSorted(), {}, &StagedFile::parent));
 
   REQUIRE(
     archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
