@@ -56,7 +56,7 @@ private:
   std::vector<std::pair<ArchiveID, uint64_t>> transactionArchiveNextPartNumbers;
   bool hasTransaction = false;
   ArchivedFileID nextArchivedFileId = 1;
-  ArchivedDirectoryID nextArchivedDirectoryId = 1;
+  ArchivedDirectoryID nextArchivedDirectoryId = 2;
   ArchiveID nextArchiveId = 1;
   ArchivedFileRevisionID nextFileRevisionId = 1;
   Size targetSize;
