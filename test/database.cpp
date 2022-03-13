@@ -205,19 +205,19 @@ TEMPLATE_TEST_CASE(
 
       auto archivedDirectory2 = archivedDatabase->addDirectory(
         stagedDirectories.at(1), archivedRootDirectory);
-      REQUIRE(archivedDirectory2.id >= archivedRootDirectory.id);
+      REQUIRE(archivedDirectory2.id > archivedRootDirectory.id);
       REQUIRE(archivedDirectory2.name == stagedDirectories.at(1).name);
       REQUIRE(archivedDirectory2.parent == archivedRootDirectory.id);
 
       auto archivedDirectory3 = archivedDatabase->addDirectory(
         stagedDirectories.at(2), archivedRootDirectory);
-      REQUIRE(archivedDirectory2.id >= archivedDirectory2.id);
-      REQUIRE(archivedDirectory2.name == stagedDirectories.at(1).name);
-      REQUIRE(archivedDirectory2.parent == archivedRootDirectory.id);
+      REQUIRE(archivedDirectory3.id > archivedDirectory2.id);
+      REQUIRE(archivedDirectory3.name == stagedDirectories.at(2).name);
+      REQUIRE(archivedDirectory3.parent == archivedRootDirectory.id);
 
       auto archivedDirectory4 = archivedDatabase->addDirectory(
         stagedDirectories.at(3), archivedDirectory2);
-      REQUIRE(archivedDirectory4.id >= archivedDirectory3.id);
+      REQUIRE(archivedDirectory4.id > archivedDirectory3.id);
       REQUIRE(archivedDirectory4.name == stagedDirectories.at(3).name);
       REQUIRE(archivedDirectory4.parent == archivedDirectory2.id);
 
@@ -225,7 +225,7 @@ TEMPLATE_TEST_CASE(
               "produce an error") {
         auto archivedDirectory18 = archivedDatabase->addDirectory(
           stagedDirectories.at(18), archivedRootDirectory);
-        REQUIRE(archivedDirectory18.id >= archivedDirectory4.id);
+        REQUIRE(archivedDirectory18.id > archivedDirectory4.id);
         REQUIRE(archivedDirectory18.name == stagedDirectories.at(18).name);
         REQUIRE(archivedDirectory18.parent == archivedRootDirectory.id);
       }
