@@ -96,4 +96,6 @@ endif ()
 add_subdirectory(database/mock_implementation)
 target_link_libraries(Archiver-Tests PRIVATE Archiver_mock_database)
 
-target_sources(Archiver-Tests PRIVATE stager.cpp)
+target_sources(Archiver-Tests PRIVATE
+        stager.cpp
+        archiver.cpp)
