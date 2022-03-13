@@ -49,7 +49,7 @@ private:
   std::vector<ArchivedDirectory> archivedDirectories = {
     {1, std::string{ArchivedDirectory::RootDirectoryName}, 1}};
   std::vector<ArchivedFile> archivedFiles;
-  std::vector<Archive> archives;
+  std::vector<Archive> archives = {{1, "<SINGLE>"}};
   std::vector<std::pair<ArchiveID, uint64_t>> archiveNextPartNumbers;
   std::vector<ArchivedDirectory> transactionArchivedDirectories;
   std::vector<ArchivedFile> transactionArchivedFiles;
@@ -58,7 +58,7 @@ private:
   bool hasTransaction = false;
   ArchivedFileID nextArchivedFileId = 1;
   ArchivedDirectoryID nextArchivedDirectoryId = 2;
-  ArchiveID nextArchiveId = 1;
+  ArchiveID nextArchiveId = 2;
   ArchivedFileRevisionID nextFileRevisionId = 1;
   Size targetSize;
 
