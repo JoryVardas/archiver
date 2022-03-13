@@ -101,7 +101,7 @@ auto ArchivedDatabase::addArchiveForExtension(const std::string& extension)
     extensionName = noExtensionArchiveContents;
   }
 
-  getArchiveVector().push_back({nextArchiveId, extensionName});
+  getArchiveVector().push_back({nextArchiveId++, extensionName});
   return getArchiveVector().back();
 }
 
