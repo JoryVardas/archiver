@@ -125,7 +125,7 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
   std::vector<ArchivedDirectory> ret;
   ranges::copy_if(getDirectoryVector(), std::back_inserter(ret),
                   [&](const auto& dir) {
-                    return dir.parent == directory.parent &&
+                    return dir.parent == directory.id &&
                            dir.name != ArchivedDirectory::RootDirectoryName;
                   });
   return ret;
