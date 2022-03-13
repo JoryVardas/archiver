@@ -42,7 +42,8 @@ public:
   auto listChildFiles(const ArchivedDirectory& directory)
     -> std::vector<ArchivedFile>;
   auto addFile(const StagedFile& stagedFile, const ArchivedDirectory& directory,
-               const Archive& archive) -> ArchivedFileAddedType;
+               const Archive& archive)
+    -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>;
 
 private:
   std::vector<ArchivedDirectory> archivedDirectories = {

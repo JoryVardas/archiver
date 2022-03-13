@@ -126,6 +126,8 @@ template <StagedFileDatabase StagedFileDatabase,
 void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stageFile(
   const std::filesystem::path& path, const std::filesystem::path& stagePath) {
   RawFile rawFile{path, readBuffer};
-  std::filesystem::copy(rawFile.path, stageLocation / rawFile.hash);
-  stagedFileDatabase->add(rawFile, stagePath);
+  auto stagedFile = stagedFileDatabase->add(rawFile, stagePath);
+  std::filesystem::copy(rawFile.path.native(),
+                        stageLocation /
+                          FORMAT_LIB::format("{}", stagedFile.id));
 }

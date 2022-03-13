@@ -19,7 +19,7 @@ concept ArchivedFileDatabase = Database<T> &&
     } -> std::same_as<std::vector<ArchivedFile>>;
   {
     t.addFile(stagedFile, archivedDirectory, archive)
-    } -> std::same_as<ArchivedFileAddedType>;
+    } -> std::same_as<std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>>;
 };
 
 _make_exception_(ArchivedFileDatabaseException);

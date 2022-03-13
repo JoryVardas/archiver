@@ -133,7 +133,7 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
         else
           return archiveDatabase->getArchiveForFile(stagedFile);
       }();
-      const auto archivedFileType = archivedFileDatabase->addFile(
+      const auto [archivedFileType, revisionId] = archivedFileDatabase->addFile(
         stagedFile, parentArchivedDirectory->second, archive);
 
       if (archivedFileType == ArchivedFileAddedType::NewRevision) {
@@ -142,8 +142,9 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
         if (!std::filesystem::exists(archiveDirectory))
           std::filesystem::create_directories(archiveDirectory);
 
-        std::filesystem::copy_file(stageLocation / stagedFile.hash,
-                                   archiveDirectory / stagedFile.hash);
+        std::filesystem::copy_file(
+          stageLocation / FORMAT_LIB::format("{}", stagedFile.id),
+          archiveDirectory / FORMAT_LIB::format("{}", revisionId));
         modifiedArchives.insert(archive);
       }
     }

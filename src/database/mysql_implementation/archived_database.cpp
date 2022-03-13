@@ -362,7 +362,7 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
 auto ArchivedDatabase::addFile(const StagedFile& file,
                                const ArchivedDirectory& directory,
                                const Archive& archive)
-  -> ArchivedFileAddedType {
+  -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> {
   try {
     const auto fileId = [&]() {
       auto existingFile = getFileId(file.name, directory);
@@ -410,8 +410,9 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
                          .set(fileRevisionParentTable.revisionId = revisionId,
                               fileRevisionParentTable.fileId = fileId));
 
-    return revisionIsDuplicate ? ArchivedFileAddedType::DuplicateRevision
-                               : ArchivedFileAddedType::NewRevision;
+    return revisionIsDuplicate
+             ? std::pair{ArchivedFileAddedType::DuplicateRevision, revisionId}
+             : std::pair{ArchivedFileAddedType::NewRevision, revisionId};
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(
       FORMAT_LIB::format("Could not add file to archived files: {}"s, err));

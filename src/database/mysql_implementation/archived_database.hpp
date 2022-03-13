@@ -49,7 +49,8 @@ public:
   auto listChildFiles(const ArchivedDirectory& directory)
     -> std::vector<ArchivedFile>;
   auto addFile(const StagedFile& file, const ArchivedDirectory& directory,
-               const Archive& archive) -> ArchivedFileAddedType;
+               const Archive& archive)
+    -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>;
 
 private:
   sqlpp::mysql::connection databaseConnection;

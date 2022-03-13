@@ -36,8 +36,8 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
   return getFileVector();
 }
 
-void StagedDatabase::add(const RawFile& file,
-                         const std::filesystem::path& stagePath) {
+auto StagedDatabase::add(const RawFile& file,
+                         const std::filesystem::path& stagePath) -> StagedFile {
   auto parentStagedDirectory = getStagedDirectory(stagePath.parent_path());
   if (!parentStagedDirectory) {
     throw StagedFileDatabaseException(FORMAT_LIB::format(
@@ -48,6 +48,7 @@ void StagedDatabase::add(const RawFile& file,
   getFileVector().push_back({nextStagedFileId++, parentStagedDirectory->id,
                              stagePath.filename().string(), file.size,
                              file.hash});
+  return getFileVector().back();
 }
 
 void StagedDatabase::remove(const StagedFile& stagedFile) {

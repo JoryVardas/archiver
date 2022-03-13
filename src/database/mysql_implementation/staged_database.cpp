@@ -106,8 +106,8 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
   return stagedFiles;
 }
 
-void StagedDatabase::add(const RawFile& file,
-                         const std::filesystem::path& stagePath) {
+auto StagedDatabase::add(const RawFile& file,
+                         const std::filesystem::path& stagePath) -> StagedFile {
   try {
     auto parentStagedDirectory = getStagedDirectory(stagePath.parent_path());
     if (!parentStagedDirectory) {
@@ -124,6 +124,8 @@ void StagedDatabase::add(const RawFile& file,
       insert_into(stagedFileParentTable)
         .set(stagedFileParentTable.fileId = stagedFileId,
              stagedFileParentTable.directoryId = parentStagedDirectory->id));
+    return {stagedFileId, parentStagedDirectory->id,
+            stagePath.filename().string(), file.size, file.hash};
   } catch (const sqlpp::exception& err) {
     throw StagedFileDatabaseException(FORMAT_LIB::format(
       "Could not add file to staged file database: {}"s, err));

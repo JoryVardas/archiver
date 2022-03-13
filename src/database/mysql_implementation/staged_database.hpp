@@ -31,7 +31,8 @@ public:
   void rollback();
 
   auto listAllFiles() -> std::vector<StagedFile>;
-  void add(const RawFile& file, const std::filesystem::path& stagePath);
+  auto add(const RawFile& file, const std::filesystem::path& stagePath)
+    -> StagedFile;
   void remove(const StagedFile& stagedFile);
   void removeAllFiles();
 

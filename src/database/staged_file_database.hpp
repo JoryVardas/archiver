@@ -12,7 +12,7 @@ concept StagedFileDatabase = Database<T> &&
   requires(T t, const RawFile& file, const std::filesystem::path& stagePath,
            const StagedFile& stagedFile) {
   { t.listAllFiles() } -> std::same_as<std::vector<StagedFile>>;
-  t.add(file, stagePath);
+  { t.add(file, stagePath) } -> std::same_as<StagedFile>;
   t.remove(stagedFile);
   t.removeAllFiles();
 };

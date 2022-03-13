@@ -348,27 +348,27 @@ TEMPLATE_TEST_CASE(
         auto archive1 = archivedDatabase->getArchiveForFile(stagedFiles.at(0));
         auto added1 = archivedDatabase->addFile(
           stagedFiles.at(0), archivedRootDirectory, archive1);
-        REQUIRE(added1 == ArchivedFileAddedType::NewRevision);
+        REQUIRE(added1.first == ArchivedFileAddedType::NewRevision);
 
         auto archive2 = archivedDatabase->getArchiveForFile(stagedFiles.at(1));
         auto added2 = archivedDatabase->addFile(stagedFiles.at(1),
                                                 archivedDirectory1, archive2);
-        REQUIRE(added2 == ArchivedFileAddedType::NewRevision);
+        REQUIRE(added2.first == ArchivedFileAddedType::NewRevision);
 
         auto archive3 = archivedDatabase->getArchiveForFile(stagedFiles.at(2));
         auto added3 = archivedDatabase->addFile(stagedFiles.at(2),
                                                 archivedDirectory1, archive3);
-        REQUIRE(added3 == ArchivedFileAddedType::NewRevision);
+        REQUIRE(added3.first == ArchivedFileAddedType::NewRevision);
 
         auto archive5 = archivedDatabase->getArchiveForFile(stagedFiles.at(4));
         auto added5 = archivedDatabase->addFile(stagedFiles.at(4),
                                                 archivedDirectory2, archive5);
-        REQUIRE(added5 == ArchivedFileAddedType::NewRevision);
+        REQUIRE(added5.first == ArchivedFileAddedType::NewRevision);
 
         auto archive4 = archivedDatabase->getArchiveForFile(stagedFiles.at(3));
         auto added4 = archivedDatabase->addFile(stagedFiles.at(3),
                                                 archivedDirectoryP, archive4);
-        REQUIRE(added4 == ArchivedFileAddedType::DuplicateRevision);
+        REQUIRE(added4.first == ArchivedFileAddedType::DuplicateRevision);
 
         SECTION("Adding a file to a directory it wasn't staged to doesn't "
                 "throw an error") {
@@ -396,7 +396,7 @@ TEMPLATE_TEST_CASE(
             archivedDatabase->getArchiveForFile(stagedFiles.at(4));
           auto added6 = archivedDatabase->addFile(
             stagedFiles.at(4), archivedDirectory2, archiveTwice2);
-          REQUIRE(added6 == ArchivedFileAddedType::DuplicateRevision);
+          REQUIRE(added6.first == ArchivedFileAddedType::DuplicateRevision);
 
           auto archivedFilesDirectory2 =
             archivedDatabase->listChildFiles(archivedDirectory2);

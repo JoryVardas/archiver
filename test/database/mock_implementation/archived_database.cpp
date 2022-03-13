@@ -166,7 +166,7 @@ auto ArchivedDatabase::listChildFiles(const ArchivedDirectory& directory)
 auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
                                const ArchivedDirectory& directory,
                                const Archive& archive)
-  -> ArchivedFileAddedType {
+  -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> {
   auto existingFile = ranges::find_if(getFileVector(), [&](const auto& file) {
     return file.parentDirectory.id == directory.id &&
            file.name == stagedFile.name;
@@ -192,13 +192,14 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
     });
 
   if (duplicateRevision == ranges::end(allRevisions)) {
-    addedFile.revisions.push_back(
-      {nextFileRevisionId++, stagedFile.hash, stagedFile.size,
-       std::chrono::system_clock::now(), archive.id});
-    return ArchivedFileAddedType::NewRevision;
+    auto revisionId = nextFileRevisionId++;
+    addedFile.revisions.push_back({revisionId, stagedFile.hash, stagedFile.size,
+                                   std::chrono::system_clock::now(),
+                                   archive.id});
+    return {ArchivedFileAddedType::NewRevision, revisionId};
   } else {
     addedFile.revisions.push_back(*duplicateRevision);
-    return ArchivedFileAddedType::DuplicateRevision;
+    return {ArchivedFileAddedType::DuplicateRevision, duplicateRevision->id};
   }
 }
 
