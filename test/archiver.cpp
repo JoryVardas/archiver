@@ -35,6 +35,10 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
                     config.archive.archive_directory,
                     config.archive.single_archive_size};
 
+  REQUIRE(std::filesystem::is_empty(config.stager.stage_directory));
+  REQUIRE(std::filesystem::is_empty(config.archive.archive_directory));
+  REQUIRE(std::filesystem::is_empty(config.archive.archive_directory));
+
   // Require that all the databases are empty
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
@@ -134,4 +138,14 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
                         testDataSingleExact->revisions.at(0).id)}));
   REQUIRE(testDataSingle->revisions.at(0).containingArchiveId ==
           testDataSingle->revisions.at(0).containingArchiveId);
+
+  // Remove staged and archived files.
+  for (auto const& file :
+       std::filesystem::directory_iterator{config.stager.stage_directory}) {
+    std::filesystem::remove(file);
+  }
+  for (auto const& dir :
+       std::filesystem::directory_iterator{config.archive.archive_directory}) {
+    std::filesystem::remove_all(dir);
+  }
 }

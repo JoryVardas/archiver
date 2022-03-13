@@ -28,6 +28,8 @@ TEST_CASE("Staging files and directories", "[stager]") {
   Stager stager{stagedDatabase, stagedDatabase, readBuffer,
                 config.stager.stage_directory};
 
+  REQUIRE(std::filesystem::is_empty(config.stager.stage_directory));
+
   // Require that all the databases are empty
   REQUIRE(stagedDatabase->listAllFiles().empty());
   REQUIRE(stagedDatabase->listAllDirectories().empty());
@@ -112,4 +114,10 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(
     archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
   REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
+
+  // Remove staged files.
+  for (auto const& file :
+       std::filesystem::directory_iterator{config.stager.stage_directory}) {
+    std::filesystem::remove(file);
+  }
 }
