@@ -24,14 +24,14 @@ StageCommand::StageCommand()
     ("v, verbose", "Enable verbose output")
     ("prefix", "Specify a prefix to remove from the paths of files/directories "
       "being staged",
-      cxxopts::value<std::string>()->default_value("")
+      cxxopts::value<std::filesystem::path>()->default_value("")
     )
     ("paths", "List of paths to stage",
-      cxxopts::value<std::vector<std::string>>(), "<paths>"
+      cxxopts::value<std::vector<std::filesystem::path>>(), "<paths>"
     )
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::string>()->default_value("config.json")
+      cxxopts::value<std::filesystem::path>()->default_value("config.json")
     );
   // clang-format on
 
@@ -62,7 +62,9 @@ int StageCommand::exec() {
   const auto config =
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
-  const auto prefix = (*this->parse_result)["prefix"].as<std::string>();
+  const auto prefix = (*this->parse_result)["prefix"]
+                        .as<std::filesystem::path>()
+                        .generic_string();
 
   auto [dataPointer, size] = getFileReadBuffer(config);
   std::span span{dataPointer.get(), size};
@@ -95,7 +97,7 @@ ArchiveCommand::ArchiveCommand()
     ("v, verbose", "Enable verbose output")
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::string>()->default_value("config.json")
+      cxxopts::value<std::filesystem::path>()->default_value("config.json")
     );
   // clang-format on
 }
@@ -154,7 +156,7 @@ UploadCommand::UploadCommand()
     ("archived", "Upload archived files")
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::string>()->default_value("config.json")
+      cxxopts::value<std::filesystem::path>()->default_value("config.json")
     );
   // clang-format on
 }
@@ -194,7 +196,7 @@ DearchiveCommand::DearchiveCommand()
     ("v, verbose", "Enable verbose output")
     ("o, output",
       "Specify the output directory to place dearchived files into",
-      cxxopts::value<std::string>()->default_value("")
+      cxxopts::value<std::filesystem::path>()->default_value("")
     )
     ("paths", "List of paths to dearchive",
       cxxopts::value<std::vector<std::string>>(), "<paths>"
