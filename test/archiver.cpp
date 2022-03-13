@@ -73,8 +73,10 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   REQUIRE(testData->revisions.size() == 1);
   REQUIRE(testData->revisions.at(0).hash == ArchiverTest::TestData1::hash);
   REQUIRE(testData->revisions.at(0).size == ArchiverTest::TestData1::size);
-  REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
-    "{}/{}", config.archive.archive_directory, testData->revisions.at(0).id)}));
+  REQUIRE(std::filesystem::exists(
+    {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
+                        testData->revisions.at(0).containingArchiveId,
+                        testData->revisions.at(0).id)}));
 
   auto testDataCopy = ranges::find(archivedFilesTestData, "TestData_Copy.test",
                                    &ArchivedFile::name);
@@ -87,7 +89,8 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   REQUIRE(testDataCopy->revisions.at(0).size ==
           ArchiverTest::TestDataCopy::size);
   REQUIRE(std::filesystem::exists(
-    {FORMAT_LIB::format("{}/{}", config.archive.archive_directory,
+    {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
+                        testDataCopy->revisions.at(0).containingArchiveId,
                         testDataCopy->revisions.at(0).id)}));
   REQUIRE(testDataCopy->revisions.at(0).id == testData->revisions.at(0).id);
 
@@ -103,7 +106,8 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   REQUIRE(testDataNotSingle->revisions.at(0).size ==
           ArchiverTest::TestDataNotSingle::size);
   REQUIRE(std::filesystem::exists(
-    {FORMAT_LIB::format("{}/{}", config.archive.archive_directory,
+    {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
+                        testDataNotSingle->revisions.at(0).containingArchiveId,
                         testDataNotSingle->revisions.at(0).id)}));
 
   auto testDataSingle = ranges::find(
@@ -117,8 +121,9 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   REQUIRE(testDataSingle->revisions.at(0).size ==
           ArchiverTest::TestDataSingle::size);
   REQUIRE(std::filesystem::exists(
-    {FORMAT_LIB::format("{}/{}", config.archive.archive_directory,
-                        testDataSingle->revisions.at(0).id)}));
+    {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
+                        testDataNotSingle->revisions.at(0).containingArchiveId,
+                        testDataNotSingle->revisions.at(0).id)}));
   REQUIRE(testDataSingle->revisions.at(0).containingArchiveId !=
           testDataNotSingle->revisions.at(0).containingArchiveId);
 
@@ -134,8 +139,9 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   REQUIRE(testDataSingleExact->revisions.at(0).size ==
           ArchiverTest::TestDataSingleExact::size);
   REQUIRE(std::filesystem::exists(
-    {FORMAT_LIB::format("{}/{}", config.archive.archive_directory,
-                        testDataSingleExact->revisions.at(0).id)}));
+    {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
+                        testDataSingle->revisions.at(0).containingArchiveId,
+                        testDataSingle->revisions.at(0).id)}));
   REQUIRE(testDataSingle->revisions.at(0).containingArchiveId ==
           testDataSingle->revisions.at(0).containingArchiveId);
 
