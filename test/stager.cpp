@@ -55,7 +55,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(testData->hash == ArchiverTest::TestData1::hash);
   REQUIRE(testData->size == ArchiverTest::TestData1::size);
   REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
-    "./{}/{}", config.stager.stage_directory, testData->id)}));
+    "{}/{}", config.stager.stage_directory, testData->id)}));
 
   auto testDataCopy =
     ranges::find(stagedFiles, "TestData_Copy.test", &StagedFile::name);
@@ -65,7 +65,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(testDataCopy->hash == ArchiverTest::TestDataCopy::hash);
   REQUIRE(testDataCopy->size == ArchiverTest::TestDataCopy::size);
   REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
-    "./{}/{}", config.stager.stage_directory, testDataCopy->id)}));
+    "{}/{}", config.stager.stage_directory, testDataCopy->id)}));
 
   auto testDataNotSingle =
     ranges::find(stagedFiles, "TestData_Not_Single.test", &StagedFile::name);
@@ -75,7 +75,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(testDataNotSingle->hash == ArchiverTest::TestDataNotSingle::hash);
   REQUIRE(testDataNotSingle->size == ArchiverTest::TestDataNotSingle::size);
   REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
-    "./{}/{}", config.stager.stage_directory, testDataNotSingle->id)}));
+    "{}/{}", config.stager.stage_directory, testDataNotSingle->id)}));
 
   auto testDataSingle =
     ranges::find(stagedFiles, "TestData_Single.test", &StagedFile::name);
@@ -85,7 +85,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(testDataSingle->hash == ArchiverTest::TestDataSingle::hash);
   REQUIRE(testDataSingle->size == ArchiverTest::TestDataSingle::size);
   REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
-    "./{}/{}", config.stager.stage_directory, testDataSingle->id)}));
+    "{}/{}", config.stager.stage_directory, testDataSingle->id)}));
 
   auto testDataSingleExact =
     ranges::find(stagedFiles, "TestData_Single_Exact.test", &StagedFile::name);
@@ -95,7 +95,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   REQUIRE(testDataSingleExact->hash == ArchiverTest::TestDataSingleExact::hash);
   REQUIRE(testDataSingleExact->size == ArchiverTest::TestDataSingleExact::size);
   REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
-    "./{}/{}", config.stager.stage_directory, testDataSingleExact->id)}));
+    "{}/{}", config.stager.stage_directory, testDataSingleExact->id)}));
 
   auto sortedDirectories = stager.getDirectoriesSorted();
   REQUIRE(sortedDirectories.at(0).id == stagedDatabase->getRootDirectory()->id);
