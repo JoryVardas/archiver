@@ -26,10 +26,9 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
   const auto removePrefix = [&](const path& fullPath) -> path {
     auto stringPath = fullPath.generic_string();
     std::string_view stringPathView = stringPath;
-    ::removePrefix(stringPathView, prefixToRemove);
     // Need to make a copy because the string that stringPathView is viewing is
     // local.
-    return {stringPathView};
+    return {::removePrefix(stringPathView, prefixToRemove)};
   };
 
   const auto stagePath = [&](const path& itemPath) {
