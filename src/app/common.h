@@ -85,13 +85,13 @@ template <typename T, typename CharT>
 struct FORMAT_LIB::formatter<std::vector<T>, CharT>
   : public FORMAT_LIB::formatter<T, CharT> {
 
-  auto parse(std::format_parse_context& ctx) {
+  auto parse(FORMAT_LIB::format_parse_context& ctx) {
     // Get the separator
     auto it = std::begin(ctx);
     if (it == std::end(ctx) || *it == '}')
       return it;
     separator = *std::begin(ctx);
-    ctx.advance_to(++std::begin(ctx));
+    ctx.advance_to(std::begin(ctx) + 1);
 
     // Pass the rest of the format string to formatter for the individual type.
     return FORMAT_LIB::formatter<T, CharT>::parse(ctx);
