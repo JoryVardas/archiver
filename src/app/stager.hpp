@@ -12,7 +12,7 @@ class Stager {
 public:
   Stager(std::shared_ptr<StagedFileDatabase>& fileDatabase,
          std::shared_ptr<StagedDirectoryDatabase>& directoryDatabase,
-         std::span<uint8_t> fileReadBuffer,
+         std::span<char> fileReadBuffer,
          const std::filesystem::path& stageDirectoryLocation);
 
   void stage(const std::vector<std::filesystem::path>& paths,
@@ -37,7 +37,7 @@ private:
 
   std::shared_ptr<StagedFileDatabase> stagedFileDatabase;
   std::shared_ptr<StagedDirectoryDatabase> stagedDirectoryDatabase;
-  std::span<uint8_t> readBuffer;
+  std::span<char> readBuffer;
   std::filesystem::path stageLocation;
 
   using path = std::filesystem::path;

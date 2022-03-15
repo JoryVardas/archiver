@@ -4,7 +4,7 @@
 #include <Hash/src/sha3.h>
 #include <fstream>
 
-RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
+RawFile::RawFile(const std::filesystem::path& path, std::span<char> buffer) {
   if (buffer.size() >
       static_cast<std::size_t>(std::numeric_limits<std::streamsize>::max()))
     throw std::logic_error(
@@ -18,7 +18,7 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer) {
     throw NotAFile(FORMAT_LIB::format("The path \"{}\" is not a file", path));
   }
 
-  std::basic_ifstream<uint8_t> inputStream(path, std::ios_base::binary);
+  std::basic_ifstream<char> inputStream(path, std::ios_base::binary);
 
   if (inputStream.bad() || !inputStream.is_open()) {
     throw FileException(FORMAT_LIB::format(

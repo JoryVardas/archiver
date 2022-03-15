@@ -14,6 +14,6 @@ public:
   std::string hash;
   std::filesystem::path path;
 
-  RawFile(const std::filesystem::path& path, std::span<uint8_t> buffer);
+  RawFile(const std::filesystem::path& path, std::span<char> buffer);
 };
 #endif

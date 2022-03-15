@@ -118,7 +118,7 @@ int ArchiveCommand::exec() {
   const auto config =
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
-  auto fakeReadBuffer = std::array<uint8_t, 1>{0};
+  auto fakeReadBuffer = std::array<char, 1>{0};
 
   auto databaseConnectionConfig =
     std::make_shared<StagedDatabase::ConnectionConfig>();

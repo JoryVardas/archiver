@@ -10,7 +10,7 @@ template <StagedFileDatabase StagedFileDatabase,
 Stager<StagedFileDatabase, StagedDirectoryDatabase>::Stager(
   std::shared_ptr<StagedFileDatabase>& fileDatabase,
   std::shared_ptr<StagedDirectoryDatabase>& directoryDatabase,
-  std::span<uint8_t> fileReadBuffer, const path& stageDirectoryLocation)
+  std::span<char> fileReadBuffer, const path& stageDirectoryLocation)
   : stagedFileDatabase(fileDatabase),
     stagedDirectoryDatabase(directoryDatabase), readBuffer(fileReadBuffer),
     stageLocation(stageDirectoryLocation) {}

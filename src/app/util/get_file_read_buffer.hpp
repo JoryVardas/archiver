@@ -6,11 +6,11 @@
 #include <memory>
 
 namespace {
-std::pair<std::unique_ptr<uint8_t[]>, Size>
+std::pair<std::unique_ptr<char[]>, Size>
 getFileReadBuffer(const Config& config) {
   for (auto size : config.general.fileReadSizes) {
     try {
-      auto data = std::make_unique<uint8_t[]>(size);
+      auto data = std::make_unique<char[]>(size);
       return std::make_pair(std::move(data), size);
     } catch (const std::bad_alloc&) {
       // If there was a bad alloc, try the next available size

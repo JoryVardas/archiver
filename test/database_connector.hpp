@@ -21,7 +21,7 @@ template <typename Database> struct DatabaseConnector {};
 template <>
 struct DatabaseConnector<MysqlDatabase>
   : public DatabaseConnectorBase<MysqlDatabase> {
-  auto connect(const Config& config, std::span<uint8_t> readBuffer) {
+  auto connect(const Config& config, std::span<char> readBuffer) {
     auto databaseConnectionConfig =
       std::make_shared<StagedDatabase::ConnectionConfig>();
     databaseConnectionConfig->database = config.database.location.schema;
@@ -43,7 +43,7 @@ struct DatabaseConnector<MysqlDatabase>
 template <>
 struct DatabaseConnector<MockDatabase>
   : public DatabaseConnectorBase<MockDatabase> {
-  auto connect(const Config& config, std::span<uint8_t> readBuffer) {
+  auto connect(const Config& config, std::span<char> readBuffer) {
     auto stagedDatabase = std::make_shared<StagedDatabase>();
     auto archivedDatabase =
       std::make_shared<ArchivedDatabase>(config.archive.target_size);
