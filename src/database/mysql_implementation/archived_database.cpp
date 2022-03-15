@@ -56,7 +56,7 @@ void ArchivedDatabase::startTransaction() {
     hasTransaction = true;
   } catch (sqlpp::exception& err) {
     throw DatabaseException(FORMAT_LIB::format(
-      "Could not start a transaction on the archived database: {}"s, err));
+      "Could not start a transaction on the archived database: {}", err));
   }
 }
 void ArchivedDatabase::rollback() {
@@ -66,7 +66,7 @@ void ArchivedDatabase::rollback() {
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
       throw DatabaseException(FORMAT_LIB::format(
-        "Could not rollback the transaction on the archived database: {}"s,
+        "Could not rollback the transaction on the archived database: {}",
         err));
     }
   }
@@ -78,7 +78,7 @@ void ArchivedDatabase::commit() {
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
       throw DatabaseException(FORMAT_LIB::format(
-        "Could not commit the transaction on the archived database: {}"s, err));
+        "Could not commit the transaction on the archived database: {}", err));
     }
   }
 }
@@ -106,12 +106,12 @@ auto ArchivedDatabase::getNextArchivePartNumber(const Archive& archive)
 
     if (archiveResults.empty())
       throw ArchiveDatabaseException(
-        FORMAT_LIB::format("Could not find archive with id {}"s, archive.id));
+        FORMAT_LIB::format("Could not find archive with id {}", archive.id));
     else
       return archiveResults.front().nextPartNumber;
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not get next archive part number for archive with id {}: {}"s,
+      "Could not get next archive part number for archive with id {}: {}",
       archive.id, err));
   }
 }
@@ -124,11 +124,11 @@ void ArchivedDatabase::incrementNextArchivePartNumber(const Archive& archive) {
 
     if (rowsUpdated != 1)
       throw ArchiveDatabaseException(FORMAT_LIB::format(
-        "Could not update next archive part number of archive with id {}"s,
+        "Could not update next archive part number of archive with id {}",
         archive.id));
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not update next archive part number of archive with id {}"s,
+      "Could not update next archive part number of archive with id {}",
       archive.id, err));
   }
 }
@@ -152,7 +152,7 @@ auto ArchivedDatabase::getArchiveForExtension(const std::string& extension)
       return {archiveResults.front().id, archiveResults.front().contents};
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not get archive for extension \"{}\": {}"s, extensionName, err));
+      "Could not get archive for extension \"{}\": {}", extensionName, err));
   }
 }
 
@@ -170,7 +170,7 @@ auto ArchivedDatabase::addArchiveForExtension(const std::string& extension)
     return {archiveId, extensionName};
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not add archive for extension \"{}\": {}"s, extensionName, err));
+      "Could not add archive for extension \"{}\": {}", extensionName, err));
   }
 }
 
@@ -186,7 +186,7 @@ auto ArchivedDatabase::getArchiveSize(const Archive& archive) -> Size {
       .sum;
   } catch (const sqlpp::exception& err) {
     throw ArchiveDatabaseException(FORMAT_LIB::format(
-      "Could not get archive size for archive with id {}: {}"s, archive.id,
+      "Could not get archive size for archive with id {}: {}", archive.id,
       err));
   }
 }
@@ -210,7 +210,7 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
 
   } catch (const sqlpp::exception& err) {
     throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
-      "Could not list child directories for archived directory with id {}: {}"s,
+      "Could not list child directories for archived directory with id {}: {}",
       directory.id, err));
   }
 }
@@ -240,7 +240,7 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
     return {directoryId, directory.name, parent.id};
   } catch (const sqlpp::exception& err) {
     throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
-      "Could not add directory to archived directories: {}"s, err));
+      "Could not add directory to archived directories: {}", err));
   }
 }
 auto ArchivedDatabase::getRootDirectory() -> ArchivedDirectory {
@@ -253,8 +253,8 @@ auto ArchivedDatabase::getRootDirectory() -> ArchivedDirectory {
     const auto& rootDirectory = result.front();
     return {rootDirectory.id, rootDirectory.name, rootDirectory.id};
   } catch (const sqlpp::exception& err) {
-    throw ArchivedDirectoryDatabaseException(FORMAT_LIB::format(
-      "Could not get the root archived directory: {}"s, err));
+    throw ArchivedDirectoryDatabaseException(
+      FORMAT_LIB::format("Could not get the root archived directory: {}", err));
   }
 }
 
@@ -278,7 +278,7 @@ auto ArchivedDatabase::listChildFiles(const ArchivedDirectory& directory)
 
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(FORMAT_LIB::format(
-      "Could not list child files for archived directory with id {}: {}"s,
+      "Could not list child files for archived directory with id {}: {}",
       directory.id, err));
   }
 }
@@ -354,7 +354,7 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
 
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(FORMAT_LIB::format(
-      "Could not list revisions for archived file with id {}: {}"s, fileId,
+      "Could not list revisions for archived file with id {}: {}", fileId,
       err));
   }
 }
@@ -415,7 +415,7 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
              : std::pair{ArchivedFileAddedType::NewRevision, revisionId};
   } catch (const sqlpp::exception& err) {
     throw ArchivedFileDatabaseException(
-      FORMAT_LIB::format("Could not add file to archived files: {}"s, err));
+      FORMAT_LIB::format("Could not add file to archived files: {}", err));
   }
 }
 
