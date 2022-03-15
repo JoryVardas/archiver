@@ -14,33 +14,11 @@ StagedDatabase::~StagedDatabase() {
   try {
     rollback();
   } catch (const std::exception& err) {
-    if (std::uncaught_exceptions()) {
-      // If there was another exception we should log that an error happened,
-      // but eat it.
-      spdlog::error(FORMAT_LIB::format(
-        "There was an error while trying to rollback changes to "
-        "the staged database while destructing the staged database "
-        "due to an exception: {}",
-        err));
-    } else {
-      throw DatabaseException(FORMAT_LIB::format(
-        "There was an error while trying to rollback changes to "
-        "the staged database while destructing the staged database: {}",
-        err));
-    }
-  } catch (...) {
-    if (std::uncaught_exceptions()) {
-      // If there was another exception we should log that an error happened,
-      // but eat it.
-      spdlog::error(
-        "There was an unknown error while trying to rollback changes to "
-        "the staged database while destructing the staged database "
-        "due to an exception");
-    } else {
-      throw DatabaseException(
-        "There was an unknown error while trying to rollback changes to "
-        "the staged database while destructing the staged database");
-    }
+    spdlog::error(FORMAT_LIB::format(
+      "There was an error while trying to rollback changes to "
+      "the staged database while destructing the staged database "
+      "due to an exception: {}",
+      err));
   }
 }
 
