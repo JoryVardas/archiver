@@ -140,12 +140,12 @@ TEMPLATE_TEST_CASE(
 
       REQUIRE(stagedFiles.size() == 2);
       REQUIRE(stagedFiles.at(0).parent == stagedDirectories.at(0).id);
-      REQUIRE(stagedFiles.at(0).size == ArchiverTest::TestData1::size);
-      REQUIRE(stagedFiles.at(0).hash == ArchiverTest::TestData1::hash);
+      REQUIRE(stagedFiles.at(0).size == testFile1.size);
+      REQUIRE(stagedFiles.at(0).hash == testFile1.hash);
       REQUIRE(stagedFiles.at(0).name == "TestData1.test");
       REQUIRE(stagedFiles.at(1).parent == stagedDirectories.at(2).id);
-      REQUIRE(stagedFiles.at(1).size == ArchiverTest::TestDataSingle::size);
-      REQUIRE(stagedFiles.at(1).hash == ArchiverTest::TestDataSingle::hash);
+      REQUIRE(stagedFiles.at(1).size == testFile2.size);
+      REQUIRE(stagedFiles.at(1).hash == testFile2.hash);
       REQUIRE(stagedFiles.at(1).name == "TestData2.test");
       REQUIRE(stagedFiles.at(1).parent != stagedFiles.at(0).parent);
       REQUIRE(stagedFiles.at(1).id > stagedFiles.at(0).id);
