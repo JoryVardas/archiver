@@ -9,6 +9,6 @@ target_compile_options(Archiver_mock_database PRIVATE ${Archiver_Compile_Flags})
 target_link_libraries(Archiver-Tests PRIVATE Archiver_mock_database)
 
 target_sources(Archiver_mock_database PRIVATE
-        staged_database.cpp
-        archived_database.cpp
-        )
+               staged_database.cpp
+               archived_database.cpp
+               )

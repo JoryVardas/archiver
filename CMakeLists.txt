@@ -24,8 +24,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(Archiver_MSVC_Disabled_Warnings_Flags /wd4464 /wd4820)
 
 set(Archiver_Compile_Flags -Wall
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-        -Werror> $<$<CXX_COMPILER_ID:MSVC>:${Archiver_MSVC_Disabled_Warnings_Flags}>)
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+    -Werror> $<$<CXX_COMPILER_ID:MSVC>:${Archiver_MSVC_Disabled_Warnings_Flags}>)
 
 set(Archiver_Util_Path ${CMAKE_CURRENT_SOURCE_DIR}/util)
 
