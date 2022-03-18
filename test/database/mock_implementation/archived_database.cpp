@@ -110,13 +110,19 @@ auto ArchivedDatabase::addArchiveForExtension(const std::string& extension)
 auto ArchivedDatabase::getArchiveSize(const Archive& archive) -> Size {
   auto allRevisions =
     getFileVector() |
-    views::transform([](auto& file) { return file.revisions; }) | views::join;
-  auto revisionsInArchive = allRevisions | views::filter([&](const auto& rev) {
-                              return rev.containingArchiveId == archive.id;
-                            });
-  auto revisionSizes = revisionsInArchive |
-                       views::transform([&](auto& rev) { return rev.size; }) |
-                       views::common;
+    views::transform(
+      [](ArchivedFile& file) -> decltype(ArchivedFile::revisions)& {
+        return file.revisions;
+      }) |
+    views::join;
+  auto revisionsInArchive =
+    allRevisions | views::filter([&](const ArchivedFileRevision& rev) {
+      return rev.containingArchiveId == archive.id;
+    });
+  auto revisionSizes =
+    revisionsInArchive |
+    views::transform([&](ArchivedFileRevision& rev) { return rev.size; }) |
+    views::common;
 
   return std::accumulate(ranges::begin(revisionSizes),
                          ranges::end(revisionSizes), Size{0});
@@ -184,10 +190,14 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
 
   auto allRevisions =
     getFileVector() |
-    views::transform([](auto& file) { return file.revisions; }) | views::join;
+    views::transform(
+      [](ArchivedFile& file) -> decltype(ArchivedFile::revisions)& {
+        return file.revisions;
+      }) |
+    views::join;
 
   const auto& duplicateRevision =
-    ranges::find_if(allRevisions, [&](const auto& rev) {
+    ranges::find_if(allRevisions, [&](const ArchivedFileRevision& rev) {
       return rev.hash == stagedFile.hash && rev.size == stagedFile.size;
     });
 
