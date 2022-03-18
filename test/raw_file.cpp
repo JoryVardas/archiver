@@ -37,7 +37,7 @@ TEST_CASE("Raw file") {
   SECTION("Opening a file that doesn't exist throws an exception") {
     REQUIRE_THROWS_MATCHES(
       (RawFile{"test_data/non_existent.test", readBuffer}), FileDoesNotExist,
-      Message("The file \"/test_data/non_existent.test\" could not be found"));
+      Message("The file \"test_data/non_existent.test\" could not be found"));
   }
   SECTION("Opening a directory as a file throws an exception") {
     REQUIRE_THROWS_MATCHES((RawFile{"test_data/", readBuffer}), NotAFile,
