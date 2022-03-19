@@ -91,7 +91,7 @@ TEMPLATE_TEST_CASE(
               "staged directories") {
         REQUIRE_THROWS_MATCHES(
           stagedDatabase->remove(stagedDirectories.at(0)),
-          StagedDirectoryDatabaseException,
+          StagedDatabaseException,
           MessageStartsWith("Can not remove staged directory which is the "
                             "parent of other staged directories."));
         REQUIRE(stagedDatabase->listAllDirectories().size() == 19);
@@ -124,7 +124,7 @@ TEMPLATE_TEST_CASE(
         "Adding a file which is in a directory that has not yet been staged") {
         REQUIRE_THROWS_MATCHES(
           stagedDatabase->add(testFile1, "/test/TestData1.test"),
-          StagedFileDatabaseException,
+          StagedDatabaseException,
           MessageStartsWith(
             "Could not add file to staged file database as the parent "
             "directory "

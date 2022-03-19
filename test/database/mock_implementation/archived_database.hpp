@@ -7,9 +7,7 @@
 #include <src/app/common.h>
 #include <src/app/staged_directory.h>
 #include <src/app/staged_file.hpp>
-#include <src/database/archive_database.hpp>
-#include <src/database/archived_directory_database.hpp>
-#include <src/database/archived_file_database.hpp>
+#include <src/database/archived_database.hpp>
 #include <string>
 #include <vector>
 

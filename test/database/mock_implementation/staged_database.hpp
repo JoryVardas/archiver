@@ -6,8 +6,7 @@
 #include <src/app/raw_file.hpp>
 #include <src/app/staged_directory.h>
 #include <src/app/staged_file.hpp>
-#include <src/database/staged_directory_database.hpp>
-#include <src/database/staged_file_database.hpp>
+#include <src/database/staged_database.hpp>
 #include <vector>
 
 namespace database::mock {

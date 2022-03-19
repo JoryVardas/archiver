@@ -26,12 +26,8 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   const ArchivedDirectory archivedRootDirectory =
     archivedDatabase->getRootDirectory();
 
-  Stager stager{stagedDatabase, stagedDatabase, readBuffer,
-                config.stager.stage_directory};
-  Archiver archiver{archivedDatabase,
-                    archivedDatabase,
-                    archivedDatabase,
-                    config.stager.stage_directory,
+  Stager stager{stagedDatabase, readBuffer, config.stager.stage_directory};
+  Archiver archiver{archivedDatabase, config.stager.stage_directory,
                     config.archive.archive_directory,
                     config.archive.single_archive_size};
 

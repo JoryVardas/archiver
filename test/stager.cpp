@@ -25,8 +25,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
   const ArchivedDirectory archivedRootDirectory =
     archivedDatabase->getRootDirectory();
 
-  Stager stager{stagedDatabase, stagedDatabase, readBuffer,
-                config.stager.stage_directory};
+  Stager stager{stagedDatabase, readBuffer, config.stager.stage_directory};
 
   REQUIRE(std::filesystem::is_empty(config.stager.stage_directory));
 

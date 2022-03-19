@@ -63,7 +63,7 @@ auto ArchivedDatabase::getNextArchivePartNumber(const Archive& archive)
                  &decltype(archiveNextPartNumbers)::value_type::first);
 
   if (found == ranges::end(getArchivePartNumberVector()))
-    throw ArchiveDatabaseException(
+    throw ArchivedDatabaseException(
       FORMAT_LIB::format("Could not find archive with id {}", archive.id));
 
   return found->second;
@@ -73,7 +73,7 @@ void ArchivedDatabase::incrementNextArchivePartNumber(const Archive& archive) {
     ranges::find(getArchivePartNumberVector(), archive.id,
                  &decltype(archiveNextPartNumbers)::value_type::first);
   if (found == ranges::end(getArchivePartNumberVector()))
-    throw ArchiveDatabaseException(FORMAT_LIB::format(
+    throw ArchivedDatabaseException(FORMAT_LIB::format(
       "Could not update next archive part number of archive with id {}",
       archive.id));
   ++(found->second);

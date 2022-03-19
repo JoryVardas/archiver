@@ -1,17 +1,13 @@
 #ifndef ARCHIVER_STAGER_HPP
 #define ARCHIVER_STAGER_HPP
 
-#include "../database/staged_directory_database.hpp"
-#include "../database/staged_file_database.hpp"
+#include "../database/staged_database.hpp"
 #include "common.h"
 #include <span>
 
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-class Stager {
+template <StagedDatabase StagedDatabase> class Stager {
 public:
-  Stager(std::shared_ptr<StagedFileDatabase>& fileDatabase,
-         std::shared_ptr<StagedDirectoryDatabase>& directoryDatabase,
+  Stager(std::shared_ptr<StagedDatabase>& stagedDatabase,
          std::span<char> fileReadBuffer,
          const std::filesystem::path& stageDirectoryLocation);
 
@@ -35,8 +31,7 @@ private:
   void stageDirectory(const std::filesystem::path& path,
                       const std::filesystem::path& stagePath);
 
-  std::shared_ptr<StagedFileDatabase> stagedFileDatabase;
-  std::shared_ptr<StagedDirectoryDatabase> stagedDirectoryDatabase;
+  std::shared_ptr<StagedDatabase> stagedDatabase;
   std::span<char> readBuffer;
   std::filesystem::path stageLocation;
 

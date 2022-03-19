@@ -1,7 +1,6 @@
 #include "staged_database.hpp"
 #include "../../app/staged_file.hpp"
-#include "../staged_directory_database.hpp"
-#include "../staged_file_database.hpp"
+#include "../staged_database.hpp"
 
 using namespace sqlpp;
 
@@ -78,7 +77,7 @@ auto StagedDatabase::listAllFiles() -> std::vector<StagedFile> {
                              stagedFile.hash});
     }
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(
+    throw StagedDatabaseException(
       FORMAT_LIB::format("Could not list staged files: {}", err));
   }
   return stagedFiles;
@@ -89,7 +88,7 @@ auto StagedDatabase::add(const RawFile& file,
   try {
     auto parentStagedDirectory = getStagedDirectory(stagePath.parent_path());
     if (!parentStagedDirectory) {
-      throw StagedFileDatabaseException(FORMAT_LIB::format(
+      throw StagedDatabaseException(FORMAT_LIB::format(
         "Could not add file to staged file database as the parent directory "
         "hasn't been added to the staged directory database"));
     }
@@ -105,7 +104,7 @@ auto StagedDatabase::add(const RawFile& file,
     return {stagedFileId, parentStagedDirectory->id,
             stagePath.filename().string(), file.size, file.hash};
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not add file to staged file database: {}", err));
   }
 }
@@ -117,7 +116,7 @@ void StagedDatabase::remove(const StagedFile& stagedFile) {
     databaseConnection(remove_from(stagedFilesTable)
                          .where(stagedFilesTable.id == stagedFile.id));
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not remove file from staged file database: {}", err));
   }
 }
@@ -127,7 +126,7 @@ void StagedDatabase::removeAllFiles() {
     databaseConnection(remove_from(stagedFileParentTable).unconditionally());
     databaseConnection(remove_from(stagedFilesTable).unconditionally());
   } catch (const sqlpp::exception& err) {
-    throw StagedFileDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not remove files from staged file database: {}", err));
   }
 }
@@ -154,7 +153,7 @@ auto StagedDatabase::listAllDirectories() -> std::vector<StagedDirectory> {
       }
     }
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(
+    throw StagedDatabaseException(
       FORMAT_LIB::format("Could not list staged directories: {}", err));
   }
   return stagedDirectories;
@@ -192,7 +191,7 @@ void StagedDatabase::add(const std::filesystem::path& stagePath) {
         .set(stagedDirectoryParentTable.parentId = parentStagedDirectory->id,
              stagedDirectoryParentTable.childId = stagedDirectoryId));
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not add directory to staged directory database: {}", err));
   }
 }
@@ -207,7 +206,7 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
         .front()
         .count;
     if (numberOfChildren != 0) {
-      throw StagedDirectoryDatabaseException(
+      throw StagedDatabaseException(
         "Can not remove staged directory which is the parent of other staged "
         "directories.");
     }
@@ -218,7 +217,7 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
       remove_from(stagedDirectoriesTable)
         .where(stagedDirectoriesTable.id == stagedDirectory.id));
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not remove directory from staged directory database: {}", err));
   }
 }
@@ -232,7 +231,7 @@ void StagedDatabase::removeAllDirectories() {
       FORMAT_LIB::format("ALTER TABLE {} AUTO_INCREMENT = 1",
                          decltype(stagedDirectoriesTable)::_alias_t::_literal));
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not remove directories from staged directory database: {}", err));
   }
 }
@@ -280,7 +279,7 @@ auto StagedDatabase::getStagedDirectory(const std::filesystem::path& stagePath)
       }
     }
   } catch (const sqlpp::exception& err) {
-    throw StagedDirectoryDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not get directory from staged directory database: {}", err));
   }
 

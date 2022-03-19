@@ -2,8 +2,7 @@
 #include <concepts>
 #include <ranges>
 #include <src/app/staged_file.hpp>
-#include <src/database/staged_directory_database.hpp>
-#include <src/database/staged_file_database.hpp>
+#include <src/database/staged_database.hpp>
 
 namespace ranges = std::ranges;
 
@@ -40,7 +39,7 @@ auto StagedDatabase::add(const RawFile& file,
                          const std::filesystem::path& stagePath) -> StagedFile {
   auto parentStagedDirectory = getStagedDirectory(stagePath.parent_path());
   if (!parentStagedDirectory) {
-    throw StagedFileDatabaseException(FORMAT_LIB::format(
+    throw StagedDatabaseException(FORMAT_LIB::format(
       "Could not add file to staged file database as the parent directory "
       "hasn't been added to the staged directory database"));
   }
@@ -102,7 +101,7 @@ void StagedDatabase::remove(const StagedDirectory& stagedDirectory) {
   if (ranges::find(getDirectoryVector(), stagedDirectory.id,
                    &StagedDirectory::parent) !=
       ranges::end(getDirectoryVector())) {
-    throw StagedDirectoryDatabaseException(
+    throw StagedDatabaseException(
       "Can not remove staged directory which is the parent of other staged "
       "directories.");
   }

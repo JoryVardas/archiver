@@ -5,20 +5,16 @@
 #include <ranges>
 #include <vector>
 
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-Stager<StagedFileDatabase, StagedDirectoryDatabase>::Stager(
-  std::shared_ptr<StagedFileDatabase>& fileDatabase,
-  std::shared_ptr<StagedDirectoryDatabase>& directoryDatabase,
-  std::span<char> fileReadBuffer, const path& stageDirectoryLocation)
-  : stagedFileDatabase(fileDatabase),
-    stagedDirectoryDatabase(directoryDatabase), readBuffer(fileReadBuffer),
+template <StagedDatabase StagedDatabase>
+Stager<StagedDatabase>::Stager(std::shared_ptr<StagedDatabase>& stagedDatabase,
+                               std::span<char> fileReadBuffer,
+                               const path& stageDirectoryLocation)
+  : stagedDatabase(stagedDatabase), readBuffer(fileReadBuffer),
     stageLocation(stageDirectoryLocation) {}
 
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
-  const std::vector<path>& paths, std::string_view prefixToRemove) {
+template <StagedDatabase StagedDatabase>
+void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
+                                   std::string_view prefixToRemove) {
   // If the prefix has a trailing forward slash then when we remove it from a
   // path that path will be missing a leading forward slash.
   prefixToRemove = removeSuffix(prefixToRemove, "/");
@@ -35,7 +31,7 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
     if (isFile(itemPath)) {
       try {
         stageFile(itemPath, removePrefix(itemPath));
-      } catch (StagedFileDatabaseException& err) {
+      } catch (StagedDatabaseException& err) {
         throw StagerException(FORMAT_LIB::format(
           "Could not stage file \"{}\" : {}", itemPath, err.what()));
       } catch (std::filesystem::filesystem_error& err) {
@@ -45,7 +41,7 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
     } else if (isDirectory(itemPath))
       try {
         stageDirectory(itemPath, removePrefix(itemPath));
-      } catch (StagedFileDatabaseException& err) {
+      } catch (StagedDatabaseException& err) {
         throw StagerException(FORMAT_LIB::format(
           "Could not stage directory \"{}\" : {}", itemPath, err.what()));
       }
@@ -56,27 +52,8 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
     }
   };
 
-  const auto startTransactions = [&]() {
-    stagedDirectoryDatabase->startTransaction();
-    if (!std::is_same_v<decltype(stagedDirectoryDatabase),
-                        decltype(stagedFileDatabase)>)
-      stagedFileDatabase->startTransaction();
-  };
-  const auto commitTransactions = [&]() {
-    stagedDirectoryDatabase->commit();
-    if (!std::is_same_v<decltype(stagedDirectoryDatabase),
-                        decltype(stagedFileDatabase)>)
-      stagedFileDatabase->commit();
-  };
-  const auto rollbackTransactions = [&]() {
-    stagedDirectoryDatabase->rollback();
-    if (!std::is_same_v<decltype(stagedDirectoryDatabase),
-                        decltype(stagedFileDatabase)>)
-      stagedFileDatabase->rollback();
-  };
-
   for (const auto& currentPath : paths) {
-    startTransactions();
+    stagedDatabase->startTransaction();
     try {
       // If path isn't a directory then we need to stage it, and if it is a
       // directory then we need to stage the root directory before we iterate
@@ -90,42 +67,37 @@ void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stage(
     } catch (StagerException& err) {
       spdlog::error(FORMAT_LIB::format("Unable to stage \"{}\", skipping. {}",
                                        currentPath, err.what()));
-      rollbackTransactions();
+      stagedDatabase->rollback();
       continue;
     }
-    commitTransactions();
+    stagedDatabase->commit();
   }
 }
 
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-auto Stager<StagedFileDatabase, StagedDirectoryDatabase>::getDirectoriesSorted()
+template <StagedDatabase StagedDatabase>
+auto Stager<StagedDatabase>::getDirectoriesSorted()
   -> std::vector<StagedDirectory> {
-  auto directories = stagedDirectoryDatabase->listAllDirectories();
+  auto directories = stagedDatabase->listAllDirectories();
   std::ranges::sort(directories, {}, &StagedDirectory::id);
   return directories;
 }
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-auto Stager<StagedFileDatabase, StagedDirectoryDatabase>::getFilesSorted()
-  -> std::vector<StagedFile> {
-  auto files = stagedFileDatabase->listAllFiles();
+template <StagedDatabase StagedDatabase>
+auto Stager<StagedDatabase>::getFilesSorted() -> std::vector<StagedFile> {
+  auto files = stagedDatabase->listAllFiles();
   std::ranges::sort(files, {}, &StagedFile::parent);
   return files;
 }
 
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stageDirectory(
+template <StagedDatabase StagedDatabase>
+void Stager<StagedDatabase>::stageDirectory(
   const std::filesystem::path& path, const std::filesystem::path& stagePath) {
-  stagedDirectoryDatabase->add({stagePath});
+  stagedDatabase->add({stagePath});
 }
-template <StagedFileDatabase StagedFileDatabase,
-          StagedDirectoryDatabase StagedDirectoryDatabase>
-void Stager<StagedFileDatabase, StagedDirectoryDatabase>::stageFile(
-  const std::filesystem::path& path, const std::filesystem::path& stagePath) {
+template <StagedDatabase StagedDatabase>
+void Stager<StagedDatabase>::stageFile(const std::filesystem::path& path,
+                                       const std::filesystem::path& stagePath) {
   RawFile rawFile{path, readBuffer};
-  auto stagedFile = stagedFileDatabase->add(rawFile, stagePath);
+  auto stagedFile = stagedDatabase->add(rawFile, stagePath);
   std::filesystem::copy(rawFile.path.native(),
                         stageLocation /
                           FORMAT_LIB::format("{}", stagedFile.id));

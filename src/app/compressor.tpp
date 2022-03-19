@@ -5,20 +5,20 @@
 #include <limits>
 #include <ranges>
 
-template <ArchiveDatabase ArchiveDatabase>
-Compressor<ArchiveDatabase>::Compressor(
-  std::shared_ptr<ArchiveDatabase>& archiveDatabase,
+template <ArchivedDatabase ArchivedDatabase>
+Compressor<ArchivedDatabase>::Compressor(
+  std::shared_ptr<ArchivedDatabase>& archivedDatabase,
   const std::filesystem::path& archiveLocation)
-  : archiveDatabase(archiveDatabase), archiveLocation(archiveLocation) {}
+  : archivedDatabase(archivedDatabase), archiveLocation(archiveLocation) {}
 
-template <ArchiveDatabase ArchiveDatabase>
-void Compressor<ArchiveDatabase>::compress(const Archive& archive) {
+template <ArchivedDatabase ArchivedDatabase>
+void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
   if (archive.id == 1)
     return compressSingleArchives();
   const auto newArchiveName =
     archiveLocation /
     FORMAT_LIB::format("{}_{}.zpaq", archive.id,
-                       archiveDatabase->getNextArchivePartNumber(archive));
+                       archivedDatabase->getNextArchivePartNumber(archive));
   const auto archiveIndex =
     archiveLocation / FORMAT_LIB::format("{}_index", archive.id);
   const std::string command = FORMAT_LIB::format(
@@ -33,11 +33,11 @@ void Compressor<ArchiveDatabase>::compress(const Archive& archive) {
   }
   std::flush(std::cout);
 
-  archiveDatabase->incrementNextArchivePartNumber(archive);
+  archivedDatabase->incrementNextArchivePartNumber(archive);
 }
 
-template <ArchiveDatabase ArchiveDatabase>
-void Compressor<ArchiveDatabase>::compressSingleArchives() {
+template <ArchivedDatabase ArchivedDatabase>
+void Compressor<ArchivedDatabase>::compressSingleArchives() {
   std::ranges::for_each(
     std::filesystem::directory_iterator(archiveLocation / "1"),
     [&](const auto& file) {

@@ -12,7 +12,8 @@
 #include <spdlog/spdlog.h>
 
 namespace ranges = std::ranges;
-using namespace database::mysql;
+using MysqlStagedDatabase = database::mysql::StagedDatabase;
+using MysqlArchivedDatabase = database::mysql::ArchivedDatabase;
 
 StageCommand::StageCommand()
   : cxxsubs::IOptions({"stage"}, "Stage files to be archived") {
@@ -70,7 +71,7 @@ int StageCommand::exec() {
   std::span span{dataPointer.get(), size};
 
   auto databaseConnectionConfig =
-    std::make_shared<StagedDatabase::ConnectionConfig>();
+    std::make_shared<MysqlStagedDatabase::ConnectionConfig>();
   databaseConnectionConfig->database = config.database.location.schema;
   databaseConnectionConfig->host = config.database.location.host;
   databaseConnectionConfig->port = config.database.location.port;
@@ -78,10 +79,9 @@ int StageCommand::exec() {
   databaseConnectionConfig->password = config.database.password;
 
   auto stagedDatabase =
-    std::make_shared<StagedDatabase>(databaseConnectionConfig);
+    std::make_shared<database::mysql::StagedDatabase>(databaseConnectionConfig);
 
-  Stager stager(stagedDatabase, stagedDatabase,
-                std::span{dataPointer.get(), size},
+  Stager stager(stagedDatabase, std::span{dataPointer.get(), size},
                 config.stager.stage_directory);
 
   stager.stage(paths, prefix);
@@ -121,7 +121,7 @@ int ArchiveCommand::exec() {
   auto fakeReadBuffer = std::array<char, 1>{0};
 
   auto databaseConnectionConfig =
-    std::make_shared<StagedDatabase::ConnectionConfig>();
+    std::make_shared<MysqlStagedDatabase::ConnectionConfig>();
   databaseConnectionConfig->database = config.database.location.schema;
   databaseConnectionConfig->host = config.database.location.host;
   databaseConnectionConfig->port = config.database.location.port;
@@ -129,17 +129,15 @@ int ArchiveCommand::exec() {
   databaseConnectionConfig->password = config.database.password;
 
   auto stagedDatabase =
-    std::make_shared<StagedDatabase>(databaseConnectionConfig);
-  auto archivedDatabase = std::make_shared<ArchivedDatabase>(
+    std::make_shared<MysqlStagedDatabase>(databaseConnectionConfig);
+  auto archivedDatabase = std::make_shared<MysqlArchivedDatabase>(
     databaseConnectionConfig, config.archive.target_size);
 
-  Stager stager(stagedDatabase, stagedDatabase,
-                std::span{fakeReadBuffer.data(), 1},
+  Stager stager(stagedDatabase, std::span{fakeReadBuffer.data(), 1},
                 config.stager.stage_directory);
-  Archiver<ArchivedDatabase, ArchivedDatabase, ArchivedDatabase> archiver(
-    archivedDatabase, archivedDatabase, archivedDatabase,
-    config.stager.stage_directory, config.archive.temp_archive_directory,
-    config.archive.single_archive_size);
+  Archiver archiver(archivedDatabase, config.stager.stage_directory,
+                    config.archive.temp_archive_directory,
+                    config.archive.single_archive_size);
 
   archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted());
 

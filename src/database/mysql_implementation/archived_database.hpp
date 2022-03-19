@@ -6,9 +6,7 @@
 #include "../../app/common.h"
 #include "../../app/staged_directory.h"
 #include "../../app/staged_file.hpp"
-#include "../archive_database.hpp"
-#include "../archived_directory_database.hpp"
-#include "../archived_file_database.hpp"
+#include "../archived_database.hpp"
 #include "archiver_database.h"
 #include "database.hpp"
 #include <optional>

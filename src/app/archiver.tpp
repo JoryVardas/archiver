@@ -7,93 +7,47 @@
 #include <ranges>
 #include <vector>
 
-template <ArchivedFileDatabase ArchivedFileDatabase,
-          ArchivedDirectoryDatabase ArchivedDirectoryDatabase,
-          ArchiveDatabase ArchiveDatabase>
-Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase, ArchiveDatabase>::
-  Archiver(std::shared_ptr<ArchivedFileDatabase>& fileDatabase,
-           std::shared_ptr<ArchivedDirectoryDatabase>& directoryDatabase,
-           std::shared_ptr<ArchiveDatabase>& archiveDatabase,
-           const std::filesystem::path& stageDirectoryLocation,
-           const std::filesystem::path& archiveDirectoryLocation,
-           Size singleFileArchiveSize)
-  : archivedFileDatabase(fileDatabase),
-    archivedDirectoryDatabase(directoryDatabase),
-    archiveDatabase(archiveDatabase), stageLocation(stageDirectoryLocation),
+template <ArchivedDatabase ArchivedDatabase>
+Archiver<ArchivedDatabase>::Archiver(
+  std::shared_ptr<ArchivedDatabase>& archivedDatabase,
+  const std::filesystem::path& stageDirectoryLocation,
+  const std::filesystem::path& archiveDirectoryLocation,
+  Size singleFileArchiveSize)
+  : archivedDatabase(archivedDatabase), stageLocation(stageDirectoryLocation),
     archiveLocation(archiveDirectoryLocation),
     singleFileArchiveSize(singleFileArchiveSize) {}
 
-template <ArchivedFileDatabase ArchivedFileDatabase,
-          ArchivedDirectoryDatabase ArchivedDirectoryDatabase,
-          ArchiveDatabase ArchiveDatabase>
-void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
-              ArchiveDatabase>::archive(const std::vector<StagedDirectory>&
-                                          stagedDirectories,
-                                        const std::vector<StagedFile>&
-                                          stagedFiles) {
-  const auto startTransactions = [&]() {
-    archivedDirectoryDatabase->startTransaction();
-    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
-                        decltype(archivedFileDatabase)>)
-      archivedFileDatabase->startTransaction();
-    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
-                        decltype(archiveDatabase)> &&
-        !std::is_same_v<decltype(archivedFileDatabase),
-                        decltype(archiveDatabase)>)
-      archiveDatabase->startTransaction();
-  };
-  const auto commitTransactions = [&]() {
-    archivedDirectoryDatabase->commit();
-    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
-                        decltype(archivedFileDatabase)>)
-      archivedFileDatabase->commit();
-    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
-                        decltype(archiveDatabase)> &&
-        !std::is_same_v<decltype(archivedFileDatabase),
-                        decltype(archiveDatabase)>)
-      archiveDatabase->commit();
-  };
-  const auto rollbackTransactions = [&]() {
-    archivedDirectoryDatabase->rollback();
-    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
-                        decltype(archivedFileDatabase)>)
-      archivedFileDatabase->rollback();
-    if (!std::is_same_v<decltype(archivedDirectoryDatabase),
-                        decltype(archiveDatabase)> &&
-        !std::is_same_v<decltype(archivedFileDatabase),
-                        decltype(archiveDatabase)>)
-      archiveDatabase->rollback();
-  };
+template <ArchivedDatabase ArchivedDatabase>
+void Archiver<ArchivedDatabase>::archive(
+  const std::vector<StagedDirectory>& stagedDirectories,
+  const std::vector<StagedFile>& stagedFiles) {
 
   try {
-    startTransactions();
+    archivedDatabase->startTransaction();
     archiveDirectories(stagedDirectories);
     archiveFiles(stagedFiles);
-    commitTransactions();
+    archivedDatabase->commit();
 
     // Saving the archive parts takes a while and on failure should not undo the
     // entire archive operation.
-    startTransactions();
+    archivedDatabase->startTransaction();
     saveArchiveParts();
-    commitTransactions();
+    archivedDatabase->commit();
   } catch (const std::exception& err) {
-    rollbackTransactions();
+    archivedDatabase->rollback();
     throw;
   }
 }
 
-template <ArchivedFileDatabase ArchivedFileDatabase,
-          ArchivedDirectoryDatabase ArchivedDirectoryDatabase,
-          ArchiveDatabase ArchiveDatabase>
-void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
-              ArchiveDatabase>::
-  archiveDirectories(const std::vector<StagedDirectory>& stagedDirectories) {
+template <ArchivedDatabase ArchivedDatabase>
+void Archiver<ArchivedDatabase>::archiveDirectories(
+  const std::vector<StagedDirectory>& stagedDirectories) {
   for (const auto& stagedDirectory : stagedDirectories) {
     if (archivedDirectoryMap.contains(stagedDirectory.id))
       continue;
     if (stagedDirectory.name == StagedDirectory::RootDirectoryName) {
       archivedDirectoryMap.insert(
-        {stagedDirectory.id, archiveDatabase->getRootDirectory()});
+        {stagedDirectory.id, archivedDatabase->getRootDirectory()});
       continue;
     }
     if (const auto parentArchivedDirectory =
@@ -104,20 +58,16 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
         "parent hasn't been archived",
         stagedDirectory.id));
     } else {
-      const auto addedArchivedDirectory =
-        archivedDirectoryDatabase->addDirectory(
-          stagedDirectory, parentArchivedDirectory->second);
+      const auto addedArchivedDirectory = archivedDatabase->addDirectory(
+        stagedDirectory, parentArchivedDirectory->second);
       archivedDirectoryMap.insert({stagedDirectory.id, addedArchivedDirectory});
     }
   }
 }
 
-template <ArchivedFileDatabase ArchivedFileDatabase,
-          ArchivedDirectoryDatabase ArchivedDirectoryDatabase,
-          ArchiveDatabase ArchiveDatabase>
-void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
-              ArchiveDatabase>::archiveFiles(const std::vector<StagedFile>&
-                                               stagedFiles) {
+template <ArchivedDatabase ArchivedDatabase>
+void Archiver<ArchivedDatabase>::archiveFiles(
+  const std::vector<StagedFile>& stagedFiles) {
   for (const auto& stagedFile : stagedFiles) {
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedFile.parent);
@@ -131,9 +81,9 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
         if (stagedFile.size >= singleFileArchiveSize)
           return {1, "<SINGLE>"};
         else
-          return archiveDatabase->getArchiveForFile(stagedFile);
+          return archivedDatabase->getArchiveForFile(stagedFile);
       }();
-      const auto [archivedFileType, revisionId] = archivedFileDatabase->addFile(
+      const auto [archivedFileType, revisionId] = archivedDatabase->addFile(
         stagedFile, parentArchivedDirectory->second, archive);
 
       if (archivedFileType == ArchivedFileAddedType::NewRevision) {
@@ -151,12 +101,9 @@ void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
   }
 }
 
-template <ArchivedFileDatabase ArchivedFileDatabase,
-          ArchivedDirectoryDatabase ArchivedDirectoryDatabase,
-          ArchiveDatabase ArchiveDatabase>
-void Archiver<ArchivedFileDatabase, ArchivedDirectoryDatabase,
-              ArchiveDatabase>::saveArchiveParts() {
-  Compressor<ArchiveDatabase> compressor{archiveDatabase, archiveLocation};
+template <ArchivedDatabase ArchivedDatabase>
+void Archiver<ArchivedDatabase>::saveArchiveParts() {
+  Compressor<ArchivedDatabase> compressor{archivedDatabase, archiveLocation};
   for (const auto& archive : modifiedArchives) {
     compressor.compress(archive);
   }
