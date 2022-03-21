@@ -5,7 +5,6 @@
 #include "archiver.hpp"
 #include "stager.hpp"
 #include "util/get_file_read_buffer.hpp"
-#include <algorithm>
 #include <filesystem>
 #include <ranges>
 #include <span>

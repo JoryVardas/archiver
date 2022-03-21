@@ -14,10 +14,6 @@
 	path = lib/cxxopts
 	url = https://github.com/jarro2783/cxxopts.git
 	branch = master
-[submodule "lib/unfmt"]
-	path = lib/unfmt
-	url = https://github.com/JoryVardas/unfmt.git
-	branch = dev
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git

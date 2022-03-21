@@ -28,10 +28,8 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
-#include <unfmt.h>
 #include <vector>
 
-using CString = const char*;
 using ID = uint64_t;
 using Size = uint64_t;
 using Extension = std::string;
@@ -53,21 +51,6 @@ using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
     name(const std::string& msg) : std::runtime_error(msg){};                  \
   };                                                                           \
   _make_formatter_for_exception_(name)
-
-bool isDirectory(const std::string& path);
-bool isDirectory(const std::filesystem::path& path);
-bool isFile(const std::string& path);
-bool isFile(const std::filesystem::path& path);
-bool pathExists(const std::string& path);
-bool pathExists(const std::filesystem::path& path);
-
-std::string toString(const TimeStamp& timestamp);
-TimeStamp toTimestamp(const std::string& str);
-
-#define _log_    std::cout
-#define abstract = 0
-
-using namespace std::string_literals;
 
 _make_formatter_for_exception_(std::exception);
 

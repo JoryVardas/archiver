@@ -1,6 +1,4 @@
-#include "../config/config.h"
 #include "commandline_options.hpp"
-#include "common.h"
 #include <cxxsubs.hpp>
 #include <iostream>
 #include <spdlog/sinks/stdout_color_sinks.h>

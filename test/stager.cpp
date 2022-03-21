@@ -1,8 +1,6 @@
 #include "additional_matchers.hpp"
 #include "database_connector.hpp"
 #include <catch2/catch_all.hpp>
-#include <concepts>
-#include <ranges>
 #include <span>
 #include <src/app/stager.hpp>
 #include <src/app/util/get_file_read_buffer.hpp>

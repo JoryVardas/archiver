@@ -28,7 +28,7 @@ void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
   };
 
   const auto stagePath = [&](const path& itemPath) {
-    if (isFile(itemPath)) {
+    if (std::filesystem::is_regular_file(itemPath)) {
       try {
         stageFile(itemPath, removePrefix(itemPath));
       } catch (StagedDatabaseException& err) {
@@ -38,7 +38,7 @@ void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
         throw StagerException(FORMAT_LIB::format(
           "Could not stage file \"{}\" : {}", itemPath, err.what()));
       }
-    } else if (isDirectory(itemPath))
+    } else if (std::filesystem::is_directory(itemPath))
       try {
         stageDirectory(itemPath, removePrefix(itemPath));
       } catch (StagedDatabaseException& err) {
@@ -59,7 +59,7 @@ void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
       // directory then we need to stage the root directory before we iterate
       // through it since recursive_directory_iterator will not visit the root.
       stagePath(currentPath);
-      if (isDirectory(currentPath)) {
+      if (std::filesystem::is_directory(currentPath)) {
         std::ranges::for_each(
           std::filesystem::recursive_directory_iterator(currentPath),
           stagePath);

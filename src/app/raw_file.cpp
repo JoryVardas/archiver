@@ -1,5 +1,4 @@
 #include "raw_file.hpp"
-#include "../config/config.h"
 #include <Hash/src/blake2.h>
 #include <Hash/src/sha3.h>
 #include <fstream>
@@ -14,7 +13,7 @@ RawFile::RawFile(const std::filesystem::path& path, std::span<char> buffer) {
     throw FileDoesNotExist(
       FORMAT_LIB::format("The file \"{}\" could not be found", path));
   }
-  if (!isFile(path)) {
+  if (!std::filesystem::is_regular_file(path)) {
     throw NotAFile(FORMAT_LIB::format("The path \"{}\" is not a file", path));
   }
 

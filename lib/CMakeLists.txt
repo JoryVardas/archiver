@@ -1,4 +1,3 @@
-target_include_directories(Archiver_sources SYSTEM PUBLIC unfmt/include)
 target_include_directories(Archiver_sources SYSTEM PUBLIC json/single_include/nlohmann)
 target_include_directories(Archiver_sources SYSTEM PUBLIC fmt/include)
 target_include_directories(Archiver_sources SYSTEM PUBLIC cxxopts/include)
