@@ -32,10 +32,52 @@ TEST_CASE("Staging files and directories", "[stager]") {
 
   REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "."));
 
+  auto initialStagedDirectories = stagedDatabase->listAllDirectories();
+  auto initialStagedFiles = stagedDatabase->listAllFiles();
+  REQUIRE(initialStagedDirectories.size() == 2);
+  REQUIRE(initialStagedFiles.size() == 5);
+
+  SECTION(
+    "Having multiple stagers sharing the same stage directory and database") {
+    Stager stager2{stagedDatabase, readBuffer, config.stager.stage_directory};
+    REQUIRE_NOTHROW(stager2.stage({{"./test_data_additional/"}}, "."));
+
+    auto secondStagedDirectories = stagedDatabase->listAllDirectories();
+    auto secondStagedFiles = stagedDatabase->listAllFiles();
+    REQUIRE(secondStagedDirectories.size() == 3);
+    REQUIRE(secondStagedFiles.size() == 7);
+
+    auto testDataAdditional1 = ranges::find(
+      secondStagedFiles, "TestData_Additional_1.additional", &StagedFile::name);
+    REQUIRE(testDataAdditional1 != ranges::end(secondStagedFiles));
+    REQUIRE(testDataAdditional1->name == "TestData_Additional_1.additional");
+    REQUIRE(testDataAdditional1->parent == secondStagedDirectories.at(2).id);
+    REQUIRE(testDataAdditional1->hash ==
+            ArchiverTest::TestDataAdditional1::hash);
+    REQUIRE(testDataAdditional1->size ==
+            ArchiverTest::TestDataAdditional1::size);
+    REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
+      "{}/{}", config.stager.stage_directory, testDataAdditional1->id)}));
+
+    auto testDataAdditionalSingleExact = ranges::find(
+      secondStagedFiles, "TestData_Additional_Single_Exact.additional",
+      &StagedFile::name);
+    REQUIRE(testDataAdditionalSingleExact != ranges::end(secondStagedFiles));
+    REQUIRE(testDataAdditionalSingleExact->name ==
+            "TestData_Additional_Single_Exact.additional");
+    REQUIRE(testDataAdditionalSingleExact->parent ==
+            secondStagedDirectories.at(2).id);
+    REQUIRE(testDataAdditionalSingleExact->hash ==
+            ArchiverTest::TestDataAdditionalSingleExact::hash);
+    REQUIRE(testDataAdditionalSingleExact->size ==
+            ArchiverTest::TestDataAdditionalSingleExact::size);
+    REQUIRE(std::filesystem::exists(
+      {FORMAT_LIB::format("{}/{}", config.stager.stage_directory,
+                          testDataAdditionalSingleExact->id)}));
+  }
+
   auto stagedDirectories = stagedDatabase->listAllDirectories();
   auto stagedFiles = stagedDatabase->listAllFiles();
-  REQUIRE(stagedDirectories.size() == 2);
-  REQUIRE(stagedFiles.size() == 5);
 
   REQUIRE(stagedDirectories.at(0).name == StagedDirectory::RootDirectoryName);
   REQUIRE(stagedDirectories.at(1).name == "test_data");

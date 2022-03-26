@@ -29,6 +29,17 @@ const std::string hash =
   "${ARCHIVER_TEST_TEST_DATA_COPY_SHA}${ARCHIVER_TEST_TEST_DATA_COPY_BLAKE2B}"s;
 const uint64_t size = ${ARCHIVER_TEST_TEST_DATA_COPY_SIZE};
 }
+
+namespace TestDataAdditional1 {
+const std::string hash =
+  "${ARCHIVER_TEST_TEST_DATA_ADDITIONAL_1_SHA}${ARCHIVER_TEST_TEST_DATA_ADDITIONAL_1_BLAKE2B}"s;
+const uint64_t size = ${ARCHIVER_TEST_TEST_DATA_ADDITIONAL_1_SIZE};
+}
+namespace TestDataAdditionalSingleExact {
+const std::string hash =
+  "${ARCHIVER_TEST_TEST_DATA_ADDITIONAL_SINGLE_EXACT_SHA}${ARCHIVER_TEST_TEST_DATA_ADDITIONAL_SINGLE_EXACT_BLAKE2B}"s;
+const uint64_t size = ${ARCHIVER_TEST_TEST_DATA_ADDITIONAL_SINGLE_EXACT_SIZE};
+}
 }
 
 #endif
