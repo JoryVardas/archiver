@@ -1,5 +1,6 @@
 #include "additional_matchers.hpp"
 #include "database_connector.hpp"
+#include "test_common.hpp"
 #include <catch2/catch_all.hpp>
 #include <span>
 #include <src/app/stager.hpp>
@@ -27,12 +28,7 @@ TEST_CASE("Staging files and directories", "[stager]") {
 
   REQUIRE(std::filesystem::is_empty(config.stager.stage_directory));
 
-  // Require that all the databases are empty
-  REQUIRE(stagedDatabase->listAllFiles().empty());
-  REQUIRE(stagedDatabase->listAllDirectories().empty());
-  REQUIRE(
-    archivedDatabase->listChildDirectories(archivedRootDirectory).empty());
-  REQUIRE(archivedDatabase->listChildFiles(archivedRootDirectory).empty());
+  REQUIRE(databasesAreEmpty(stagedDatabase, archivedDatabase));
 
   REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "."));
 
