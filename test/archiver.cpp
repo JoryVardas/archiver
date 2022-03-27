@@ -203,7 +203,7 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
     {FORMAT_LIB::format("{}/{}/{}", config.archive.archive_directory,
                         testDataSingle->revisions.at(0).containingArchiveId,
                         testDataSingle->revisions.at(0).id)}));
-  REQUIRE(testDataSingle->revisions.at(0).containingArchiveId ==
+  REQUIRE(testDataSingleExact->revisions.at(0).containingArchiveId ==
           testDataSingle->revisions.at(0).containingArchiveId);
 
   // Remove staged and archived files.
