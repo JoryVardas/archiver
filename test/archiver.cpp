@@ -35,12 +35,81 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   REQUIRE(std::filesystem::is_empty(config.stager.stage_directory));
   REQUIRE(std::filesystem::is_empty(config.archive.archive_directory));
   REQUIRE(std::filesystem::is_empty(config.archive.archive_directory));
-  
+
   REQUIRE(databasesAreEmpty(stagedDatabase, archivedDatabase));
 
   REQUIRE_NOTHROW(stager.stage({{"./test_data/"}}, "."));
   REQUIRE_NOTHROW(
     archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted()));
+
+  auto initialArchivedDirectories =
+    archivedDatabase->listChildDirectories(archivedRootDirectory);
+  REQUIRE(initialArchivedDirectories.size() == 1);
+
+  SECTION("Having multiple archivers sharing the same archive directory and "
+          "database") {
+    auto initialStagedDirectories = stager.getDirectoriesSorted();
+    auto initialStagedFiles = stager.getFilesSorted();
+
+    stager.stage({{"./test_data_additional/"}}, ".");
+    auto newlyStagedDirectories = stager.getDirectoriesSorted();
+    auto newlyStagedFiles = stager.getFilesSorted();
+    std::erase_if(newlyStagedDirectories, [&](auto& val) {
+      return val.id <= initialStagedDirectories.back().id;
+    });
+    std::erase_if(newlyStagedFiles, [&](auto& val) {
+      return val.id <= initialStagedFiles.back().id;
+    });
+
+    Archiver archiver2{archivedDatabase, config.stager.stage_directory,
+                       config.archive.archive_directory,
+                       config.archive.single_archive_size};
+
+    REQUIRE_NOTHROW(archiver.archive(newlyStagedDirectories, newlyStagedFiles));
+
+    auto archivedDirectories =
+      archivedDatabase->listChildDirectories(archivedRootDirectory);
+    REQUIRE(archivedDirectories.size() == 2);
+    auto archivedFilesTestDataAdditional =
+      archivedDatabase->listChildFiles(archivedDirectories.at(1));
+
+    auto testDataAdditional1 =
+      ranges::find(archivedFilesTestDataAdditional,
+                   "TestData_Additional_1.additional", &ArchivedFile::name);
+    REQUIRE(testDataAdditional1 !=
+            ranges::end(archivedFilesTestDataAdditional));
+    REQUIRE(testDataAdditional1->name == "TestData_Additional_1.additional");
+    REQUIRE(testDataAdditional1->parentDirectory.id ==
+            archivedDirectories.at(1).id);
+    REQUIRE(testDataAdditional1->revisions.size() == 1);
+    REQUIRE(testDataAdditional1->revisions.at(0).hash ==
+            ArchiverTest::TestDataAdditional1::hash);
+    REQUIRE(testDataAdditional1->revisions.at(0).size ==
+            ArchiverTest::TestDataAdditional1::size);
+    REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
+      "{}/{}/{}", config.archive.archive_directory,
+      testDataAdditional1->revisions.at(0).containingArchiveId,
+      testDataAdditional1->revisions.at(0).id)}));
+
+    auto testDataAdditionalSingleExact = ranges::find(
+      archivedFilesTestDataAdditional,
+      "TestData_Additional_Single_Exact.additional", &ArchivedFile::name);
+    REQUIRE(testDataAdditionalSingleExact !=
+            ranges::end(archivedFilesTestDataAdditional));
+    REQUIRE(testDataAdditionalSingleExact->name ==
+            "TestData_Additional_Single_Exact.additional");
+    REQUIRE(testDataAdditionalSingleExact->parentDirectory.id ==
+            archivedDirectories.at(1).id);
+    REQUIRE(testDataAdditionalSingleExact->revisions.size() == 1);
+    REQUIRE(testDataAdditionalSingleExact->revisions.at(0).hash ==
+            ArchiverTest::TestDataAdditionalSingleExact::hash);
+    REQUIRE(testDataAdditionalSingleExact->revisions.at(0).size ==
+            ArchiverTest::TestDataAdditionalSingleExact::size);
+    REQUIRE(std::filesystem::exists({FORMAT_LIB::format(
+      "{}/{}/{}", config.archive.archive_directory,
+      testDataAdditionalSingleExact->revisions.at(0).containingArchiveId,
+      testDataAdditionalSingleExact->revisions.at(0).id)}));
+  }
 
   auto archivedDirectories =
     archivedDatabase->listChildDirectories(archivedRootDirectory);
@@ -49,7 +118,6 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
   auto archivedFilesTestData =
     archivedDatabase->listChildFiles(archivedDirectories.at(0));
 
-  REQUIRE(archivedDirectories.size() == 1);
   REQUIRE(archivedDirectories.at(0).name == "test_data");
   REQUIRE(archivedDirectories.at(0).parent == archivedRootDirectory.id);
 
