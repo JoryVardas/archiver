@@ -93,10 +93,11 @@ target_sources(Archiver-Tests PRIVATE additional_matchers.cpp)
 # Add config tests
 add_subdirectory(config)
 
-# Make directories for staging and archiving
+# Make directories for staging, archiving, and dearchiving
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/stage")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/archive")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/archive_temp")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dearchive")
 
 # Give a warning if no database connection is possible.
 if (NOT DEFINED ARCHIVER_TEST_DATABASE_USERNAME OR NOT DEFINED ARCHIVER_TEST_DATABASE_PASSWORD)
@@ -113,4 +114,5 @@ target_link_libraries(Archiver-Tests PRIVATE Archiver_mock_database)
 target_sources(Archiver-Tests PRIVATE
                stager.cpp
                archiver.cpp
-               raw_file.cpp)
+               raw_file.cpp
+               dearchiver.cpp)
