@@ -21,8 +21,9 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
                        archivedDatabase->getNextArchivePartNumber(archive));
   const auto archiveIndex =
     archiveLocation / FORMAT_LIB::format("{}_index", archive.id);
-  const std::string command = FORMAT_LIB::format(
-    "zpaq a {} ./{} -m5 -index {}", newArchiveName, archive.id, archiveIndex);
+  const std::string command =
+    FORMAT_LIB::format("zpaq a {} {}/{} -m5 -index {}", newArchiveName,
+                       archiveLocation, archive.id, archiveIndex);
 
   std::flush(std::cout);
   if (const auto exitCode = system(command.c_str()); exitCode != 0) {
