@@ -54,9 +54,6 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
     stager.stage({{"./test_data_additional/"}}, ".");
     auto newlyStagedDirectories = stager.getDirectoriesSorted();
     auto newlyStagedFiles = stager.getFilesSorted();
-    std::erase_if(newlyStagedDirectories, [&](auto& val) {
-      return val.id <= initialStagedDirectories.back().id;
-    });
     std::erase_if(newlyStagedFiles, [&](auto& val) {
       return val.id <= initialStagedFiles.back().id;
     });
