@@ -4,6 +4,7 @@
 #include <functional>
 #include <limits>
 #include <ranges>
+#include <subprocess.hpp>
 
 template <ArchivedDatabase ArchivedDatabase>
 Compressor<ArchivedDatabase>::Compressor(
@@ -15,24 +16,42 @@ template <ArchivedDatabase ArchivedDatabase>
 void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
   if (archive.id == 1)
     return compressSingleArchives();
+
   const auto newArchiveName =
     archiveLocation /
     FORMAT_LIB::format("{}_{}.zpaq", archive.id,
                        archivedDatabase->getNextArchivePartNumber(archive));
   const auto archiveIndex =
     archiveLocation / FORMAT_LIB::format("{}_index", archive.id);
-  const std::string command =
-    FORMAT_LIB::format("zpaq a {} {}/{} -m5 -index {}", newArchiveName,
-                       archiveLocation, archive.id, archiveIndex);
 
-  std::flush(std::cout);
-  if (const auto exitCode = system(command.c_str()); exitCode != 0) {
-    throw CompressorException(FORMAT_LIB::format(
-      "There was an error while compressing archive with id {}, "
-      "zpaq returned the error {}",
-      archive.id, exitCode));
+  auto compressFiles = [&](const std::vector<std::string> files) {
+    std::vector<std::string> commandList = {"zpaq", "a", newArchiveName};
+    std::ranges::copy(files, std::back_inserter(commandList));
+    commandList.push_back("-m5");
+
+    subprocess::run(commandList, {.check = true,
+                                  .cout = subprocess::PipeOption::cout,
+                                  .cerr = subprocess::PipeOption::cerr,
+                                  .cwd = archiveLocation});
+  };
+
+  // Chunk and add the files to the archive.
+  std::vector<std::string> filesChunk;
+  const decltype(filesChunk)::size_type chunkSize = 10;
+  for (const auto& file : std::filesystem::directory_iterator(
+         archiveLocation / FORMAT_LIB::format("{}", archive.id))) {
+    filesChunk.push_back(
+      std::filesystem::path(FORMAT_LIB::format("{}", archive.id)) /
+      file.path().filename());
+
+    if (filesChunk.size() == chunkSize) {
+      compressFiles(filesChunk);
+      filesChunk.clear();
+    }
   }
-  std::flush(std::cout);
+  if (!filesChunk.empty()) {
+    compressFiles(filesChunk);
+  }
 
   archivedDatabase->incrementNextArchivePartNumber(archive);
 }
@@ -45,17 +64,14 @@ void Compressor<ArchivedDatabase>::compressSingleArchives() {
       const auto newArchiveName =
         archiveLocation /
         FORMAT_LIB::format("1_{}.zpaq", file.path().filename());
-      const std::string command =
-        FORMAT_LIB::format("zpaq a {} {} -m5", newArchiveName, file.path());
 
-      std::flush(std::cout);
-      if (const auto exitCode = system(command.c_str()); exitCode != 0) {
-        throw CompressorException(FORMAT_LIB::format(
-          "There was an error while compressing the single file "
-          "archive with name {}, "
-          "zpaq returned the error {}",
-          file.path().filename(), exitCode));
-      }
-      std::flush(std::cout);
+      std::vector<std::string> commandList = {
+        "zpaq", "a", newArchiveName,
+        std::filesystem::path("1") / file.path().filename(), "-m5"};
+
+      subprocess::run(commandList, {.check = true,
+                                    .cout = subprocess::PipeOption::cout,
+                                    .cerr = subprocess::PipeOption::cerr,
+                                    .cwd = archiveLocation});
     });
 }

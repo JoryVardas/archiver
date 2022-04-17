@@ -30,3 +30,6 @@
 	path = lib/cxxsubs
 	url = https://github.com/edmBernard/cxxsubs.git
 	branch = master
+[submodule "subprocess"]
+	path = lib/subprocess
+	url = https://github.com/benman64/subprocess.git
