@@ -65,7 +65,8 @@ TEST_CASE("Archiving files and directories", "[archiver]") {
                        config.archive.archive_directory,
                        config.archive.single_archive_size};
 
-    REQUIRE_NOTHROW(archiver.archive(newlyStagedDirectories, newlyStagedFiles));
+    REQUIRE_NOTHROW(
+      archiver2.archive(newlyStagedDirectories, newlyStagedFiles));
 
     auto archivedDirectories =
       archivedDatabase->listChildDirectories(archivedRootDirectory);
