@@ -16,6 +16,10 @@ public:
              const std::filesystem::path& archiveLocation);
 
   void compress(const Archive& archive);
+  void decompress(ArchiveID archiveId,
+                  const std::filesystem::path& destination);
+  void decompressSingleArchive(ArchivedFileRevisionID revisionId,
+                               const std::filesystem::path& destination);
 
   Compressor& operator=(const Compressor&) = delete;
   Compressor& operator=(Compressor&&) = default;

@@ -57,6 +57,33 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
 }
 
 template <ArchivedDatabase ArchivedDatabase>
+void Compressor<ArchivedDatabase>::decompress(
+  ArchiveID archiveId, const std::filesystem::path& destination) {
+  const auto archiveName = FORMAT_LIB::format("{}.zpaq", archiveId);
+
+  std::vector<std::string> commandList = {"zpaq", "x",
+                                          archiveLocation / archiveName};
+
+  subprocess::run(commandList, {.check = true,
+                                .cout = subprocess::PipeOption::cout,
+                                .cerr = subprocess::PipeOption::cerr,
+                                .cwd = destination});
+}
+template <ArchivedDatabase ArchivedDatabase>
+void Compressor<ArchivedDatabase>::decompressSingleArchive(
+  ArchivedFileRevisionID revisionId, const std::filesystem::path& destination) {
+  const auto archiveName = FORMAT_LIB::format("{}_{}.zpaq", 1, revisionId);
+
+  std::vector<std::string> commandList = {"zpaq", "x",
+                                          archiveLocation / archiveName};
+
+  subprocess::run(commandList, {.check = true,
+                                .cout = subprocess::PipeOption::cout,
+                                .cerr = subprocess::PipeOption::cerr,
+                                .cwd = destination});
+}
+
+template <ArchivedDatabase ArchivedDatabase>
 void Compressor<ArchivedDatabase>::compressSingleArchives() {
   std::ranges::for_each(
     std::filesystem::directory_iterator(archiveLocation / "1"),
