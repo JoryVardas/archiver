@@ -7,11 +7,11 @@
 #include <ranges>
 #include <span>
 #include <src/app/archiver.hpp>
+#include <src/app/dearchiver.hpp>
 #include <src/app/stager.hpp>
 #include <src/app/util/get_file_read_buffer.hpp>
 #include <src/config/config.h>
 #include <test/test_constant.hpp>
-//#include <src/app/dearchiver.hpp>
 
 using Catch::Matchers::StartsWith;
 namespace ranges = std::ranges;
@@ -102,7 +102,8 @@ TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
                     config.archive.archive_directory,
                     config.archive.single_archive_size};
 
-  // Construct the dearchiver.
+  Dearchiver dearchiver{archivedDatabase, config.archive.archive_directory,
+                        config.archive.temp_archive_directory, readBuffer1};
 
   REQUIRE(std::filesystem::is_empty(config.stager.stage_directory));
   REQUIRE(std::filesystem::is_empty(config.archive.archive_directory));
@@ -114,13 +115,14 @@ TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
   stager.stage({{"./test_data/"}, {"./test_data_additional/"}}, ".");
   archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted());
 
-  // Dearchive the all of /test_data.
+  dearchiver.dearchive("/test_data", "./dearchive");
 
   SECTION(
     "Having multiple dearchivers sharing the same dearchive directory and "
     "database") {
-    // Construct a second dearchiver.
-    // Dearchive /test_data_additional.
+    Dearchiver dearchiver2{archivedDatabase, config.archive.archive_directory,
+                           config.archive.temp_archive_directory, readBuffer1};
+    dearchiver2.dearchive("/test_data_additional", "./dearchive");
 
     REQUIRE(std::filesystem::exists(
       "./dearchive/test_data_additional/TestData_Additional_1.additional"));
@@ -138,6 +140,10 @@ TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
       readBuffer1, readBuffer2));
   }
 
+  REQUIRE(std::filesystem::exists("./dearchive/test_data/TestData1.test"));
+  REQUIRE(std::filesystem::exists("./dearchive/test_data/TestData_Copy.test"));
+  REQUIRE(
+    std::filesystem::exists("./dearchive/test_data/TestData_Not_Single.test"));
   REQUIRE(
     std::filesystem::exists("./dearchive/test_data/TestData_Single.test"));
   REQUIRE(std::filesystem::exists(
@@ -169,6 +175,10 @@ TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
     std::filesystem::remove_all(dir);
   }
   for (auto const& dir : std::filesystem::directory_iterator{"./dearchive"}) {
+    std::filesystem::remove_all(dir);
+  }
+  for (auto const& dir :
+       std::filesystem::directory_iterator{"./archive_temp"}) {
     std::filesystem::remove_all(dir);
   }
 }
