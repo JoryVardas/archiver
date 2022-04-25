@@ -139,34 +139,25 @@ TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
   }
 
   REQUIRE(
-    std::filesystem::exists("./dearchive/test_data_additional/TestData1.test"));
+    std::filesystem::exists("./dearchive/test_data/TestData_Single.test"));
   REQUIRE(std::filesystem::exists(
-    "./dearchive/test_data_additional/TestData_Copy.test"));
-  REQUIRE(std::filesystem::exists(
-    "./dearchive/test_data_additional/TestData_Not_Single.test"));
-  REQUIRE(std::filesystem::exists(
-    "./dearchive/test_data_additional/TestData_Single.test"));
-  REQUIRE(std::filesystem::exists(
-    "./dearchive/test_data_additional/TestData_Single_Exact.test"));
+    "./dearchive/test_data/TestData_Single_Exact.test"));
 
-  REQUIRE(fileByteCompare("./test_data_additional/TestData1.test",
-                          "./dearchive/test_data_additional/TestData1.test",
+  REQUIRE(fileByteCompare("./test_data/TestData1.test",
+                          "./dearchive/test_data/TestData1.test", readBuffer1,
+                          readBuffer2));
+  REQUIRE(fileByteCompare("./test_data/TestData_Copy.test",
+                          "./dearchive/test_data/TestData_Copy.test",
                           readBuffer1, readBuffer2));
-  REQUIRE(fileByteCompare("./test_data_additional/TestData_Copy.test",
-                          "./dearchive/test_data_additional/TestData_Copy.test",
+  REQUIRE(fileByteCompare("./test_data/TestData_Not_Single.test",
+                          "./dearchive/test_data/TestData_Not_Single.test",
                           readBuffer1, readBuffer2));
-  REQUIRE(
-    fileByteCompare("./test_data_additional/TestData_Not_Single.test",
-                    "./dearchive/test_data_additional/TestData_Not_Single.test",
-                    readBuffer1, readBuffer2));
-  REQUIRE(
-    fileByteCompare("./test_data_additional/TestData_Single.test",
-                    "./dearchive/test_data_additional/TestData_Single.test",
-                    readBuffer1, readBuffer2));
-  REQUIRE(fileByteCompare(
-    "./test_data_additional/TestData_Single_Exact.test",
-    "./dearchive/test_data_additional/TestData_Single_Exact.test", readBuffer1,
-    readBuffer2));
+  REQUIRE(fileByteCompare("./test_data/TestData_Single.test",
+                          "./dearchive/test_data/TestData_Single.test",
+                          readBuffer1, readBuffer2));
+  REQUIRE(fileByteCompare("./test_data/TestData_Single_Exact.test",
+                          "./dearchive/test_data/TestData_Single_Exact.test",
+                          readBuffer1, readBuffer2));
 
   // Remove staged, archived, and dearchived files.
   for (auto const& file :
