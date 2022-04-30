@@ -192,9 +192,10 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
     return childDirectories;
 
   } catch (const sqlpp::exception& err) {
-    throw ArchivedDatabaseException(FORMAT_LIB::format(
-      "Could not list child directories for archived directory with id {}: {}",
-      directory.id, err));
+    throw ArchivedDatabaseException(
+      FORMAT_LIB::format("Could not list child directories for archived "
+                         "directory with id {}: {}",
+                         directory.id, err));
   }
 }
 auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
