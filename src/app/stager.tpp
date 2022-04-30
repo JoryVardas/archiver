@@ -37,6 +37,10 @@ void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
       } catch (std::filesystem::filesystem_error& err) {
         throw StagerException(FORMAT_LIB::format(
           "Could not stage file \"{}\" : {}", itemPath, err.what()));
+      } catch (...) {
+        throw StagerException(FORMAT_LIB::format(
+          "An unknown error occurred while trying to stage file \"{}\"",
+          itemPath));
       }
     } else if (std::filesystem::is_directory(itemPath))
       try {
@@ -44,6 +48,10 @@ void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
       } catch (StagedDatabaseException& err) {
         throw StagerException(FORMAT_LIB::format(
           "Could not stage directory \"{}\" : {}", itemPath, err.what()));
+      } catch (...) {
+        throw StagerException(FORMAT_LIB::format(
+          "An unknown error occurred while trying to stage directory \"{}\"",
+          itemPath));
       }
     else {
       throw StagerException(FORMAT_LIB::format(
