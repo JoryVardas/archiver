@@ -3,6 +3,7 @@
 #include "util/string_helpers.hpp"
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <ranges>
 #include <vector>
