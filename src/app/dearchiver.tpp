@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <ranges>
+#include <string>
 #include <vector>
 
 template <ArchivedDatabase ArchivedDatabase>
@@ -139,17 +140,36 @@ void Dearchiver<ArchivedDatabase>::mergeArchiveParts(ArchiveID archiveId) {
       "There was an error opening \"{}\" for writing", outputPath));
   }
 
+  const auto archiveNameStart = FORMAT_LIB::format("{}_", archiveId);
+
+  unsigned long long maxPartNumber = 1;
+
   for (const auto& directoryEntry : fs::directory_iterator(archiveLocation)) {
     if (!directoryEntry.is_regular_file())
       continue;
 
     const auto archivePartPath = directoryEntry.path();
-    const auto fileName = directoryEntry.path().filename().string();
+    const std::string fileName = directoryEntry.path().filename().string();
 
     // Skip archive parts which are not
-    if (!std::string_view{fileName}.starts_with(
-          FORMAT_LIB::format("{}_", archiveId)))
+    if (!std::string_view{fileName}.starts_with(archiveNameStart))
       continue;
+
+    const std::string_view partNumberString =
+      removeSuffix(removePrefix(fileName, archiveNameStart), ".zpaq");
+    try {
+      const auto partNumber = std::stoull(std::string{partNumberString});
+      maxPartNumber = std::max(maxPartNumber, partNumber);
+    } catch (std::invalid_argument& err) {
+      // Do nothing and don't count the result.
+    }
+  }
+
+  for (Size partNumber = 1; partNumber <= maxPartNumber; ++partNumber) {
+
+    const auto archivePartPath =
+      archiveLocation /
+      FORMAT_LIB::format("{}{}.zpaq", archiveNameStart, partNumber);
 
     std::basic_ifstream<char> inputStream(archivePartPath,
                                           std::ios_base::binary);
