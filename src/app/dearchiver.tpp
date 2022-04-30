@@ -75,7 +75,12 @@ void Dearchiver<ArchivedDatabase>::dearchive(
     [&](const ArchivedDirectory& directory,
         const std::filesystem::path& containingDirectory,
         auto&& recurse) -> void {
-    auto directoryPath = containingDirectory / directory.name;
+    auto directoryPath = [&]() {
+      if (directory.name == ArchivedDirectory::RootDirectoryName)
+        return containingDirectory;
+      else
+        return containingDirectory / directory.name;
+    }();
     std::filesystem::create_directory(directoryPath);
 
     const auto childDirectories =
@@ -105,6 +110,10 @@ void Dearchiver<ArchivedDatabase>::dearchive(
                                            &ArchivedFile::name);
              file != std::end(siblingFiles)) {
     dearchiveFile(*file, dearchiveLocation);
+  } else if (pathToDearchive.generic_string() ==
+             ArchivedDirectory::RootDirectoryName) {
+    dearchiveDirectory(archivedDatabase->getRootDirectory(), dearchiveLocation,
+                       dearchiveDirectory);
   } else {
     throw DearchiverException(
       "Attempt to dearchive a path that was never archived.");
