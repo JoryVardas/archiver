@@ -64,6 +64,7 @@ void Dearchiver<ArchivedDatabase>::dearchive(
     if (!hasArchiveBeenDecompressed(revision.containingArchiveId)) {
       mergeArchiveParts(revision.containingArchiveId);
       compressor.decompress(revision.containingArchiveId, archiveTempLocation);
+      decompressedArchives.push_back(revision.containingArchiveId);
     }
 
     std::filesystem::copy_file(
