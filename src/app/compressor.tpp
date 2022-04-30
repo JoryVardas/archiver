@@ -42,7 +42,7 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
 
   // Chunk and add the files to the archive.
   std::vector<std::string> filesChunk;
-  const decltype(filesChunk)::size_type chunkSize = 10;
+  const decltype(filesChunk)::size_type chunkSize = 100;
   for (const auto& file : std::filesystem::directory_iterator(
          archiveLocation / FORMAT_LIB::format("{}", archive.id))) {
     filesChunk.push_back(
