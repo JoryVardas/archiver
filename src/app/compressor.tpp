@@ -17,14 +17,15 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
   if (archive.id == 1)
     return compressSingleArchives();
 
-  const auto newArchiveName =
-    archiveLocation /
-    FORMAT_LIB::format("{}_{}.zpaq", archive.id,
-                       archivedDatabase->getNextArchivePartNumber(archive));
   const auto archiveIndex =
     archiveLocation / FORMAT_LIB::format("{}_index", archive.id);
 
   auto compressFiles = [&](const std::vector<std::string> files) {
+    const auto newArchiveName =
+      archiveLocation /
+      FORMAT_LIB::format("{}_{}.zpaq", archive.id,
+                         archivedDatabase->getNextArchivePartNumber(archive));
+
     std::vector<std::string> commandList = {"zpaq", "a", newArchiveName};
     std::ranges::copy(files, std::back_inserter(commandList));
     commandList.push_back("-m5");
@@ -35,6 +36,8 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
                                   .cout = subprocess::PipeOption::cout,
                                   .cerr = subprocess::PipeOption::cerr,
                                   .cwd = archiveLocation});
+
+    archivedDatabase->incrementNextArchivePartNumber(archive);
   };
 
   // Chunk and add the files to the archive.
@@ -54,8 +57,6 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
   if (!filesChunk.empty()) {
     compressFiles(filesChunk);
   }
-
-  archivedDatabase->incrementNextArchivePartNumber(archive);
 }
 
 template <ArchivedDatabase ArchivedDatabase>
