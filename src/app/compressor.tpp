@@ -28,6 +28,8 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
     std::vector<std::string> commandList = {"zpaq", "a", newArchiveName};
     std::ranges::copy(files, std::back_inserter(commandList));
     commandList.push_back("-m5");
+    commandList.push_back("-index");
+    commandList.push_back(archiveIndex.native());
 
     subprocess::run(commandList, {.check = true,
                                   .cout = subprocess::PipeOption::cout,
