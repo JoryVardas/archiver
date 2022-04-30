@@ -3,6 +3,7 @@
 #include "../database/mysql_implementation/archived_database.hpp"
 #include "../database/mysql_implementation/staged_database.hpp"
 #include "archiver.hpp"
+#include "dearchiver.hpp"
 #include "stager.hpp"
 #include "util/get_file_read_buffer.hpp"
 #include <filesystem>
@@ -135,7 +136,7 @@ int ArchiveCommand::exec() {
   Stager stager(stagedDatabase, std::span{fakeReadBuffer.data(), 1},
                 config.stager.stage_directory);
   Archiver archiver(archivedDatabase, config.stager.stage_directory,
-                    config.archive.temp_archive_directory,
+                    config.archive.archive_directory,
                     config.archive.single_archive_size);
 
   archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted());
@@ -196,11 +197,11 @@ DearchiveCommand::DearchiveCommand()
       cxxopts::value<std::filesystem::path>()->default_value("")
     )
     ("paths", "List of paths to dearchive",
-      cxxopts::value<std::vector<std::string>>(), "<paths>"
+      cxxopts::value<std::vector<std::filesystem::path>>(), "<paths>"
     )
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::string>()->default_value("config.json")
+      cxxopts::value<std::filesystem::path>()->default_value("config.json")
     );
   // clang-format on
 
@@ -227,6 +228,33 @@ int DearchiveCommand::exec() {
   const auto config =
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
 
-  // TODO dearchive
+  const auto& paths =
+    (*this->parse_result)["paths"].as<std::vector<std::filesystem::path>>();
+
+  const auto& outputPath =
+    std::filesystem::current_path() /
+    (*this->parse_result)["output"].as<std::filesystem::path>();
+
+  auto databaseConnectionConfig =
+    std::make_shared<MysqlArchivedDatabase::ConnectionConfig>();
+  databaseConnectionConfig->database = config.database.location.schema;
+  databaseConnectionConfig->host = config.database.location.host;
+  databaseConnectionConfig->port = config.database.location.port;
+  databaseConnectionConfig->user = config.database.user;
+  databaseConnectionConfig->password = config.database.password;
+
+  auto archivedDatabase = std::make_shared<MysqlArchivedDatabase>(
+    databaseConnectionConfig, config.archive.target_size);
+
+  auto [dataPointer, size] = getFileReadBuffer(config);
+  std::span span{dataPointer.get(), size};
+
+  Dearchiver dearchiver(archivedDatabase, config.archive.archive_directory,
+                        config.archive.temp_archive_directory, span);
+
+  for (const auto& path : paths) {
+    dearchiver.dearchive(path, outputPath);
+  }
+
   return EXIT_SUCCESS;
 }
