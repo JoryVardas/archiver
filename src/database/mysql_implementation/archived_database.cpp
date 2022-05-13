@@ -111,7 +111,7 @@ void ArchivedDatabase::incrementNextArchivePartNumber(const Archive& archive) {
         archive.id));
   } catch (const sqlpp::exception& err) {
     throw ArchivedDatabaseException(FORMAT_LIB::format(
-      "Could not update next archive part number of archive with id {}",
+      "Could not update next archive part number of archive with id {}: {}",
       archive.id, err));
   }
 }
