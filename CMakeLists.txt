@@ -16,13 +16,8 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
 endif ()
 
-# Enable C++ 20, or C++23 if using MSVC
-#  Some C++20 features are in C++latest for MSVC and the only way to get that flag is by using C++23
-if (DEFINED MSVC)
-    set(CMAKE_CXX_STANDARD 23)
-else ()
-    set(CMAKE_CXX_STANDARD 20)
-endif ()
+# Enable C++20
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
