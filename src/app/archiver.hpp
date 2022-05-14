@@ -37,9 +37,10 @@ private:
 
   using path = std::filesystem::path;
 
-  void
-  archiveDirectories(const std::vector<StagedDirectory>& stagedDirectories);
-  void archiveFiles(const std::vector<StagedFile>& stagedFiles);
+  void archiveDirectories(const std::vector<StagedDirectory>& stagedDirectories,
+                          ArchiveOperationID archiveOperation);
+  void archiveFiles(const std::vector<StagedFile>& stagedFiles,
+                    ArchiveOperationID archiveOperation);
   void saveArchiveParts();
 };
 

@@ -4,6 +4,13 @@ CREATE DATABASE `archiver`;
 
 USE `archiver`;
 
+CREATE TABLE `archive_operation`
+(
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `time` DATETIME(2)     NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
 CREATE TABLE `directory`
 (
     `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -18,6 +25,15 @@ CREATE TABLE `directory_parent`
     PRIMARY KEY (`parent_id`, `child_id`),
     FOREIGN KEY (`parent_id`) REFERENCES `directory` (`id`),
     FOREIGN KEY (`child_id`) REFERENCES `directory` (`id`)
+);
+
+CREATE TABLE `directory_archive_operation`
+(
+    `directory_id`         BIGINT UNSIGNED NOT NULL,
+    `archive_operation_id` BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`directory_id`, `archive_operation_id`),
+    FOREIGN KEY (`directory_id`) REFERENCES `directory` (`id`),
+    FOREIGN KEY (`archive_operation_id`) REFERENCES `archive_operation` (`id`)
 );
 
 INSERT INTO `directory` (`name`)
@@ -52,10 +68,9 @@ VALUES ("<SINGLE>");
 
 CREATE TABLE `file_revision`
 (
-    `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `hash`         TEXT(256),
-    `size`         BIGINT UNSIGNED,
-    `archive_time` DATETIME(2)     NOT NULL,
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `hash` TEXT(256),
+    `size` BIGINT UNSIGNED,
     PRIMARY KEY (`id`)
 );
 
@@ -84,6 +99,15 @@ CREATE TABLE `file_revision_duplicate`
     PRIMARY KEY (`revision_id`, `original_revision_id`),
     FOREIGN KEY (`revision_id`) REFERENCES `file_revision` (`id`),
     FOREIGN KEY (`original_revision_id`) REFERENCES `file_revision` (`id`)
+);
+
+CREATE TABLE `file_revision_archive_operation`
+(
+    `revision_id`          BIGINT UNSIGNED NOT NULL,
+    `archive_operation_id` BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`revision_id`, `archive_operation_id`),
+    FOREIGN KEY (`revision_id`) REFERENCES `file_revision` (`id`),
+    FOREIGN KEY (`archive_operation_id`) REFERENCES `archive_operation` (`id`)
 );
 
 CREATE TABLE `staged_directory`

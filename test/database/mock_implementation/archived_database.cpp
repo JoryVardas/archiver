@@ -139,7 +139,8 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
   return ret;
 }
 auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
-                                    const ArchivedDirectory& parent)
+                                    const ArchivedDirectory& parent,
+                                    const ArchiveOperationID archiveOperation)
   -> ArchivedDirectory {
   if (directory.name == ArchivedDirectory::RootDirectoryName)
     return getRootDirectory();
@@ -153,7 +154,7 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
   }
 
   getDirectoryVector().push_back(
-    {nextArchivedDirectoryId++, directory.name, parent.id});
+    {nextArchivedDirectoryId++, directory.name, parent.id, archiveOperation});
   return getDirectoryVector().back();
 }
 auto ArchivedDatabase::getRootDirectory() -> ArchivedDirectory {
@@ -171,7 +172,8 @@ auto ArchivedDatabase::listChildFiles(const ArchivedDirectory& directory)
 
 auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
                                const ArchivedDirectory& directory,
-                               const Archive& archive)
+                               const Archive& archive,
+                               const ArchiveOperationID archiveOperation)
   -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> {
   auto existingFile = ranges::find_if(getFileVector(), [&](const auto& file) {
     return file.parentDirectory.id == directory.id &&
@@ -204,13 +206,19 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
   if (duplicateRevision == ranges::end(allRevisions)) {
     auto revisionId = nextFileRevisionId++;
     addedFile.revisions.push_back({revisionId, stagedFile.hash, stagedFile.size,
-                                   std::chrono::system_clock::now(),
-                                   archive.id});
+                                   archive.id, archiveOperation});
     return {ArchivedFileAddedType::NewRevision, revisionId};
   } else {
     addedFile.revisions.push_back(*duplicateRevision);
     return {ArchivedFileAddedType::DuplicateRevision, duplicateRevision->id};
   }
+}
+
+auto ArchivedDatabase::createArchiveOperation() -> ArchiveOperationID {
+  auto archiveOperationId = nextArchiveOperationId++;
+  getArchiveOperationVector().push_back(
+    {archiveOperationId, std::chrono::system_clock::now()});
+  return archiveOperationId;
 }
 
 auto ArchivedDatabase::getFileVector() -> decltype(archivedFiles)& {
@@ -237,5 +245,12 @@ auto ArchivedDatabase::getArchivePartNumberVector()
     return transactionArchiveNextPartNumbers;
   else
     return archiveNextPartNumbers;
+}
+auto ArchivedDatabase::getArchiveOperationVector()
+  -> decltype(archiveOperations)& {
+  if (hasTransaction)
+    return transactionArchiveOperations;
+  else
+    return archiveOperations;
 }
 }

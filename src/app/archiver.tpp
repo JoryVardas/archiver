@@ -24,8 +24,9 @@ void Archiver<ArchivedDatabase>::archive(
 
   try {
     archivedDatabase->startTransaction();
-    archiveDirectories(stagedDirectories);
-    archiveFiles(stagedFiles);
+    auto archiveOperationId = archivedDatabase->createArchiveOperation();
+    archiveDirectories(stagedDirectories, archiveOperationId);
+    archiveFiles(stagedFiles, archiveOperationId);
     archivedDatabase->commit();
 
     // Saving the archive parts takes a while and on failure should not undo the
@@ -41,7 +42,8 @@ void Archiver<ArchivedDatabase>::archive(
 
 template <ArchivedDatabase ArchivedDatabase>
 void Archiver<ArchivedDatabase>::archiveDirectories(
-  const std::vector<StagedDirectory>& stagedDirectories) {
+  const std::vector<StagedDirectory>& stagedDirectories,
+  ArchiveOperationID archiveOperation) {
   for (const auto& stagedDirectory : stagedDirectories) {
     if (archivedDirectoryMap.contains(stagedDirectory.id))
       continue;
@@ -59,7 +61,7 @@ void Archiver<ArchivedDatabase>::archiveDirectories(
         stagedDirectory.id));
     } else {
       const auto addedArchivedDirectory = archivedDatabase->addDirectory(
-        stagedDirectory, parentArchivedDirectory->second);
+        stagedDirectory, parentArchivedDirectory->second, archiveOperation);
       archivedDirectoryMap.insert({stagedDirectory.id, addedArchivedDirectory});
     }
   }
@@ -67,7 +69,8 @@ void Archiver<ArchivedDatabase>::archiveDirectories(
 
 template <ArchivedDatabase ArchivedDatabase>
 void Archiver<ArchivedDatabase>::archiveFiles(
-  const std::vector<StagedFile>& stagedFiles) {
+  const std::vector<StagedFile>& stagedFiles,
+  ArchiveOperationID archiveOperation) {
   for (const auto& stagedFile : stagedFiles) {
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedFile.parent);
@@ -84,7 +87,7 @@ void Archiver<ArchivedDatabase>::archiveFiles(
           return archivedDatabase->getArchiveForFile(stagedFile);
       }();
       const auto [archivedFileType, revisionId] = archivedDatabase->addFile(
-        stagedFile, parentArchivedDirectory->second, archive);
+        stagedFile, parentArchivedDirectory->second, archive, archiveOperation);
 
       if (archivedFileType == ArchivedFileAddedType::NewRevision) {
         const auto archiveDirectory =

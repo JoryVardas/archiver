@@ -1,6 +1,7 @@
 #ifndef ARCHIVER_MYSQL_ARCHIVED_DATABASE_HPP
 #define ARCHIVER_MYSQL_ARCHIVED_DATABASE_HPP
 
+#include "../../app/archive_operation.hpp"
 #include "../../app/archived_directory.hpp"
 #include "../../app/archived_file.hpp"
 #include "../../app/common.h"
@@ -41,14 +42,19 @@ public:
   auto listChildDirectories(const ArchivedDirectory& directory)
     -> std::vector<ArchivedDirectory>;
   auto addDirectory(const StagedDirectory& directory,
-                    const ArchivedDirectory& parent) -> ArchivedDirectory;
+                    const ArchivedDirectory& parent,
+                    const ArchiveOperationID archiveOperation)
+    -> ArchivedDirectory;
   auto getRootDirectory() -> ArchivedDirectory;
 
   auto listChildFiles(const ArchivedDirectory& directory)
     -> std::vector<ArchivedFile>;
   auto addFile(const StagedFile& file, const ArchivedDirectory& directory,
-               const Archive& archive)
+               const Archive& archive,
+               const ArchiveOperationID archiveOperation)
     -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>;
+
+  auto createArchiveOperation() -> ArchiveOperationID;
 
 private:
   sqlpp::mysql::connection databaseConnection;
@@ -61,6 +67,10 @@ private:
   archiver_database::FileRevisionArchive fileRevisionArchiveTable;
   archiver_database::FileRevisionParent fileRevisionParentTable;
   archiver_database::FileRevisionDuplicate fileRevisionDuplicateTable;
+  archiver_database::DirectoryArchiveOperation directoryArchiveOperationTable;
+  archiver_database::FileRevisionArchiveOperation
+    fileRevisionArchiveOperationTable;
+  archiver_database::ArchiveOperation archiveOperationTable;
   bool hasTransaction = false;
   Size targetSize;
 

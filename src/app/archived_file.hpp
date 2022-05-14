@@ -2,6 +2,7 @@
 #define ARCHIVER_ARCHIVED_FILE_HPP
 
 #include "archive.h"
+#include "archive_operation.hpp"
 #include "archived_directory.hpp"
 #include "common.h"
 #include <vector>
@@ -14,8 +15,8 @@ public:
   ArchivedFileRevisionID id;
   std::string hash;
   Size size;
-  TimeStamp archiveTime;
   ArchiveID containingArchiveId;
+  ArchiveOperationID containingOperation;
 };
 
 struct ArchivedFile {

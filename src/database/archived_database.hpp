@@ -2,6 +2,7 @@
 #define ARCHIVER_ARCHIVED_DATABASE_HPP
 
 #include "../app/archive.h"
+#include "../app/archive_operation.hpp"
 #include "../app/archived_directory.hpp"
 #include "../app/archived_file.hpp"
 #include "../app/common.h"
@@ -13,12 +14,14 @@
 enum class ArchivedFileAddedType : uint8_t { NewRevision, DuplicateRevision };
 
 template <typename T>
-concept ArchivedDatabase = Database<T> &&
+concept ArchivedDatabase =
+  Database<T> &&
   requires(T t, const StagedFile& stagedFile, const ArchivedFile& archivedFile,
            const StagedDirectory& stagedDirectory,
            const ArchivedDirectory& archivedDirectory,
-           const ArchivedDirectory& archivedParent, const Archive& archive) {
-  /* clang-format off */
+           const ArchivedDirectory& archivedParent, const Archive& archive,
+           const ArchiveOperationID archiveOperation) {
+    /* clang-format off */
   // Listing
   { t.listChildDirectories(archivedDirectory) }
       -> std::same_as<std::vector<ArchivedDirectory>>;
@@ -28,14 +31,15 @@ concept ArchivedDatabase = Database<T> &&
   { t.getNextArchivePartNumber(archive) } -> std::same_as<uint64_t>;
   { t.getRootDirectory() } -> std::same_as<ArchivedDirectory>;
   // Adding
-  { t.addDirectory(stagedDirectory, archivedParent) }
+  { t.createArchiveOperation()} -> std::same_as<ArchiveOperationID>;
+  { t.addDirectory(stagedDirectory, archivedParent,  archiveOperation) }
       -> std::same_as<ArchivedDirectory>;
-  { t.addFile(stagedFile, archivedDirectory, archive) }
+  { t.addFile(stagedFile, archivedDirectory, archive, archiveOperation) }
       -> std::same_as<std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>>;
   // Updating
   t.incrementNextArchivePartNumber(archive);
-  /* clang-format on */
-};
+    /* clang-format on */
+  };
 
 _make_exception_(ArchivedDatabaseException);
 

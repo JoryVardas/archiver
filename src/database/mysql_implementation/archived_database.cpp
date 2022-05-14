@@ -186,7 +186,13 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
     std::vector<ArchivedDirectory> childDirectories;
 
     for (const auto& row : results) {
-      childDirectories.push_back({row.id, row.name.value(), directory.id});
+      auto archiveOperationResult = databaseConnection(
+        select(all_of(directoryArchiveOperationTable))
+          .from(directoryArchiveOperationTable)
+          .where(directoryArchiveOperationTable.directoryId == row.id));
+      childDirectories.push_back(
+        {row.id, row.name.value(), directory.id,
+         archiveOperationResult.front().archiveOperationId});
     }
 
     return childDirectories;
@@ -199,19 +205,25 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
   }
 }
 auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
-                                    const ArchivedDirectory& parent)
+                                    const ArchivedDirectory& parent,
+                                    const ArchiveOperationID archiveOperation)
   -> ArchivedDirectory {
   if (directory.name == ArchivedDirectory::RootDirectoryName)
     return getRootDirectory();
   try {
     auto matchingDirectory = databaseConnection(
-      select(directoriesTable.id)
+      select(directoriesTable.id,
+             directoryArchiveOperationTable.archiveOperationId)
         .from(directoryParentTable.join(directoriesTable)
-                .on(directoryParentTable.childId == directoriesTable.id))
+                .on(directoryParentTable.childId == directoriesTable.id)
+                .join(directoryArchiveOperationTable)
+                .on(directoriesTable.id ==
+                    directoryArchiveOperationTable.directoryId))
         .where(directoryParentTable.parentId == parent.id and
                directoriesTable.name == directory.name));
     if (!matchingDirectory.empty()) {
-      return {matchingDirectory.front().id, directory.name, parent.id};
+      return {matchingDirectory.front().id, directory.name, parent.id,
+              matchingDirectory.front().archiveOperationId};
     }
 
     auto directoryId =
@@ -220,8 +232,13 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
     databaseConnection(insert_into(directoryParentTable)
                          .set(directoryParentTable.parentId = parent.id,
                               directoryParentTable.childId = directoryId));
+    databaseConnection(
+      insert_into(directoryArchiveOperationTable)
+        .set(directoryArchiveOperationTable.directoryId = directoryId,
+             directoryArchiveOperationTable.archiveOperationId =
+               archiveOperation));
 
-    return {directoryId, directory.name, parent.id};
+    return {directoryId, directory.name, parent.id, archiveOperation};
   } catch (const sqlpp::exception& err) {
     throw ArchivedDatabaseException(FORMAT_LIB::format(
       "Could not add directory to archived directories: {}", err));
@@ -235,7 +252,7 @@ auto ArchivedDatabase::getRootDirectory() -> ArchivedDirectory {
         .where(directoriesTable.name ==
                std::string{ArchivedDirectory::RootDirectoryName}));
     const auto& rootDirectory = result.front();
-    return {rootDirectory.id, rootDirectory.name, rootDirectory.id};
+    return {rootDirectory.id, rootDirectory.name, rootDirectory.id, 0};
   } catch (const sqlpp::exception& err) {
     throw ArchivedDatabaseException(
       FORMAT_LIB::format("Could not get the root archived directory: {}", err));
@@ -275,7 +292,6 @@ SQLPP_ALIAS_PROVIDER(revisionId);
 SQLPP_ALIAS_PROVIDER(revisionSize);
 SQLPP_ALIAS_PROVIDER(revisionHash);
 SQLPP_ALIAS_PROVIDER(revisionArchiveId);
-SQLPP_ALIAS_PROVIDER(revisionArchiveTime);
 SQLPP_ALIAS_PROVIDER(isDuplicate);
 }
 auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
@@ -287,12 +303,16 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
       select(
         all_of(fileRevisionTable),
         fileRevisionDuplicateTable.originalRevisionId,
-        fileRevisionDuplicateTable.revisionId.is_not_null().as(isDuplicate))
+        fileRevisionDuplicateTable.revisionId.is_not_null().as(isDuplicate),
+        fileRevisionArchiveOperationTable.archiveOperationId)
         .from(
           fileRevisionTable.join(fileRevisionParentTable)
             .on(fileRevisionTable.id == fileRevisionParentTable.revisionId)
             .left_outer_join(fileRevisionDuplicateTable)
-            .on(fileRevisionTable.id == fileRevisionDuplicateTable.revisionId))
+            .on(fileRevisionTable.id == fileRevisionDuplicateTable.revisionId)
+            .join(fileRevisionArchiveOperationTable)
+            .on(fileRevisionTable.id ==
+                fileRevisionArchiveOperationTable.revisionId))
         .where(fileRevisionParentTable.fileId == fileId)
         .as(RelevantRevisionTable);
     auto relevantFileRevisionsWithDuplicateInfo =
@@ -308,7 +328,7 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
                .then(relevantFileRevisions.size)
                .else_(duplicateRevisionTable.size)
                .as(revisionSize),
-             relevantFileRevisions.archiveTime.as(revisionArchiveTime))
+             relevantFileRevisions.archiveOperationId)
         .from(relevantFileRevisions.left_outer_join(duplicateRevisionTable)
                 .on(relevantFileRevisions.originalRevisionId ==
                     duplicateRevisionTable.id))
@@ -328,9 +348,9 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
     std::vector<ArchivedFileRevision> revisions;
 
     for (const auto& row : fileRevisionResults) {
-      ArchivedFileRevision a = {
-        row.revisionId, row.revisionHash, row.revisionSize,
-        row.revisionArchiveTime.value(), row.revisionArchiveId};
+      ArchivedFileRevision a = {row.revisionId, row.revisionHash,
+                                row.revisionSize, row.revisionArchiveId,
+                                row.archiveOperationId};
       revisions.push_back(a);
     }
 
@@ -345,7 +365,8 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
 
 auto ArchivedDatabase::addFile(const StagedFile& file,
                                const ArchivedDirectory& directory,
-                               const Archive& archive)
+                               const Archive& archive,
+                               const ArchiveOperationID archiveOperation)
   -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> {
   try {
     const auto fileId = [&]() {
@@ -366,9 +387,12 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
       const auto duplicateRevision = findDuplicateRevisionId(file);
       if (duplicateRevision) {
         auto newRevisionId =
-          databaseConnection(insert_into(fileRevisionTable)
-                               .set(fileRevisionTable.archiveTime =
-                                      verbatim_t<sqlpp::time_point>("NOW()")));
+          databaseConnection(insert_into(fileRevisionTable).default_values());
+        databaseConnection(
+          insert_into(fileRevisionArchiveOperationTable)
+            .set(fileRevisionArchiveOperationTable.revisionId = newRevisionId,
+                 fileRevisionArchiveOperationTable.archiveOperationId =
+                   archiveOperation));
         databaseConnection(
           insert_into(fileRevisionDuplicateTable)
             .set(fileRevisionDuplicateTable.revisionId = newRevisionId,
@@ -378,10 +402,13 @@ auto ArchivedDatabase::addFile(const StagedFile& file,
       } else {
         auto newRevisionId =
           databaseConnection(insert_into(fileRevisionTable)
-                               .set(fileRevisionTable.archiveTime =
-                                      verbatim_t<sqlpp::time_point>("NOW()"),
-                                    fileRevisionTable.hash = file.hash,
+                               .set(fileRevisionTable.hash = file.hash,
                                     fileRevisionTable.size = file.size));
+        databaseConnection(
+          insert_into(fileRevisionArchiveOperationTable)
+            .set(fileRevisionArchiveOperationTable.revisionId = newRevisionId,
+                 fileRevisionArchiveOperationTable.archiveOperationId =
+                   archiveOperation));
         databaseConnection(
           insert_into(fileRevisionArchiveTable)
             .set(fileRevisionArchiveTable.revisionId = newRevisionId,
@@ -441,4 +468,17 @@ auto ArchivedDatabase::findDuplicateRevisionId(const StagedFile& file)
       file.id, file.name, file.hash, err));
   }
 }
+auto ArchivedDatabase::createArchiveOperation() -> ArchiveOperationID {
+  try {
+    auto archiveOperationId =
+      databaseConnection(insert_into(archiveOperationTable)
+                           .set(archiveOperationTable.time =
+                                  verbatim_t<sqlpp::time_point>("NOW()")));
+    return archiveOperationId;
+  } catch (const sqlpp::exception& err) {
+    throw ArchivedDatabaseException(
+      FORMAT_LIB::format("Count not create archive operation data: {}", err));
+  }
+}
+
 }
