@@ -127,6 +127,7 @@ auto ArchivedDatabase::getArchiveForExtension(const std::string& extension)
       databaseConnection(select(all_of(archivesTable))
                            .from(archivesTable)
                            .where(archivesTable.contents == extensionName)
+                           .order_by(archivesTable.id.desc())
                            .limit(1u));
 
     if (archiveResults.empty())
