@@ -65,7 +65,7 @@ auto ArchivedDatabase::getArchiveForFile(const StagedFile& file) -> Archive {
   const std::string_view fileName = file.name;
   const auto fileExtension = [&]() {
     if (fileName.find_last_of('.') == std::string_view::npos)
-      return std::string{".<BLANK>"};
+      return std::string{"<BLANK>"};
     else
       return std::string{fileName.substr(fileName.find_last_of('.'))};
   }();
