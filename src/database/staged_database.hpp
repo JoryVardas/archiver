@@ -9,23 +9,24 @@
 #include <concepts>
 #include <vector>
 
-template <typename T>
-concept StagedDatabase = Database<T> &&
-  requires(T t, const RawFile& file, const std::filesystem::path& stagePath,
-           const StagedFile& stagedFile, const StagedDirectory& directory) {
+interface StagedDatabase : public Database {
   // Listing
-  { t.listAllDirectories() } -> std::same_as<std::vector<StagedDirectory>>;
-  { t.listAllFiles() } -> std::same_as<std::vector<StagedFile>>;
-  { t.getRootDirectory() } -> std::same_as<std::optional<StagedDirectory>>;
+  virtual auto listAllDirectories() -> std::vector<StagedDirectory> abstract;
+  virtual auto listAllFiles() -> std::vector<StagedFile> abstract;
+  virtual auto getRootDirectory() -> std::optional<StagedDirectory> abstract;
   // Adding
-  t.add(stagePath);
-  { t.add(file, stagePath) } -> std::same_as<StagedFile>;
+  virtual void add(const std::filesystem::path& stagePath) abstract;
+  virtual auto add(const RawFile& file, const std::filesystem::path& stagePath)
+    -> StagedFile abstract;
   // Removing
-  t.remove(directory);
-  t.remove(stagedFile);
-  t.removeAllDirectories();
-  t.removeAllFiles();
+  virtual void remove(const StagedDirectory& directory) abstract;
+  virtual void remove(const StagedFile& stagedFile) abstract;
+  virtual void removeAllDirectories() abstract;
+  virtual void removeAllFiles() abstract;
+
+  virtual ~StagedDatabase() = default;
 };
+
 _make_exception_(StagedDatabaseException);
 
 #endif

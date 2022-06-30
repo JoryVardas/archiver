@@ -1,5 +1,7 @@
+#include "dearchiver.hpp"
 #include "common.h"
 #include "compressor.hpp"
+#include "raw_file.hpp"
 #include "util/string_helpers.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -9,8 +11,7 @@
 #include <string>
 #include <vector>
 
-template <ArchivedDatabase ArchivedDatabase>
-Dearchiver<ArchivedDatabase>::Dearchiver(
+Dearchiver::Dearchiver(
   std::shared_ptr<ArchivedDatabase>& archivedDatabase,
   const std::filesystem::path& archiveDirectoryLocation,
   const std::filesystem::path& archiveTempDirectoryLocation,
@@ -26,10 +27,8 @@ Dearchiver<ArchivedDatabase>::Dearchiver(
       "maximum input read stream input size.");
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-void Dearchiver<ArchivedDatabase>::dearchive(
-  const std::filesystem::path& pathToDearchive,
-  const std::filesystem::path& dearchiveLocation) {
+void Dearchiver::dearchive(const std::filesystem::path& pathToDearchive,
+                           const std::filesystem::path& dearchiveLocation) {
   // Find the contianing archived directory.
   ArchivedDirectory parentDirectory = archivedDatabase->getRootDirectory();
   for (const auto& directoryName : pathToDearchive.parent_path()) {
@@ -48,7 +47,7 @@ void Dearchiver<ArchivedDatabase>::dearchive(
     parentDirectory = *child;
   }
 
-  Compressor<ArchivedDatabase> compressor{archivedDatabase, archiveLocation};
+  Compressor compressor{archivedDatabase, archiveLocation};
 
   auto dearchiveFile = [&](const ArchivedFile& file,
                            const std::filesystem::path& containingDirectory) {
@@ -122,14 +121,11 @@ void Dearchiver<ArchivedDatabase>::dearchive(
   }
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-bool Dearchiver<ArchivedDatabase>::hasArchiveBeenDecompressed(
-  ArchiveID archiveId) const {
+bool Dearchiver::hasArchiveBeenDecompressed(ArchiveID archiveId) const {
   return std::ranges::find(decompressedArchives, archiveId) !=
          std::ranges::end(decompressedArchives);
 }
-template <ArchivedDatabase ArchivedDatabase>
-void Dearchiver<ArchivedDatabase>::mergeArchiveParts(ArchiveID archiveId) {
+void Dearchiver::mergeArchiveParts(ArchiveID archiveId) {
   namespace fs = std::filesystem;
 
   const auto outputPath =

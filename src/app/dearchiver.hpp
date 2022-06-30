@@ -3,8 +3,9 @@
 
 #include "../database/archived_database.hpp"
 #include "common.h"
+#include <span>
 
-template <ArchivedDatabase ArchivedDatabase> class Dearchiver {
+class Dearchiver {
 public:
   Dearchiver(std::shared_ptr<ArchivedDatabase>& archivedDatabase,
              const std::filesystem::path& archiveDirectoryLocation,
@@ -34,7 +35,5 @@ private:
 };
 
 _make_exception_(DearchiverException);
-
-#include "dearchiver.tpp"
 
 #endif

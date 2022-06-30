@@ -4,7 +4,7 @@
 #include <src/database/archived_database.hpp>
 #include <src/database/staged_database.hpp>
 
-template <StagedDatabase StagedDatabase, ArchivedDatabase ArchivedDatabase>
+namespace {
 bool databasesAreEmpty(std::shared_ptr<StagedDatabase> stagedDatabase,
                        std::shared_ptr<ArchivedDatabase> archivedDatabase) {
   bool ret = true;
@@ -30,5 +30,6 @@ bool databasesAreEmpty(std::shared_ptr<StagedDatabase> stagedDatabase,
 
   return ret;
 };
+}
 
 #endif

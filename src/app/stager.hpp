@@ -5,7 +5,7 @@
 #include "common.h"
 #include <span>
 
-template <StagedDatabase StagedDatabase> class Stager {
+class Stager {
 public:
   Stager(std::shared_ptr<StagedDatabase>& stagedDatabase,
          std::span<char> fileReadBuffer,
@@ -39,7 +39,5 @@ private:
 };
 
 _make_exception_(StagerException);
-
-#include "stager.tpp"
 
 #endif

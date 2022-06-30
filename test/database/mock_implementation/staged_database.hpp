@@ -10,23 +10,23 @@
 #include <vector>
 
 namespace database::mock {
-class StagedDatabase {
+class StagedDatabase : public ::StagedDatabase {
 public:
-  void startTransaction();
-  void commit();
-  void rollback();
+  void startTransaction() final;
+  void commit() final;
+  void rollback() final;
 
-  auto listAllFiles() -> std::vector<StagedFile>;
+  auto listAllFiles() -> std::vector<StagedFile> final;
   auto add(const RawFile& file, const std::filesystem::path& stagePath)
-    -> StagedFile;
-  void remove(const StagedFile& stagedFile);
-  void removeAllFiles();
+    -> StagedFile final;
+  void remove(const StagedFile& stagedFile) final;
+  void removeAllFiles() final;
 
-  auto listAllDirectories() -> std::vector<StagedDirectory>;
-  void add(const std::filesystem::path& stagePath);
-  void remove(const StagedDirectory& stagedDirectory);
-  void removeAllDirectories();
-  auto getRootDirectory() -> std::optional<StagedDirectory>;
+  auto listAllDirectories() -> std::vector<StagedDirectory> final;
+  void add(const std::filesystem::path& stagePath) final;
+  void remove(const StagedDirectory& stagedDirectory) final;
+  void removeAllDirectories() final;
+  auto getRootDirectory() -> std::optional<StagedDirectory> final;
 
 private:
   std::vector<StagedDirectory> stagedDirectories;

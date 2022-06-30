@@ -5,10 +5,11 @@
 #include "common.h"
 #include "staged_directory.h"
 #include "staged_file.hpp"
+#include <map>
 #include <set>
 #include <span>
 
-template <ArchivedDatabase ArchivedDatabase> class Archiver {
+class Archiver {
 public:
   Archiver(std::shared_ptr<ArchivedDatabase>& archivedDatabase,
            const std::filesystem::path& stageDirectoryLocation,
@@ -45,7 +46,5 @@ private:
 };
 
 _make_exception_(ArchiverException);
-
-#include "archiver.tpp"
 
 #endif

@@ -1,3 +1,4 @@
+#include "stager.hpp"
 #include "common.h"
 #include "util/string_helpers.hpp"
 #include <algorithm>
@@ -5,16 +6,14 @@
 #include <ranges>
 #include <vector>
 
-template <StagedDatabase StagedDatabase>
-Stager<StagedDatabase>::Stager(std::shared_ptr<StagedDatabase>& stagedDatabase,
-                               std::span<char> fileReadBuffer,
-                               const path& stageDirectoryLocation)
+Stager::Stager(std::shared_ptr<StagedDatabase>& stagedDatabase,
+               std::span<char> fileReadBuffer,
+               const path& stageDirectoryLocation)
   : stagedDatabase(stagedDatabase), readBuffer(fileReadBuffer),
     stageLocation(stageDirectoryLocation) {}
 
-template <StagedDatabase StagedDatabase>
-void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
-                                   std::string_view prefixToRemove) {
+void Stager::stage(const std::vector<path>& paths,
+                   std::string_view prefixToRemove) {
   // If the prefix has a trailing forward slash then when we remove it from a
   // path that path will be missing a leading forward slash.
   prefixToRemove = removeSuffix(prefixToRemove, "/");
@@ -82,28 +81,23 @@ void Stager<StagedDatabase>::stage(const std::vector<path>& paths,
   }
 }
 
-template <StagedDatabase StagedDatabase>
-auto Stager<StagedDatabase>::getDirectoriesSorted()
-  -> std::vector<StagedDirectory> {
+auto Stager::getDirectoriesSorted() -> std::vector<StagedDirectory> {
   auto directories = stagedDatabase->listAllDirectories();
   std::ranges::sort(directories, {}, &StagedDirectory::id);
   return directories;
 }
-template <StagedDatabase StagedDatabase>
-auto Stager<StagedDatabase>::getFilesSorted() -> std::vector<StagedFile> {
+auto Stager::getFilesSorted() -> std::vector<StagedFile> {
   auto files = stagedDatabase->listAllFiles();
   std::ranges::sort(files, {}, &StagedFile::parent);
   return files;
 }
 
-template <StagedDatabase StagedDatabase>
-void Stager<StagedDatabase>::stageDirectory(
-  const std::filesystem::path& path, const std::filesystem::path& stagePath) {
+void Stager::stageDirectory(const std::filesystem::path& path,
+                            const std::filesystem::path& stagePath) {
   stagedDatabase->add({stagePath});
 }
-template <StagedDatabase StagedDatabase>
-void Stager<StagedDatabase>::stageFile(const std::filesystem::path& path,
-                                       const std::filesystem::path& stagePath) {
+void Stager::stageFile(const std::filesystem::path& path,
+                       const std::filesystem::path& stagePath) {
   RawFile rawFile{path, readBuffer};
   auto stagedFile = stagedDatabase->add(rawFile, stagePath);
   std::filesystem::copy(rawFile.path.native(),

@@ -1,26 +1,22 @@
+#include "archiver.hpp"
 #include "common.h"
 #include "compressor.hpp"
-#include "util/string_helpers.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <map>
 #include <ranges>
 #include <vector>
 
-template <ArchivedDatabase ArchivedDatabase>
-Archiver<ArchivedDatabase>::Archiver(
-  std::shared_ptr<ArchivedDatabase>& archivedDatabase,
-  const std::filesystem::path& stageDirectoryLocation,
-  const std::filesystem::path& archiveDirectoryLocation,
-  Size singleFileArchiveSize)
+Archiver::Archiver(std::shared_ptr<ArchivedDatabase>& archivedDatabase,
+                   const std::filesystem::path& stageDirectoryLocation,
+                   const std::filesystem::path& archiveDirectoryLocation,
+                   Size singleFileArchiveSize)
   : archivedDatabase(archivedDatabase), stageLocation(stageDirectoryLocation),
     archiveLocation(archiveDirectoryLocation),
     singleFileArchiveSize(singleFileArchiveSize) {}
 
-template <ArchivedDatabase ArchivedDatabase>
-void Archiver<ArchivedDatabase>::archive(
-  const std::vector<StagedDirectory>& stagedDirectories,
-  const std::vector<StagedFile>& stagedFiles) {
+void Archiver::archive(const std::vector<StagedDirectory>& stagedDirectories,
+                       const std::vector<StagedFile>& stagedFiles) {
 
   try {
     archivedDatabase->startTransaction();
@@ -40,8 +36,7 @@ void Archiver<ArchivedDatabase>::archive(
   }
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-void Archiver<ArchivedDatabase>::archiveDirectories(
+void Archiver::archiveDirectories(
   const std::vector<StagedDirectory>& stagedDirectories,
   ArchiveOperationID archiveOperation) {
   for (const auto& stagedDirectory : stagedDirectories) {
@@ -67,10 +62,8 @@ void Archiver<ArchivedDatabase>::archiveDirectories(
   }
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-void Archiver<ArchivedDatabase>::archiveFiles(
-  const std::vector<StagedFile>& stagedFiles,
-  ArchiveOperationID archiveOperation) {
+void Archiver::archiveFiles(const std::vector<StagedFile>& stagedFiles,
+                            ArchiveOperationID archiveOperation) {
   for (const auto& stagedFile : stagedFiles) {
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedFile.parent);
@@ -104,9 +97,8 @@ void Archiver<ArchivedDatabase>::archiveFiles(
   }
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-void Archiver<ArchivedDatabase>::saveArchiveParts() {
-  Compressor<ArchivedDatabase> compressor{archivedDatabase, archiveLocation};
+void Archiver::saveArchiveParts() {
+  Compressor compressor{archivedDatabase, archiveLocation};
   for (const auto& archive : modifiedArchives) {
     compressor.compress(archive);
   }

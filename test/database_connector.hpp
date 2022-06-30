@@ -37,7 +37,9 @@ struct DatabaseConnector<MysqlDatabase>
     const ArchivedDirectory archivedRootDirectory =
       archivedDatabase->getRootDirectory();
 
-    return std::pair{stagedDatabase, archivedDatabase};
+    return std::pair{
+      std::static_pointer_cast<::StagedDatabase>(stagedDatabase),
+      std::static_pointer_cast<::ArchivedDatabase>(archivedDatabase)};
   };
 };
 template <>
@@ -50,7 +52,9 @@ struct DatabaseConnector<MockDatabase>
     const ArchivedDirectory archivedRootDirectory =
       archivedDatabase->getRootDirectory();
 
-    return std::pair{stagedDatabase, archivedDatabase};
+    return std::pair{
+      std::static_pointer_cast<::StagedDatabase>(stagedDatabase),
+      std::static_pointer_cast<::ArchivedDatabase>(archivedDatabase)};
   };
 };
 

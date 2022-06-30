@@ -78,8 +78,9 @@ int StageCommand::exec() {
   databaseConnectionConfig->user = config.database.user;
   databaseConnectionConfig->password = config.database.password;
 
-  auto stagedDatabase =
-    std::make_shared<database::mysql::StagedDatabase>(databaseConnectionConfig);
+  auto stagedDatabase = std::static_pointer_cast<StagedDatabase>(
+    std::make_shared<database::mysql::StagedDatabase>(
+      databaseConnectionConfig));
 
   Stager stager(stagedDatabase, std::span{dataPointer.get(), size},
                 config.stager.stage_directory);
@@ -128,10 +129,11 @@ int ArchiveCommand::exec() {
   databaseConnectionConfig->user = config.database.user;
   databaseConnectionConfig->password = config.database.password;
 
-  auto stagedDatabase =
-    std::make_shared<MysqlStagedDatabase>(databaseConnectionConfig);
-  auto archivedDatabase = std::make_shared<MysqlArchivedDatabase>(
-    databaseConnectionConfig, config.archive.target_size);
+  auto stagedDatabase = std::static_pointer_cast<StagedDatabase>(
+    std::make_shared<MysqlStagedDatabase>(databaseConnectionConfig));
+  auto archivedDatabase = std::static_pointer_cast<ArchivedDatabase>(
+    std::make_shared<MysqlArchivedDatabase>(databaseConnectionConfig,
+                                            config.archive.target_size));
 
   Stager stager(stagedDatabase, std::span{fakeReadBuffer.data(), 1},
                 config.stager.stage_directory);
@@ -243,8 +245,9 @@ int DearchiveCommand::exec() {
   databaseConnectionConfig->user = config.database.user;
   databaseConnectionConfig->password = config.database.password;
 
-  auto archivedDatabase = std::make_shared<MysqlArchivedDatabase>(
-    databaseConnectionConfig, config.archive.target_size);
+  auto archivedDatabase = std::static_pointer_cast<ArchivedDatabase>(
+    std::make_shared<MysqlArchivedDatabase>(databaseConnectionConfig,
+                                            config.archive.target_size));
 
   auto [dataPointer, size] = getFileReadBuffer(config);
   std::span span{dataPointer.get(), size};

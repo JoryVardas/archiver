@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace database::mock {
-class ArchivedDatabase {
+class ArchivedDatabase : public ::ArchivedDatabase {
 public:
   ArchivedDatabase() = delete;
   ArchivedDatabase(const ArchivedDatabase&) = delete;
@@ -24,30 +24,30 @@ public:
   ArchivedDatabase& operator=(const ArchivedDatabase&) = delete;
   ArchivedDatabase& operator=(ArchivedDatabase&&) = default;
 
-  void startTransaction();
-  void commit();
-  void rollback();
+  void startTransaction() final;
+  void commit() final;
+  void rollback() final;
 
-  auto getArchiveForFile(const StagedFile& file) -> Archive;
-  auto getNextArchivePartNumber(const Archive& archive) -> uint64_t;
-  void incrementNextArchivePartNumber(const Archive& archive);
+  auto getArchiveForFile(const StagedFile& file) -> Archive final;
+  auto getNextArchivePartNumber(const Archive& archive) -> uint64_t final;
+  void incrementNextArchivePartNumber(const Archive& archive) final;
 
   auto listChildDirectories(const ArchivedDirectory& directory)
-    -> std::vector<ArchivedDirectory>;
+    -> std::vector<ArchivedDirectory> final;
   auto addDirectory(const StagedDirectory& directory,
                     const ArchivedDirectory& parent,
                     const ArchiveOperationID archiveOperation)
-    -> ArchivedDirectory;
-  auto getRootDirectory() -> ArchivedDirectory;
+    -> ArchivedDirectory final;
+  auto getRootDirectory() -> ArchivedDirectory final;
 
   auto listChildFiles(const ArchivedDirectory& directory)
-    -> std::vector<ArchivedFile>;
+    -> std::vector<ArchivedFile> final;
   auto addFile(const StagedFile& stagedFile, const ArchivedDirectory& directory,
                const Archive& archive,
                const ArchiveOperationID archiveOperation)
-    -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>;
+    -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> final;
 
-  auto createArchiveOperation() -> ArchiveOperationID;
+  auto createArchiveOperation() -> ArchiveOperationID final;
 
 private:
   std::vector<ArchivedDirectory> archivedDirectories = {

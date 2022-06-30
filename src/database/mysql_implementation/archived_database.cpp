@@ -9,7 +9,7 @@ const std::string ArchivedDatabase::noExtensionArchiveContents = "<BLANK>"s;
 ArchivedDatabase::ArchivedDatabase(
   std::shared_ptr<ArchivedDatabase::ConnectionConfig>& config,
   Size archiveTargetSize)
-  : databaseConnection(config), targetSize(archiveTargetSize) {}
+  : database::mysql::Database(config), targetSize(archiveTargetSize) {}
 
 ArchivedDatabase::~ArchivedDatabase() {
   try {

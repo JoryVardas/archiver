@@ -95,4 +95,7 @@ private:
   char separator;
 };
 
+#define abstract  = 0
+#define interface struct
+
 #endif

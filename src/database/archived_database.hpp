@@ -13,33 +13,33 @@
 
 enum class ArchivedFileAddedType : uint8_t { NewRevision, DuplicateRevision };
 
-template <typename T>
-concept ArchivedDatabase =
-  Database<T> &&
-  requires(T t, const StagedFile& stagedFile, const ArchivedFile& archivedFile,
-           const StagedDirectory& stagedDirectory,
-           const ArchivedDirectory& archivedDirectory,
-           const ArchivedDirectory& archivedParent, const Archive& archive,
-           const ArchiveOperationID archiveOperation) {
-    /* clang-format off */
+interface ArchivedDatabase : public Database {
   // Listing
-  { t.listChildDirectories(archivedDirectory) }
-      -> std::same_as<std::vector<ArchivedDirectory>>;
-  { t.listChildFiles(archivedDirectory) }
-      -> std::same_as<std::vector<ArchivedFile>>;
-  { t.getArchiveForFile(stagedFile) } -> std::same_as<Archive>;
-  { t.getNextArchivePartNumber(archive) } -> std::same_as<uint64_t>;
-  { t.getRootDirectory() } -> std::same_as<ArchivedDirectory>;
+  virtual auto listChildDirectories(const ArchivedDirectory& archivedDirectory)
+    -> std::vector<ArchivedDirectory> abstract;
+  virtual auto listChildFiles(const ArchivedDirectory& archivedDirectory)
+    -> std::vector<ArchivedFile> abstract;
+  virtual auto getArchiveForFile(const StagedFile& stagedFile)
+    -> Archive abstract;
+  virtual auto getNextArchivePartNumber(const Archive& archive)
+    -> uint64_t abstract;
+  virtual auto getRootDirectory() -> ArchivedDirectory abstract;
   // Adding
-  { t.createArchiveOperation()} -> std::same_as<ArchiveOperationID>;
-  { t.addDirectory(stagedDirectory, archivedParent,  archiveOperation) }
-      -> std::same_as<ArchivedDirectory>;
-  { t.addFile(stagedFile, archivedDirectory, archive, archiveOperation) }
-      -> std::same_as<std::pair<ArchivedFileAddedType, ArchivedFileRevisionID>>;
+  virtual auto createArchiveOperation() -> ArchiveOperationID abstract;
+  virtual auto addDirectory(const StagedDirectory& stagedDirectory,
+                            const ArchivedDirectory& archivedParent,
+                            const ArchiveOperationID archiveOperation)
+    -> ArchivedDirectory abstract;
+  virtual auto addFile(const StagedFile& stagedFile,
+                       const ArchivedDirectory& archivedDirectory,
+                       const Archive& archive,
+                       const ArchiveOperationID archiveOperation)
+    -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> abstract;
   // Updating
-  t.incrementNextArchivePartNumber(archive);
-    /* clang-format on */
-  };
+  virtual void incrementNextArchivePartNumber(const Archive& archive) abstract;
+
+  virtual ~ArchivedDatabase() = default;
+};
 
 _make_exception_(ArchivedDatabaseException);
 

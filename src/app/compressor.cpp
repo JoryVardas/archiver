@@ -6,14 +6,11 @@
 #include <ranges>
 #include <subprocess.hpp>
 
-template <ArchivedDatabase ArchivedDatabase>
-Compressor<ArchivedDatabase>::Compressor(
-  std::shared_ptr<ArchivedDatabase>& archivedDatabase,
-  const std::filesystem::path& archiveLocation)
+Compressor::Compressor(std::shared_ptr<ArchivedDatabase>& archivedDatabase,
+                       const std::filesystem::path& archiveLocation)
   : archivedDatabase(archivedDatabase), archiveLocation(archiveLocation) {}
 
-template <ArchivedDatabase ArchivedDatabase>
-void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
+void Compressor::compress(const Archive& archive) {
   if (archive.id == 1)
     return compressSingleArchives();
 
@@ -59,9 +56,8 @@ void Compressor<ArchivedDatabase>::compress(const Archive& archive) {
   }
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-void Compressor<ArchivedDatabase>::decompress(
-  ArchiveID archiveId, const std::filesystem::path& destination) {
+void Compressor::decompress(ArchiveID archiveId,
+                            const std::filesystem::path& destination) {
   const auto archiveName = FORMAT_LIB::format("{}.zpaq", archiveId);
 
   std::vector<std::string> commandList = {"zpaq", "x",
@@ -72,8 +68,7 @@ void Compressor<ArchivedDatabase>::decompress(
                                 .cerr = subprocess::PipeOption::cerr,
                                 .cwd = destination});
 }
-template <ArchivedDatabase ArchivedDatabase>
-void Compressor<ArchivedDatabase>::decompressSingleArchive(
+void Compressor::decompressSingleArchive(
   ArchivedFileRevisionID revisionId, const std::filesystem::path& destination) {
   const auto archiveName = FORMAT_LIB::format("{}_{}.zpaq", 1, revisionId);
 
@@ -86,8 +81,7 @@ void Compressor<ArchivedDatabase>::decompressSingleArchive(
                                 .cwd = destination});
 }
 
-template <ArchivedDatabase ArchivedDatabase>
-void Compressor<ArchivedDatabase>::compressSingleArchives() {
+void Compressor::compressSingleArchives() {
   std::ranges::for_each(
     std::filesystem::directory_iterator(archiveLocation / "1"),
     [&](const auto& file) {

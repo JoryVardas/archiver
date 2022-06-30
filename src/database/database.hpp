@@ -4,11 +4,12 @@
 #include "../app/common.h"
 #include <concepts>
 
-template <typename T>
-concept Database = requires(T t) {
-  t.startTransaction();
-  t.commit();
-  t.rollback();
+interface Database {
+  virtual void startTransaction() abstract;
+  virtual void commit() abstract;
+  virtual void rollback() abstract;
+  
+  virtual ~Database() = default;
 };
 
 _make_exception_(DatabaseException);

@@ -5,7 +5,7 @@
 #include "archive.h"
 #include "common.h"
 
-template <ArchivedDatabase ArchivedDatabase> class Compressor {
+class Compressor {
 public:
   Compressor() = delete;
   Compressor(const Compressor&) = delete;
@@ -32,7 +32,5 @@ private:
 };
 
 _make_exception_(CompressorException);
-
-#include "compressor.tpp"
 
 #endif
