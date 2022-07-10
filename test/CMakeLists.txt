@@ -11,7 +11,10 @@ list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
 # Create the target
 add_executable(Archiver-Tests "")
-target_compile_options(Archiver-Tests PRIVATE ${Archiver_Compile_Flags})
+set(Archiver_Test_Clang_GCC_Disabled_Warnings -Wno-unused-function)
+target_compile_options(Archiver-Tests PRIVATE ${Archiver_Compile_Flags}
+                       $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+                       ${Archiver_Test_Clang_GCC_Disabled_Warnings}>)
 target_link_libraries(Archiver-Tests PRIVATE Catch2::Catch2WithMain)
 # Include Archiver_sources target which builds the application code
 target_link_libraries(Archiver-Tests PRIVATE Archiver_sources)
