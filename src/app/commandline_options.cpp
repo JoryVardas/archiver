@@ -67,7 +67,7 @@ int StageCommand::exec() {
                         .as<std::filesystem::path>()
                         .generic_string();
 
-  auto [dataPointer, size] = getFileReadBuffer(config);
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span span{dataPointer.get(), size};
 
   auto databaseConnectionConfig =
@@ -249,7 +249,7 @@ int DearchiveCommand::exec() {
     std::make_shared<MysqlArchivedDatabase>(databaseConnectionConfig,
                                             config.archive.target_size));
 
-  auto [dataPointer, size] = getFileReadBuffer(config);
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span span{dataPointer.get(), size};
 
   Dearchiver dearchiver(archivedDatabase, config.archive.archive_directory,

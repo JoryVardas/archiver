@@ -12,7 +12,7 @@ using Catch::Matchers::StartsWith;
 TEST_CASE("Raw file") {
   Config config("./config/test_config.json");
 
-  auto [dataPointer, size] = getFileReadBuffer(config);
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span readBuffer{dataPointer.get(), size};
 
   SECTION("Reading a file that exists") {

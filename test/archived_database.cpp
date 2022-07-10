@@ -14,7 +14,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
                    "[database]", MysqlDatabase, MockDatabase) {
   Config config("./config/test_config.json");
 
-  auto [dataPointer, size] = getFileReadBuffer(config);
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span readBuffer{dataPointer.get(), size};
 
   DatabaseConnector<TestType> databaseConnector;

@@ -17,7 +17,7 @@ namespace ranges = std::ranges;
 TEST_CASE("Archiving files and directories", "[archiver]") {
   Config config("./config/test_config.json");
 
-  auto [dataPointer, size] = getFileReadBuffer(config);
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span readBuffer{dataPointer.get(), size};
 
   DatabaseConnector<MockDatabase> databaseConnector;

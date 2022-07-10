@@ -14,7 +14,7 @@ namespace ranges = std::ranges;
 TEST_CASE("Staging files and directories", "[stager]") {
   Config config("./config/test_config.json");
 
-  auto [dataPointer, size] = getFileReadBuffer(config);
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span readBuffer{dataPointer.get(), size};
 
   DatabaseConnector<MockDatabase> databaseConnector;

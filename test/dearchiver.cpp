@@ -85,9 +85,9 @@ bool fileByteCompare(const std::filesystem::path& path1,
 TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
   Config config("./config/test_config.json");
 
-  auto [dataPointer1, size1] = getFileReadBuffer(config);
+  auto [dataPointer1, size1] = getFileReadBuffer(config.general.fileReadSizes);
   std::span readBuffer1{dataPointer1.get(), size1};
-  auto [dataPointer2, size2] = getFileReadBuffer(config);
+  auto [dataPointer2, size2] = getFileReadBuffer(config.general.fileReadSizes);
   std::span readBuffer2{dataPointer2.get(), size2};
 
   DatabaseConnector<MockDatabase> databaseConnector;
