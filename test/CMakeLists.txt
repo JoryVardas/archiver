@@ -111,6 +111,9 @@ target_sources(Archiver-Tests PRIVATE staged_database.cpp archived_database.cpp)
 add_subdirectory(database/mock_implementation)
 target_link_libraries(Archiver-Tests PRIVATE Archiver_mock_database)
 
+# Add util tests
+add_subdirectory(util)
+
 target_sources(Archiver-Tests PRIVATE
                stager.cpp
                archiver.cpp
