@@ -13,7 +13,8 @@ public:
              std::span<char> fileReadBuffer);
 
   void dearchive(const std::filesystem::path& pathToDearchive,
-                 const std::filesystem::path& dearchiveLocation);
+                 const std::filesystem::path& dearchiveLocation,
+                 const std::optional<ArchiveOperationID> archiveOperation);
 
   Dearchiver() = delete;
   Dearchiver(const Dearchiver&) = delete;

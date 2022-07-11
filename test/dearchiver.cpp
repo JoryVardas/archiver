@@ -115,14 +115,14 @@ TEST_CASE("Dearchiving files and directories", "[dearchiver][.]") {
   stager.stage({{"./test_data/"}, {"./test_data_additional/"}}, ".");
   archiver.archive(stager.getDirectoriesSorted(), stager.getFilesSorted());
 
-  dearchiver.dearchive("/test_data", "./dearchive");
+  dearchiver.dearchive("/test_data", "./dearchive", std::nullopt);
 
   SECTION(
     "Having multiple dearchivers sharing the same dearchive directory and "
     "database") {
     Dearchiver dearchiver2{archivedDatabase, config.archive.archive_directory,
                            config.archive.temp_archive_directory, readBuffer1};
-    dearchiver2.dearchive("/test_data_additional", "./dearchive");
+    dearchiver2.dearchive("/test_data_additional", "./dearchive", std::nullopt);
 
     REQUIRE(std::filesystem::exists(
       "./dearchive/test_data_additional/TestData_Additional_1.additional"));

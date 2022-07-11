@@ -204,6 +204,10 @@ DearchiveCommand::DearchiveCommand()
     (
       "config", "Configuration file to use",
       cxxopts::value<std::filesystem::path>()->default_value("config.json")
+    )
+    ("n, number", "Specify that only files/directories from the given archive "
+      "operation should be dearchvied",
+      cxxopts::value<ArchiveOperationID>()
     );
   // clang-format on
 
@@ -226,6 +230,13 @@ int DearchiveCommand::exec() {
 
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
+
+  const auto archiveOperation = [&]() -> std::optional<ArchiveOperationID> {
+    if (this->parse_result->count("number") > 0)
+      return (*this->parse_result)["number"].as<ArchiveOperationID>();
+    else
+      return std::nullopt;
+  }();
 
   const auto config =
     Config((*this->parse_result)["config"].as<std::filesystem::path>());
@@ -256,7 +267,7 @@ int DearchiveCommand::exec() {
                         config.archive.temp_archive_directory, span);
 
   for (const auto& path : paths) {
-    dearchiver.dearchive(path, outputPath);
+    dearchiver.dearchive(path, outputPath, archiveOperation);
   }
 
   return EXIT_SUCCESS;

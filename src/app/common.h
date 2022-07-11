@@ -7,10 +7,20 @@
 // library, so use fmtlib which implements it.
 #if __has_include(<format>)
 #include <format>
+// Clang has a <format> hearder but the contents are incomplete
+#if defined(_LIBCPP_VERSION)
+#if !defined(_LIBCPP_HAS_NO_INCOMPLETE_FORMAT)
 // The FMT library is no longer needed now that there is a native <format>
 // library.
 //  Please update the usage from fmt::format and fmt::formatter to std::format
 //  and std::formatter.
+#define ARCHIVER_USING_STD_FORMAT
+#endif
+#else
+#define ARCHIVER_USING_STD_FORMAT
+#endif
+#endif
+#ifdef ARCHIVER_USING_STD_FORMAT
 #define FORMAT_LIB std
 #define SPDLOG_USE_STD_FORMAT
 #else

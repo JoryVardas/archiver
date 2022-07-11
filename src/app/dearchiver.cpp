@@ -27,8 +27,10 @@ Dearchiver::Dearchiver(
       "maximum input read stream input size.");
 }
 
-void Dearchiver::dearchive(const std::filesystem::path& pathToDearchive,
-                           const std::filesystem::path& dearchiveLocation) {
+void Dearchiver::dearchive(
+  const std::filesystem::path& pathToDearchive,
+  const std::filesystem::path& dearchiveLocation,
+  const std::optional<ArchiveOperationID> archiveOperation) {
   // Find the contianing archived directory.
   ArchivedDirectory parentDirectory = archivedDatabase->getRootDirectory();
   for (const auto& directoryName : pathToDearchive.parent_path()) {
@@ -49,9 +51,25 @@ void Dearchiver::dearchive(const std::filesystem::path& pathToDearchive,
 
   Compressor compressor{archivedDatabase, archiveLocation};
 
+  auto getArchivedFileRevisionIterator = [&](const ArchivedFile& file) {
+    if (archiveOperation.has_value()) {
+      return std::ranges::find_if(
+        file.revisions,
+        std::bind_front(std::ranges::equal_to(), archiveOperation.value()),
+        &ArchivedFileRevision::containingOperation);
+    } else
+      return --std::ranges::end(file.revisions);
+  };
   auto dearchiveFile = [&](const ArchivedFile& file,
                            const std::filesystem::path& containingDirectory) {
-    auto revision = file.revisions.back();
+    const auto revisionIterator = getArchivedFileRevisionIterator(file);
+
+    // If no valid revision is found skip the file.
+    if (revisionIterator == std::ranges::end(file.revisions))
+      return;
+
+    const auto revision = *revisionIterator;
+
     if (revision.containingArchiveId == 1) {
       // The file was archived into a single file archive.
       compressor.decompressSingleArchive(revision.id, archiveTempLocation);
@@ -92,7 +110,10 @@ void Dearchiver::dearchive(const std::filesystem::path& pathToDearchive,
       dearchiveFile(file, directoryPath);
     }
     for (const auto& dir : childDirectories) {
-      recurse(dir, directoryPath, recurse);
+      if (!archiveOperation.has_value() ||
+          dir.containingArchiveOperation == archiveOperation.value()) {
+        recurse(dir, directoryPath, recurse);
+      }
     }
   };
 
