@@ -82,13 +82,22 @@ struct FORMAT_LIB::formatter<std::vector<T>, CharT>
 
   template <typename FormatContext>
   auto format(const std::vector<T>& vector, FormatContext& fc) {
+    auto outputIterator = fc.out();
+    *outputIterator++ = '{';
+
     auto it = std::begin(vector);
-    FORMAT_LIB::formatter<T, CharT>::format(*it, fc);
-    for (++it; it != std::end(vector); ++it) {
-      FORMAT_LIB::format_to(fc.out(), "{}", separator);
+    auto end = std::end(vector);
+    if (it != end) {
       FORMAT_LIB::formatter<T, CharT>::format(*it, fc);
+      for (++it; it != std::end(vector); ++it) {
+        *outputIterator++ = separator;
+        *outputIterator++ = ' ';
+        FORMAT_LIB::formatter<T, CharT>::format(*it, fc);
+      }
     }
-    return fc.out();
+
+    *outputIterator++ = '}';
+    return outputIterator;
   };
 
 private:
