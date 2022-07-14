@@ -1,5 +1,5 @@
-#ifndef ARCHIVER_ADDITIONAL_MATCHERS_HPP
-#define ARCHIVER_ADDITIONAL_MATCHERS_HPP
+#ifndef ARCHIVER_TEST_ADDITIONAL_MATCHERS_HPP
+#define ARCHIVER_TEST_ADDITIONAL_MATCHERS_HPP
 
 #include <catch2/matchers/catch_matchers_exception.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>

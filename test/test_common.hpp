@@ -1,5 +1,5 @@
-#ifndef ARCHIVER_TEST_COMMON_HPP
-#define ARCHIVER_TEST_COMMON_HPP
+#ifndef ARCHIVER_TEST_TEST_COMMON_HPP
+#define ARCHIVER_TEST_TEST_COMMON_HPP
 #include <catch2/catch_all.hpp>
 #include <src/database/archived_database.hpp>
 #include <src/database/staged_database.hpp>
