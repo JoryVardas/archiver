@@ -102,20 +102,9 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/archive")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/archive_temp")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dearchive")
 
-# Give a warning if no database connection is possible.
-if (NOT DEFINED ARCHIVER_TEST_DATABASE_USERNAME OR NOT DEFINED ARCHIVER_TEST_DATABASE_PASSWORD)
-    message(WARNING
-            "ARCHIVER_TEST_DATABASE_USERNAME and/or ARCHIVER_TEST_DATABASE_PASSWORD"
-            " were not set and as such no connection to a database will be possible.")
-endif ()
-target_sources(Archiver-Tests PRIVATE staged_database.cpp archived_database.cpp)
-
-# Add mock database
-add_subdirectory(database/mock_implementation)
-target_link_libraries(Archiver-Tests PRIVATE Archiver_mock_database)
-
 # Add util tests
 add_subdirectory(util)
+add_subdirectory(database)
 
 target_sources(Archiver-Tests PRIVATE
                stager.cpp

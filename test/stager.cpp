@@ -1,5 +1,5 @@
 #include "additional_matchers.hpp"
-#include "database_helpers.hpp"
+#include "database/database_helpers.hpp"
 #include <catch2/catch_all.hpp>
 #include <span>
 #include <src/app/stager.hpp>

@@ -1,8 +1,8 @@
-#ifndef ARCHIVER_TEST_DATABASE_HELPERS_HPP
-#define ARCHIVER_TEST_DATABASE_HELPERS_HPP
+#ifndef ARCHIVER_TEST_DATABASE_DATABASE_HELPERS_HPP
+#define ARCHIVER_TEST_DATABASE_DATABASE_HELPERS_HPP
 
-#include "database/mock_implementation/archived_database.hpp"
-#include "database/mock_implementation/staged_database.hpp"
+#include "mock_implementation/archived_database.hpp"
+#include "mock_implementation/staged_database.hpp"
 #include <catch2/catch_all.hpp>
 #include <src/config/config.h>
 #include <src/database/archived_database.hpp>
