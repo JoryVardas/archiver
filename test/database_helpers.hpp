@@ -1,11 +1,14 @@
-#ifndef ARCHIVER_TEST_DATABASE_CONNECTOR_HPP
-#define ARCHIVER_TEST_DATABASE_CONNECTOR_HPP
+#ifndef ARCHIVER_TEST_DATABASE_HELPERS_HPP
+#define ARCHIVER_TEST_DATABASE_HELPERS_HPP
 
 #include "database/mock_implementation/archived_database.hpp"
 #include "database/mock_implementation/staged_database.hpp"
+#include <catch2/catch_all.hpp>
 #include <src/config/config.h>
+#include <src/database/archived_database.hpp>
 #include <src/database/mysql_implementation/archived_database.hpp>
 #include <src/database/mysql_implementation/staged_database.hpp>
+#include <src/database/staged_database.hpp>
 #include <utility>
 
 using MysqlDatabase =
@@ -57,5 +60,33 @@ struct DatabaseConnector<MockDatabase>
       std::static_pointer_cast<::ArchivedDatabase>(archivedDatabase)};
   };
 };
+
+namespace {
+bool databasesAreEmpty(std::shared_ptr<StagedDatabase> stagedDatabase,
+                       std::shared_ptr<ArchivedDatabase> archivedDatabase) {
+  bool ret = true;
+  if (!stagedDatabase->listAllDirectories().empty()) {
+    UNSCOPED_INFO("Staged database has directories in it");
+    ret = false;
+  }
+  if (!stagedDatabase->listAllFiles().empty()) {
+    UNSCOPED_INFO("Staged database has files in it");
+    ret = false;
+  }
+  if (!archivedDatabase
+         ->listChildDirectories(archivedDatabase->getRootDirectory())
+         .empty()) {
+    UNSCOPED_INFO("Archived database has directories in it");
+    ret = false;
+  }
+  if (!archivedDatabase->listChildFiles(archivedDatabase->getRootDirectory())
+         .empty()) {
+    UNSCOPED_INFO("Archived database has files in it");
+    ret = false;
+  }
+
+  return ret;
+};
+}
 
 #endif

@@ -1,6 +1,5 @@
 #include "additional_matchers.hpp"
-#include "database_connector.hpp"
-#include "test_common.hpp"
+#include "database_helpers.hpp"
 #include <catch2/catch_all.hpp>
 #include <span>
 #include <src/app/util/get_file_read_buffer.hpp>
