@@ -221,7 +221,9 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
                 .on(directoriesTable.id ==
                     directoryArchiveOperationTable.directoryId))
         .where(directoryParentTable.parentId == parent.id and
-               directoriesTable.name == directory.name));
+               directoriesTable.name ==
+                 verbatim_t<sqlpp::text>(FORMAT_LIB::format(
+                   "\"{}\" COLLATE utf8mb3_bin", directory.name))));
     if (!matchingDirectory.empty()) {
       return {matchingDirectory.front().id, directory.name, parent.id,
               matchingDirectory.front().archiveOperationId};
@@ -435,12 +437,13 @@ auto ArchivedDatabase::getFileId(const std::string& name,
                                  const ArchivedDirectory& directory)
   -> std::optional<ArchivedFileID> {
   try {
-    auto results =
-      databaseConnection(select(fileParentTable.fileId)
-                           .from(filesTable.join(fileParentTable)
-                                   .on(filesTable.id == fileParentTable.fileId))
-                           .where(filesTable.name == name and
-                                  fileParentTable.directoryId == directory.id));
+    auto results = databaseConnection(
+      select(fileParentTable.fileId)
+        .from(filesTable.join(fileParentTable)
+                .on(filesTable.id == fileParentTable.fileId))
+        .where(filesTable.name == verbatim_t<sqlpp::text>(FORMAT_LIB::format(
+                                    "\"{}\" COLLATE utf8mb3_bin", name)) and
+               fileParentTable.directoryId == directory.id));
     if (results.empty())
       return std::nullopt;
     return results.front().fileId;
