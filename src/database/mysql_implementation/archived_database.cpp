@@ -225,6 +225,14 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
                  verbatim_t<sqlpp::text>(FORMAT_LIB::format(
                    "\"{}\" COLLATE utf8mb3_bin", directory.name))));
     if (!matchingDirectory.empty()) {
+      // Add an entry to the directory_archive_operation table
+      databaseConnection(
+        insert_into(directoryArchiveOperationTable)
+          .set(directoryArchiveOperationTable.directoryId =
+                 matchingDirectory.front().id,
+               directoryArchiveOperationTable.archiveOperationId =
+                 archiveOperation));
+
       return {matchingDirectory.front().id, directory.name, parent.id,
               matchingDirectory.front().archiveOperationId};
     }

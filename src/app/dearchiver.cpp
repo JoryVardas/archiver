@@ -40,8 +40,14 @@ void Dearchiver::dearchive(
 
     const auto children =
       archivedDatabase->listChildDirectories(parentDirectory);
-    auto child = std::ranges::find(children, directoryName.string(),
-                                   &ArchivedDirectory::name);
+    auto child =
+      std::ranges::find_if(children, [&](const ArchivedDirectory& dir) {
+        if (archiveOperation) {
+          return dir.name == directoryName.string() &&
+                 dir.containingArchiveOperation == archiveOperation.value();
+        } else
+          return dir.name == directoryName.string();
+      });
     if (child == std::end(children)) {
       throw DearchiverException(
         "Attempt to dearchive a path which was never archived.");
@@ -122,10 +128,17 @@ void Dearchiver::dearchive(
   auto siblingDirectories =
     archivedDatabase->listChildDirectories(parentDirectory);
   auto siblingFiles = archivedDatabase->listChildFiles(parentDirectory);
-  if (auto directory = std::ranges::find(siblingDirectories,
-                                         pathToDearchive.filename().string(),
-                                         &ArchivedDirectory::name);
+  if (auto directory = std::ranges::find_if(
+        siblingDirectories,
+        [&](const auto& dir) {
+          if (archiveOperation) {
+            return dir.name == pathToDearchive.filename().string() &&
+                   dir.containingArchiveOperation == archiveOperation.value();
+          } else
+            return dir.name == pathToDearchive.filename().string();
+        });
       directory != std::end(siblingDirectories)) {
+    spdlog::info("Path to dearchive is a directory");
     dearchiveDirectory(*directory, dearchiveLocation, dearchiveDirectory);
   } else if (auto file = std::ranges::find(siblingFiles,
                                            pathToDearchive.filename().string(),
