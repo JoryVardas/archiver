@@ -179,21 +179,20 @@ auto ArchivedDatabase::listChildDirectories(const ArchivedDirectory& directory)
   -> std::vector<ArchivedDirectory> {
   try {
     auto results = databaseConnection(
-      select(all_of(directoriesTable))
+      select(all_of(directoriesTable),
+             directoryArchiveOperationTable.archiveOperationId)
         .from(directoriesTable.join(directoryParentTable)
-                .on(directoriesTable.id == directoryParentTable.childId))
+                .on(directoriesTable.id == directoryParentTable.childId)
+                .join(directoryArchiveOperationTable)
+                .on(directoriesTable.id ==
+                    directoryArchiveOperationTable.directoryId))
         .where(directoryParentTable.parentId == directory.id));
 
     std::vector<ArchivedDirectory> childDirectories;
 
     for (const auto& row : results) {
-      auto archiveOperationResult = databaseConnection(
-        select(all_of(directoryArchiveOperationTable))
-          .from(directoryArchiveOperationTable)
-          .where(directoryArchiveOperationTable.directoryId == row.id));
       childDirectories.push_back(
-        {row.id, row.name.value(), directory.id,
-         archiveOperationResult.front().archiveOperationId});
+        {row.id, row.name.value(), directory.id, row.archiveOperationId});
     }
 
     return childDirectories;
