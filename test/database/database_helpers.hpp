@@ -62,6 +62,40 @@ struct DatabaseConnector<MockDatabase>
 };
 
 namespace {
+template <typename Database>
+bool databaseIsEmpty(std::shared_ptr<Database> database) {
+  return false;
+};
+template <>
+bool databaseIsEmpty<::StagedDatabase>(
+  std::shared_ptr<::StagedDatabase> database) {
+  bool ret = true;
+  if (!database->listAllDirectories().empty()) {
+    UNSCOPED_INFO("Staged database has directories in it");
+    ret = false;
+  }
+  if (!database->listAllFiles().empty()) {
+    UNSCOPED_INFO("Staged database has files in it");
+    ret = false;
+  }
+  return ret;
+};
+template <>
+bool databaseIsEmpty<::ArchivedDatabase>(
+  std::shared_ptr<::ArchivedDatabase> database) {
+  bool ret = true;
+  if (!database->listChildDirectories(database->getRootDirectory()).empty()) {
+    UNSCOPED_INFO("Archived database has directories in it");
+    ret = false;
+  }
+  if (!database->listChildFiles(database->getRootDirectory()).empty()) {
+    UNSCOPED_INFO("Archived database has files in it");
+    ret = false;
+  }
+
+  return ret;
+};
+
 bool databasesAreEmpty(std::shared_ptr<StagedDatabase> stagedDatabase,
                        std::shared_ptr<ArchivedDatabase> archivedDatabase) {
   bool ret = true;

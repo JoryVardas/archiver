@@ -91,7 +91,9 @@ archiver_test_get_random_file(5120
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_constant_template.hpp ${CMAKE_CURRENT_BINARY_DIR}/test_constant.hpp)
 
 # Add source files which may be required by all tests
-target_sources(Archiver-Tests PRIVATE additional_matchers.cpp)
+target_sources(Archiver-Tests PRIVATE
+               additional_matchers.cpp
+               additional_generators.cpp)
 
 # Add config tests
 add_subdirectory(config)
