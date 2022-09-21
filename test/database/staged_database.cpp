@@ -51,53 +51,37 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
       auto pathComponents = GENERATE(take(
         10, chunk(GENERATE(take(3, random(2, 15))), randomFilename(1, 50))));
 
-      // Make it an optional so we can check if it was assigned to later.
-      std::optional<std::filesystem::path> pathToAdd{std::nullopt};
+      std::filesystem::path pathToAdd = "/" + joinStrings(pathComponents, "/");
 
-      SECTION("empty members in the path should be ignored") {
-        SECTION("empty member is the second component") {
-          pathToAdd = "/" + joinStrings(pathComponents, "/") + "/";
-        }
-        SECTION("empty member is the last component") {
-          pathToAdd = "/" + pathComponents.at(0) + "//" +
-                      joinStrings(pathComponents, "/", 1);
-        }
+      SECTION("Adding the same path multiple times has no effect") {
+        REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd));
       }
-      SECTION("Adding a path without empty members") {
-        pathToAdd = "/" + joinStrings(pathComponents, "/");
-
-        SECTION("Adding the same path multiple times has no effect") {
-          REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd.value()));
-        }
+      SECTION("Adding the same path with a trailing separator has no effect") {
+        REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd.generic_string() + "/"));
       }
 
-      // This section will run one additional time where nothing was added to
-      // the database, so guard the checks to make sure that we don't check
-      // requirements when nothing was done.
-      if (pathToAdd) {
-        REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd.value()));
+      REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd));
 
-        const auto stagedDirectories = stagedDatabase->listAllDirectories();
+      const auto stagedDirectories = stagedDatabase->listAllDirectories();
 
-        REQUIRE(stagedDirectories.size() == pathComponents.size() + 1);
+      REQUIRE(stagedDirectories.size() == pathComponents.size() + 1);
 
-        // The first directory must be / and is it's own parent
-        REQUIRE(stagedDirectories.at(0).name ==
-                StagedDirectory::RootDirectoryName);
-        REQUIRE(stagedDirectories.at(0).id == stagedDirectories.at(0).parent);
+      // The first directory must be / and is it's own parent
+      REQUIRE(stagedDirectories.at(0).name ==
+              StagedDirectory::RootDirectoryName);
+      REQUIRE(stagedDirectories.at(0).id == stagedDirectories.at(0).parent);
 
-        for (auto elem : std::views::counted(std::begin(stagedDirectories),
-                                             stagedDirectories.size() - 1) |
-                           enumerateView<StagedDirectory>) {
-          const auto& cur = elem.second;
-          const auto index = elem.first;
-          const auto& next = stagedDirectories.at(index + 1);
+      for (auto elem : std::views::counted(std::begin(stagedDirectories),
+                                           stagedDirectories.size() - 1) |
+                         enumerateView<StagedDirectory>) {
+        const auto& cur = elem.second;
+        const auto index = elem.first;
+        const auto& next = stagedDirectories.at(index + 1);
 
-          REQUIRE(cur.id == next.parent);
-          REQUIRE(cur.id < next.id);
-          if (index > 0) {
-            REQUIRE(cur.name == pathComponents.at(index - 1));
-          }
+        REQUIRE(cur.id == next.parent);
+        REQUIRE(cur.id < next.id);
+        if (index > 0) {
+          REQUIRE(cur.name == pathComponents.at(index - 1));
         }
       }
     }
