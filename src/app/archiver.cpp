@@ -98,7 +98,7 @@ void Archiver::archiveFiles(const std::vector<StagedFile>& stagedFiles,
 }
 
 void Archiver::saveArchiveParts() {
-  Compressor compressor{archivedDatabase, archiveLocation};
+  Compressor compressor{archivedDatabase, {archiveLocation}};
   for (const auto& archive : modifiedArchives) {
     compressor.compress(archive);
   }

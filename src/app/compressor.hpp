@@ -13,7 +13,7 @@ public:
   ~Compressor() = default;
 
   Compressor(std::shared_ptr<ArchivedDatabase>& archivedDatabase,
-             const std::filesystem::path& archiveLocation);
+             const std::vector<std::filesystem::path>& archiveLocations);
 
   void compress(const Archive& archive);
   void decompress(ArchiveID archiveId,
@@ -26,7 +26,7 @@ public:
 
 private:
   std::shared_ptr<ArchivedDatabase> archivedDatabase;
-  std::filesystem::path archiveLocation;
+  std::vector<std::filesystem::path> archiveLocations;
 
   void compressSingleArchives();
 };

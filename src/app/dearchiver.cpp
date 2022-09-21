@@ -64,7 +64,8 @@ void Dearchiver::dearchive(
   spdlog::info("The parent directory was found to be {} with id {}",
                parentDirectory.name, parentDirectory.id);
 
-  Compressor compressor{archivedDatabase, archiveLocation};
+  Compressor compressor{archivedDatabase,
+                        {archiveLocation, archiveTempLocation}};
 
   spdlog::info("Compressor created");
 
@@ -203,7 +204,8 @@ void Dearchiver::dearchive(
 void Dearchiver::check() {
   spdlog::info("Begining check");
 
-  Compressor compressor{archivedDatabase, archiveLocation};
+  Compressor compressor{archivedDatabase,
+                        {archiveLocation, archiveTempLocation}};
 
   spdlog::info("Compressor created");
 
@@ -320,7 +322,7 @@ void Dearchiver::mergeArchiveParts(ArchiveID archiveId) {
   namespace fs = std::filesystem;
 
   const auto outputPath =
-    archiveLocation / FORMAT_LIB::format("{}.zpaq", archiveId);
+    archiveTempLocation / FORMAT_LIB::format("{}.zpaq", archiveId);
   std::basic_ofstream<char> outputStream(outputPath, std::ios_base::binary |
                                                        std::ios_base::trunc);
   if (outputStream.bad() || !outputStream.is_open()) {
