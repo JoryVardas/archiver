@@ -50,6 +50,7 @@ endfunction()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_data)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_data_additional)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_files)
 
 archiver_test_get_random_file(1024
                               ${CMAKE_CURRENT_BINARY_DIR}/test_data/TestData1.test
@@ -86,6 +87,15 @@ archiver_test_get_random_file(5120
                               ARCHIVER_TEST_TEST_DATA_ADDITIONAL_SINGLE_EXACT_SHA
                               ARCHIVER_TEST_TEST_DATA_ADDITIONAL_SINGLE_EXACT_BLAKE2B
                               ARCHIVER_TEST_TEST_DATA_ADDITIONAL_SINGLE_EXACT_SIZE)
+
+set(ARCHIVER_TEST_NUMBER_ADDITIONAL_FILES 100)
+
+# Generate test files
+foreach (LOOP_INDEX RANGE ${ARCHIVER_TEST_NUMBER_ADDITIONAL_FILES})
+    # We don't care about the hash or size of the generated file so we will just
+    # dump those values into an unused variable
+    archiver_test_get_random_file(1024 ${CMAKE_CURRENT_BINARY_DIR}/test_files/${LOOP_INDEX}.adt ARCHIVER_TEST_IGNORE ARCHIVER_TEST_IGNORE ARCHIVER_TEST_IGNORE)
+endforeach ()
 
 # Generate TestConstantTemplate
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_constant_template.hpp ${CMAKE_CURRENT_BINARY_DIR}/test_constant.hpp)
