@@ -31,6 +31,10 @@ void Dearchiver::dearchive(
   const std::filesystem::path& pathToDearchive,
   const std::filesystem::path& dearchiveLocation,
   const std::optional<ArchiveOperationID> archiveOperation) {
+  spdlog::info("Dearchiving {} to {}", pathToDearchive, dearchiveLocation);
+  if (archiveOperation)
+    spdlog::info("Archive operation specified: {}", archiveOperation.value());
+
   // Find the contianing archived directory.
   ArchivedDirectory parentDirectory = archivedDatabase->getRootDirectory();
   for (const auto& directoryName : pathToDearchive.parent_path()) {
@@ -55,7 +59,12 @@ void Dearchiver::dearchive(
     parentDirectory = *child;
   }
 
+  spdlog::info("The parent directory was found to be {} with id {}",
+               parentDirectory.name, parentDirectory.id);
+
   Compressor compressor{archivedDatabase, archiveLocation};
+
+  spdlog::info("Compressor created");
 
   auto getArchivedFileRevisionIterator = [&](const ArchivedFile& file) {
     if (archiveOperation.has_value()) {
@@ -68,12 +77,17 @@ void Dearchiver::dearchive(
   };
   auto dearchiveFile = [&](const ArchivedFile& file,
                            const std::filesystem::path& containingDirectory) {
+    spdlog::info("Processing file {} with id {}", file.name, file.id);
     const auto revisionIterator = getArchivedFileRevisionIterator(file);
 
     // If no valid revision is found skip the file.
-    if (revisionIterator == std::ranges::end(file.revisions))
+    if (revisionIterator == std::ranges::end(file.revisions)) {
+      spdlog::info("File did not have a revision which was part of the "
+                   "specified archive operation");
       return;
+    }
 
+    spdlog::info("Revision was found");
     const auto revision = *revisionIterator;
 
     if (revision.containingArchiveId == 1) {
@@ -91,11 +105,15 @@ void Dearchiver::dearchive(
           archiveTempLocation / FORMAT_LIB::format("{}/{}",
                                                    revision.containingArchiveId,
                                                    revision.id))) {
+      spdlog::info("Revision has not yet been decompressed, so decompress it");
       mergeArchiveParts(revision.containingArchiveId);
       compressor.decompress(revision.containingArchiveId, archiveTempLocation);
       decompressedArchives.push_back(revision.containingArchiveId);
     }
 
+    spdlog::info("Copying file revision from \"{}/{}\" to \"{}/{}\"",
+                 revision.containingArchiveId, revision.id, containingDirectory,
+                 file.name);
     std::filesystem::copy_file(
       archiveTempLocation /
         FORMAT_LIB::format("{}/{}", revision.containingArchiveId, revision.id),
@@ -106,6 +124,8 @@ void Dearchiver::dearchive(
     [&](const ArchivedDirectory& directory,
         const std::filesystem::path& containingDirectory,
         auto&& recurse) -> void {
+    spdlog::info("Processing directory {} with id {}", directory.name,
+                 directory.id);
     auto directoryPath = [&]() {
       if (directory.name == ArchivedDirectory::RootDirectoryName)
         return containingDirectory;
@@ -119,9 +139,14 @@ void Dearchiver::dearchive(
     const auto childFiles = archivedDatabase->listChildFiles(directory);
 
     for (const auto& file : childFiles) {
+      spdlog::info("Directory has files");
       dearchiveFile(file, directoryPath);
     }
     for (const auto& dir : childDirectories) {
+      spdlog::info("Directory has directories");
+      if (archiveOperation.has_value())
+        spdlog::info("Child directory has archive operation {}",
+                     dir.containingArchiveOperation);
       if (!archiveOperation.has_value() ||
           dir.containingArchiveOperation == archiveOperation.value()) {
         recurse(dir, directoryPath, recurse);
@@ -150,9 +175,11 @@ void Dearchiver::dearchive(
                                            pathToDearchive.filename().string(),
                                            &ArchivedFile::name);
              file != std::end(siblingFiles)) {
+    spdlog::info("Path to dearchive is a file");
     dearchiveFile(*file, dearchiveLocation);
   } else if (pathToDearchive.generic_string() ==
              ArchivedDirectory::RootDirectoryName) {
+    spdlog::info("Path to dearchive is the root directory");
     dearchiveDirectory(archivedDatabase->getRootDirectory(), dearchiveLocation,
                        dearchiveDirectory);
   } else {
