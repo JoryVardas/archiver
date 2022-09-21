@@ -78,13 +78,19 @@ void Dearchiver::dearchive(
 
     if (revision.containingArchiveId == 1) {
       // The file was archived into a single file archive.
-      compressor.decompressSingleArchive(revision.id, archiveTempLocation);
+      if (!std::filesystem::exists(archiveTempLocation /
+                                   FORMAT_LIB::format("1/{}", revision.id)))
+        compressor.decompressSingleArchive(revision.id, archiveTempLocation);
       std::filesystem::copy_file(archiveTempLocation /
                                    FORMAT_LIB::format("1/{}", revision.id),
                                  containingDirectory / file.name);
       return;
     }
-    if (!hasArchiveBeenDecompressed(revision.containingArchiveId)) {
+    if (!hasArchiveBeenDecompressed(revision.containingArchiveId) &&
+        !std::filesystem::exists(
+          archiveTempLocation / FORMAT_LIB::format("{}/{}",
+                                                   revision.containingArchiveId,
+                                                   revision.id))) {
       mergeArchiveParts(revision.containingArchiveId);
       compressor.decompress(revision.containingArchiveId, archiveTempLocation);
       decompressedArchives.push_back(revision.containingArchiveId);
