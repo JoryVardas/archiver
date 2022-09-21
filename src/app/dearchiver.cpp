@@ -136,9 +136,17 @@ void Dearchiver::dearchive(
     }();
     std::filesystem::create_directory(directoryPath);
 
-    const auto childDirectories =
-      archivedDatabase->listChildDirectories(directory);
+    auto childDirectories = archivedDatabase->listChildDirectories(directory);
     const auto childFiles = archivedDatabase->listChildFiles(directory);
+
+    if (!archiveOperation.has_value()) {
+      std::ranges::sort(childDirectories, {}, &ArchivedDirectory::id);
+      auto [toEraseStart, toEraseEnd] =
+        std::ranges::unique(childDirectories, {}, &ArchivedDirectory::id);
+      childDirectories.erase(toEraseStart, toEraseEnd);
+    }
+
+    auto rootDirectoryId = archivedDatabase->getRootDirectory().id;
 
     for (const auto& file : childFiles) {
       spdlog::info("Directory has files");
@@ -146,6 +154,8 @@ void Dearchiver::dearchive(
     }
     for (const auto& dir : childDirectories) {
       spdlog::info("Directory has directories");
+      if (dir.id == rootDirectoryId)
+        continue;
       if (archiveOperation.has_value())
         spdlog::info("Child directory has archive operation {}",
                      dir.containingArchiveOperation);
