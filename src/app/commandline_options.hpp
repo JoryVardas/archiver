@@ -58,5 +58,18 @@ public:
   int validate() override;
   int exec() override;
 };
+class CheckCommand : public cxxsubs::IOptions {
+public:
+  CheckCommand();
+  CheckCommand(const CheckCommand&) = delete;
+  CheckCommand(CheckCommand&&) = delete;
+  virtual ~CheckCommand() = default;
+
+  CheckCommand& operator=(const CheckCommand&) = delete;
+  CheckCommand& operator=(CheckCommand&&) = delete;
+
+  int validate() override;
+  int exec() override;
+};
 
 #endif

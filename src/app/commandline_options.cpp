@@ -272,3 +272,56 @@ int DearchiveCommand::exec() {
 
   return EXIT_SUCCESS;
 }
+CheckCommand::CheckCommand() : cxxsubs::IOptions({"check"}, "Check files") {
+
+  // clang-format off
+  options.add_options()
+    ("help", "Print help")
+    ("v, verbose", "Enable verbose output")
+    (
+      "config", "Configuration file to use",
+      cxxopts::value<std::filesystem::path>()->default_value("config.json")
+    );
+  // clang-format on
+
+  options.parse_positional({"paths"});
+}
+int CheckCommand::validate() {
+  if (this->parse_result->count("help"))
+    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
+}
+int CheckCommand::exec() {
+  if (this->parse_result->count("help")) {
+    std::cout << this->options.help({""}) << std::endl;
+    return EXIT_SUCCESS;
+  }
+
+  if (this->parse_result->count("verbose") > 0)
+    spdlog::set_level(spdlog::level::info);
+
+  const auto config =
+    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+
+  auto databaseConnectionConfig =
+    std::make_shared<MysqlArchivedDatabase::ConnectionConfig>();
+  databaseConnectionConfig->database = config.database.location.schema;
+  databaseConnectionConfig->host = config.database.location.host;
+  databaseConnectionConfig->port = config.database.location.port;
+  databaseConnectionConfig->user = config.database.user;
+  databaseConnectionConfig->password = config.database.password;
+
+  auto archivedDatabase = std::static_pointer_cast<ArchivedDatabase>(
+    std::make_shared<MysqlArchivedDatabase>(databaseConnectionConfig,
+                                            config.archive.target_size));
+
+  auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
+  std::span span{dataPointer.get(), size};
+
+  Dearchiver dearchiver(archivedDatabase, config.archive.archive_directory,
+                        config.archive.temp_archive_directory, span);
+
+  dearchiver.check();
+
+  return EXIT_SUCCESS;
+}

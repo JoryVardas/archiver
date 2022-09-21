@@ -338,7 +338,8 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
                .then(relevantFileRevisions.size)
                .else_(duplicateRevisionTable.size)
                .as(revisionSize),
-             relevantFileRevisions.archiveOperationId)
+             relevantFileRevisions.archiveOperationId,
+             relevantFileRevisions.isDuplicate)
         .from(relevantFileRevisions.left_outer_join(duplicateRevisionTable)
                 .on(relevantFileRevisions.originalRevisionId ==
                     duplicateRevisionTable.id))
@@ -358,9 +359,9 @@ auto ArchivedDatabase::getFileRevisionsForFile(ArchivedFileID fileId)
     std::vector<ArchivedFileRevision> revisions;
 
     for (const auto& row : fileRevisionResults) {
-      ArchivedFileRevision a = {row.revisionId, row.revisionHash,
-                                row.revisionSize, row.revisionArchiveId,
-                                row.archiveOperationId};
+      ArchivedFileRevision a = {row.revisionId,         row.revisionHash,
+                                row.revisionSize,       row.revisionArchiveId,
+                                row.archiveOperationId, row.isDuplicate};
       revisions.push_back(a);
     }
 

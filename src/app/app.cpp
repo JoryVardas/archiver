@@ -16,7 +16,7 @@ int main(int argc, const char* const argv[]) {
     spdlog::set_level(spdlog::level::err);
 
     cxxsubs::Verbs<StageCommand, ArchiveCommand, DearchiveCommand,
-                   UploadCommand>(argc, argv);
+                   UploadCommand, CheckCommand>(argc, argv);
 
     return EXIT_SUCCESS;
 

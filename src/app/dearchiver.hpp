@@ -16,6 +16,8 @@ public:
                  const std::filesystem::path& dearchiveLocation,
                  const std::optional<ArchiveOperationID> archiveOperation);
 
+  void check();
+
   Dearchiver() = delete;
   Dearchiver(const Dearchiver&) = delete;
   Dearchiver(Dearchiver&&) = default;

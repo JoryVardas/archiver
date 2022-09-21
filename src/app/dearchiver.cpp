@@ -3,6 +3,8 @@
 #include "compressor.hpp"
 #include "raw_file.hpp"
 #include "util/string_helpers.hpp"
+#include <concepts>
+
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -185,6 +187,118 @@ void Dearchiver::dearchive(
   } else {
     throw DearchiverException(
       "Attempt to dearchive a path that was never archived.");
+  }
+}
+
+void Dearchiver::check() {
+  spdlog::info("Begining check");
+
+  Compressor compressor{archivedDatabase, archiveLocation};
+
+  spdlog::info("Compressor created");
+
+  std::vector<ArchivedFileRevisionID> incorrectRevisions;
+
+  auto checkFile = [&](const ArchivedFile& file) {
+    spdlog::info("Checking file {} with id {}", file.name, file.id);
+
+    if (file.revisions.size() == 0) {
+      spdlog::error("File with id {} did not have any revisions", file.id);
+    }
+    for (const auto& revision : file.revisions) {
+      spdlog::info("Checking revision with id {}", revision.id);
+      if (revision.isDuplicate) {
+        spdlog::info("Revision is a duplicate, skipping check");
+        continue;
+      }
+
+      if (revision.containingArchiveId == 1) {
+        // The file was archived into a single file archive.
+        if (!std::filesystem::exists(archiveTempLocation /
+                                     FORMAT_LIB::format("1/{}", revision.id)))
+          compressor.decompressSingleArchive(revision.id, archiveTempLocation);
+      }
+      if (!std::filesystem::exists(
+            archiveTempLocation /
+            FORMAT_LIB::format("{}/{}", revision.containingArchiveId,
+                               revision.id))) {
+        spdlog::info(
+          "Revision has not yet been decompressed, so decompress it");
+        mergeArchiveParts(revision.containingArchiveId);
+        compressor.decompress(revision.containingArchiveId,
+                              archiveTempLocation);
+      }
+
+      if (!std::filesystem::exists(
+            archiveTempLocation /
+            FORMAT_LIB::format("{}/{}", revision.containingArchiveId,
+                               revision.id))) {
+        spdlog::error("Revision with id {} could not be decompressed",
+                      revision.id);
+        incorrectRevisions.push_back(revision.id);
+      } else {
+        RawFile rawFile(archiveTempLocation /
+                          FORMAT_LIB::format(
+                            "{}/{}", revision.containingArchiveId, revision.id),
+                        readBuffer);
+        if (rawFile.size != revision.size || rawFile.hash != revision.hash) {
+          spdlog::warn("Revision with id {} is archived incorrectly",
+                       revision.id);
+          incorrectRevisions.push_back(revision.id);
+        }
+      }
+    }
+  };
+
+  auto rootDirectoryId = archivedDatabase->getRootDirectory().id;
+
+  auto checkDirectory = [&](const ArchivedDirectory& directory,
+                            auto&& recurse) -> void {
+    spdlog::info("Checking directory {} with id {}", directory.name,
+                 directory.id);
+
+    auto childDirectories = archivedDatabase->listChildDirectories(directory);
+    const auto childFiles = archivedDatabase->listChildFiles(directory);
+
+    spdlog::info("Sorting child directories");
+    std::ranges::sort(childDirectories, {}, &ArchivedDirectory::id);
+
+    spdlog::info("removing duplicate children");
+    auto [toEraseStart, toEraseEnd] =
+      std::ranges::unique(childDirectories, {}, &ArchivedDirectory::id);
+    childDirectories.erase(toEraseStart, toEraseEnd);
+
+    spdlog::info("Listing all child directories");
+    for (const auto& dir : childDirectories) {
+      spdlog::info("Child directory with id {}", dir.id);
+    }
+
+    if (childFiles.size() > 0) {
+      spdlog::info("Directory has files");
+    }
+    for (const auto& file : childFiles) {
+      checkFile(file);
+    }
+
+    if (childDirectories.size() > 0) {
+      spdlog::info("Directory has directories");
+    }
+    for (const auto& dir : childDirectories) {
+      spdlog::info("Child directory with id {}", dir.id);
+
+      if (dir.id != rootDirectoryId) {
+        recurse(dir, recurse);
+      }
+    }
+  };
+
+  checkDirectory(archivedDatabase->getRootDirectory(), checkDirectory);
+
+  if (incorrectRevisions.size() > 0) {
+    spdlog::warn("The following revisions are not archived correctly.");
+    for (const auto rev : incorrectRevisions) {
+      spdlog::warn("Revision {}", rev);
+    }
   }
 }
 

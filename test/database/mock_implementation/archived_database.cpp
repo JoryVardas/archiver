@@ -206,10 +206,12 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
   if (duplicateRevision == ranges::end(allRevisions)) {
     auto revisionId = nextFileRevisionId++;
     addedFile.revisions.push_back({revisionId, stagedFile.hash, stagedFile.size,
-                                   archive.id, archiveOperation});
+                                   archive.id, archiveOperation, false});
     return {ArchivedFileAddedType::NewRevision, revisionId};
   } else {
-    addedFile.revisions.push_back(*duplicateRevision);
+    auto dupRevision = *duplicateRevision;
+    dupRevision.isDuplicate = true;
+    addedFile.revisions.push_back(dupRevision);
     return {ArchivedFileAddedType::DuplicateRevision, duplicateRevision->id};
   }
 }

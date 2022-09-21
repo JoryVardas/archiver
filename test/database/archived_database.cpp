@@ -227,6 +227,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
               stagedFiles.at(4).size);
       REQUIRE(archivedFilesD.at(0).revisions.at(0).hash ==
               stagedFiles.at(4).hash);
+      REQUIRE(archivedFilesD.at(0).revisions.at(0).isDuplicate);
     }
     SECTION("Adding a file twice gives it an updated revision") {
       auto archiveTwice2 =
@@ -256,6 +257,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
               stagedFiles.at(4).size);
       REQUIRE(archivedFilesDirectory2.at(0).revisions.at(1).hash ==
               stagedFiles.at(4).hash);
+      REQUIRE(archivedFilesDirectory2.at(0).revisions.at(1).isDuplicate);
     }
 
     auto archivedFilesRoot =
@@ -271,6 +273,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
             stagedFiles.at(0).size);
     REQUIRE(archivedFilesRoot.at(0).revisions.at(0).hash ==
             stagedFiles.at(0).hash);
+    REQUIRE(!archivedFilesRoot.at(0).revisions.at(0).isDuplicate);
 
     auto archivedFilesDirectory =
       archivedDatabase->listChildFiles(archivedDirectory1);
@@ -285,6 +288,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
             stagedFiles.at(1).size);
     REQUIRE(archivedFilesDirectory.at(0).revisions.at(0).hash ==
             stagedFiles.at(1).hash);
+    REQUIRE(!archivedFilesDirectory.at(0).revisions.at(0).isDuplicate);
     REQUIRE(archivedFilesDirectory.at(1).name == stagedFiles.at(2).name);
     REQUIRE(archivedFilesDirectory.at(1).parentDirectory.id ==
             archivedDirectory1.id);
@@ -295,6 +299,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
             stagedFiles.at(2).size);
     REQUIRE(archivedFilesDirectory.at(1).revisions.at(0).hash ==
             stagedFiles.at(2).hash);
+    REQUIRE(!archivedFilesDirectory.at(1).revisions.at(0).isDuplicate);
 
     auto archivedFilesDirectory2 =
       archivedDatabase->listChildFiles(archivedDirectory2);
@@ -308,6 +313,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
             stagedFiles.at(4).size);
     REQUIRE(archivedFilesDirectory2.at(0).revisions.at(0).hash ==
             stagedFiles.at(4).hash);
+    REQUIRE(!archivedFilesDirectory2.at(0).revisions.at(0).isDuplicate);
 
     auto archivedFilesDirectoryP =
       archivedDatabase->listChildFiles(archivedDirectoryP);
@@ -321,6 +327,7 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
             stagedFiles.at(3).size);
     REQUIRE(archivedFilesDirectoryP.at(0).revisions.at(0).hash ==
             stagedFiles.at(3).hash);
+    REQUIRE(archivedFilesDirectoryP.at(0).revisions.at(0).isDuplicate);
 
     SECTION("Get new archive for archives which are full") {
       REQUIRE(archivedDatabase->getArchiveForFile(stagedFiles.at(0)).id >

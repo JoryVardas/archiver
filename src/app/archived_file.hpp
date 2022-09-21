@@ -17,6 +17,7 @@ public:
   Size size;
   ArchiveID containingArchiveId;
   ArchiveOperationID containingOperation;
+  bool isDuplicate;
 };
 
 struct ArchivedFile {
