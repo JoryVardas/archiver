@@ -25,14 +25,14 @@ StageCommand::StageCommand()
     ("v, verbose", "Enable verbose output")
     ("prefix", "Specify a prefix to remove from the paths of files/directories "
       "being staged",
-      cxxopts::value<std::filesystem::path>()->default_value("")
+      cxxopts::value<std::string>()->default_value("")
     )
     ("paths", "List of paths to stage",
-      cxxopts::value<std::vector<std::filesystem::path>>(), "<paths>"
+      cxxopts::value<std::vector<std::string>>(), "<paths>"
     )
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::filesystem::path>()->default_value("config.json")
+      cxxopts::value<std::string>()->default_value("config.json")
     );
   // clang-format on
 
@@ -57,15 +57,18 @@ int StageCommand::exec() {
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
 
-  const auto& paths =
-    (*this->parse_result)["paths"].as<std::vector<std::filesystem::path>>();
+  const auto& pathsStrings =
+    (*this->parse_result)["paths"].as<std::vector<std::string>>();
+  std::vector<std::filesystem::path> paths(std::size(pathsStrings));
+  std::ranges::transform(
+    pathsStrings, std::back_inserter(paths),
+    [](auto& path) { return std::filesystem::path{path}; });
 
-  const auto config =
-    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+  const auto config = Config((*this->parse_result)["config"].as<std::string>());
 
-  const auto prefix = (*this->parse_result)["prefix"]
-                        .as<std::filesystem::path>()
-                        .generic_string();
+  const auto prefix =
+    std::filesystem::path{(*this->parse_result)["prefix"].as<std::string>()}
+      .generic_string();
 
   auto [dataPointer, size] = getFileReadBuffer(config.general.fileReadSizes);
   std::span span{dataPointer.get(), size};
@@ -98,7 +101,7 @@ ArchiveCommand::ArchiveCommand()
     ("v, verbose", "Enable verbose output")
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::filesystem::path>()->default_value("config.json")
+      cxxopts::value<std::string>()->default_value("config.json")
     );
   // clang-format on
 }
@@ -116,8 +119,7 @@ int ArchiveCommand::exec() {
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
 
-  const auto config =
-    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+  const auto config = Config((*this->parse_result)["config"].as<std::string>());
 
   auto fakeReadBuffer = std::array<char, 1>{0};
 
@@ -156,7 +158,7 @@ UploadCommand::UploadCommand()
     ("archived", "Upload archived files")
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::filesystem::path>()->default_value("config.json")
+      cxxopts::value<std::string>()->default_value("config.json")
     );
   // clang-format on
 }
@@ -179,8 +181,7 @@ int UploadCommand::exec() {
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
 
-  const auto config =
-    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+  const auto config = Config((*this->parse_result)["config"].as<std::string>());
 
   // TODO Upload archived, or staged files
   return EXIT_SUCCESS;
@@ -196,14 +197,14 @@ DearchiveCommand::DearchiveCommand()
     ("v, verbose", "Enable verbose output")
     ("o, output",
       "Specify the output directory to place dearchived files into",
-      cxxopts::value<std::filesystem::path>()->default_value("")
+      cxxopts::value<std::string>()->default_value("")
     )
     ("paths", "List of paths to dearchive",
-      cxxopts::value<std::vector<std::filesystem::path>>(), "<paths>"
+      cxxopts::value<std::vector<std::string>>(), "<paths>"
     )
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::filesystem::path>()->default_value("config.json")
+      cxxopts::value<std::string>()->default_value("config.json")
     )
     ("n, number", "Specify that only files/directories from the given archive "
       "operation should be dearchvied",
@@ -238,15 +239,13 @@ int DearchiveCommand::exec() {
       return std::nullopt;
   }();
 
-  const auto config =
-    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+  const auto config = Config((*this->parse_result)["config"].as<std::string>());
 
   const auto& paths =
-    (*this->parse_result)["paths"].as<std::vector<std::filesystem::path>>();
+    (*this->parse_result)["paths"].as<std::vector<std::string>>();
 
-  const auto& outputPath =
-    std::filesystem::current_path() /
-    (*this->parse_result)["output"].as<std::filesystem::path>();
+  const auto& outputPath = std::filesystem::current_path() /
+                           (*this->parse_result)["output"].as<std::string>();
 
   auto databaseConnectionConfig =
     std::make_shared<MysqlArchivedDatabase::ConnectionConfig>();
@@ -280,7 +279,7 @@ CheckCommand::CheckCommand() : cxxsubs::IOptions({"check"}, "Check files") {
     ("v, verbose", "Enable verbose output")
     (
       "config", "Configuration file to use",
-      cxxopts::value<std::filesystem::path>()->default_value("config.json")
+      cxxopts::value<std::string>()->default_value("config.json")
     );
   // clang-format on
 
@@ -300,8 +299,7 @@ int CheckCommand::exec() {
   if (this->parse_result->count("verbose") > 0)
     spdlog::set_level(spdlog::level::info);
 
-  const auto config =
-    Config((*this->parse_result)["config"].as<std::filesystem::path>());
+  const auto config = Config((*this->parse_result)["config"].as<std::string>());
 
   auto databaseConnectionConfig =
     std::make_shared<MysqlArchivedDatabase::ConnectionConfig>();
