@@ -1,7 +1,7 @@
 # FindMySQL.cmake
 # From sqlpp11
 
-if (DEFINED MSVC)
+if (WIN32)
     set(SEARCH_PATHS
         "$ENV{ProgramFiles}/MySQL/MySQL Server 8.0"
         "$ENV{ProgramFiles}/MySQL/MySQL Server 5.7"
