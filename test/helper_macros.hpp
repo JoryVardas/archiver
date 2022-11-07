@@ -11,4 +11,11 @@
     return ret;                                                                \
   }()
 
+#define REQUIRE_NOT_EQUAL_RETURN(expression, expected)                         \
+  [&]() {                                                                      \
+    auto ret = expression;                                                     \
+    REQUIRE(ret != expected);                                                  \
+    return ret;                                                                \
+  }()
+
 #endif

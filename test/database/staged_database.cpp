@@ -1,8 +1,10 @@
 #include "../additional_generators.hpp"
 #include "../additional_matchers.hpp"
 #include "../helper_functions.hpp"
+#include "../helper_macros.hpp"
 #include "database_helpers.hpp"
 #include <catch2/catch_all.hpp>
+#include <fmt/format.h>
 #include <ranges>
 #include <span>
 #include <src/app/util/get_file_read_buffer.hpp>
@@ -25,175 +27,213 @@ TEMPLATE_TEST_CASE("Connecting to, modifying, and retrieving data from the "
   REQUIRE(databaseIsEmpty(stagedDatabase));
   REQUIRE_NOTHROW(stagedDatabase->startTransaction());
 
-  SECTION("Adding and listing directories") {
-    SECTION("Adding an empty path") {
-      REQUIRE_NOTHROW(stagedDatabase->add(""));
-      auto addedDirectories = stagedDatabase->listAllDirectories();
-      REQUIRE(addedDirectories.size() == 0);
-    }
-    SECTION("Adding the root directory by itself") {
-      REQUIRE_NOTHROW(stagedDatabase->add("/"));
-      SECTION(
-        "Adding the root directory multiple times has no additional effect") {
-        REQUIRE_NOTHROW(stagedDatabase->add("/"));
-        REQUIRE_NOTHROW(stagedDatabase->add("/"));
+  auto path =
+    GENERATE(std::filesystem::path{StagedDirectory::RootDirectoryName},
+             take(10, randomFilePath(1, 3, randomFilename(1, 50))));
+
+  SECTION("Directory operations") {
+    SECTION("Adding and listing directories") {
+      SECTION("Adding an empty path") {
+        REQUIRE_NOTHROW(stagedDatabase->add(""));
+        REQUIRE(stagedDatabase->listAllDirectories().size() == 0);
       }
-
-      auto addedDirectories = stagedDatabase->listAllDirectories();
-      REQUIRE(addedDirectories.size() == 1);
-      REQUIRE(addedDirectories.at(0).parent == addedDirectories.at(0).id);
-
-      REQUIRE(stagedDatabase->getRootDirectory());
-      REQUIRE(addedDirectories.at(0).id ==
-              stagedDatabase->getRootDirectory().value().id);
-    }
-    SECTION("Adding a path") {
-      auto pathComponents = GENERATE(take(
-        10, chunk(GENERATE(take(3, random(2, 15))), randomFilename(1, 50))));
-
-      std::filesystem::path pathToAdd = "/" + joinStrings(pathComponents, "/");
-
-      SECTION("Adding the same path multiple times has no effect") {
-        REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd));
-      }
-      SECTION("Adding the same path with a trailing separator has no effect") {
-        REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd.generic_string() + "/"));
-      }
-
-      REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd));
-
-      const auto stagedDirectories = stagedDatabase->listAllDirectories();
-
-      REQUIRE(stagedDirectories.size() == pathComponents.size() + 1);
-
-      // The first directory must be / and is it's own parent
-      REQUIRE(stagedDirectories.at(0).name ==
-              StagedDirectory::RootDirectoryName);
-      REQUIRE(stagedDirectories.at(0).id == stagedDirectories.at(0).parent);
-
-      for (auto elem : std::views::counted(std::begin(stagedDirectories),
-                                           stagedDirectories.size() - 1) |
-                         enumerateView<StagedDirectory>) {
-        const auto& cur = elem.second;
-        const auto index = elem.first;
-        const auto& next = stagedDirectories.at(index + 1);
-
-        REQUIRE(cur.id == next.parent);
-        REQUIRE(cur.id < next.id);
-        if (index > 0) {
-          REQUIRE(cur.name == pathComponents.at(index - 1));
+      SECTION("Getting the root directory") {
+        SECTION("Getting the root directory before it has been staged") {
+          REQUIRE(!stagedDatabase->getRootDirectory().has_value());
+        }
+        SECTION("Getting the root directory after it has been staged") {
+          REQUIRE_NOTHROW(
+            stagedDatabase->add(StagedDirectory::RootDirectoryName));
+          auto rootOptional = stagedDatabase->getRootDirectory();
+          REQUIRE(rootOptional.has_value());
+          auto rootDir = rootOptional.value();
+          REQUIRE(rootDir.parent == rootDir.id);
+          REQUIRE(rootDir.name == StagedDirectory::RootDirectoryName);
         }
       }
+      SECTION("Adding a path") {
+        REQUIRE_NOTHROW(stagedDatabase->add(path));
+
+        SECTION("Adding the same path multiple times has no effect") {
+          REQUIRE_NOTHROW(stagedDatabase->add(path));
+        }
+        SECTION(
+          "Adding the same path with a trailing separator has no effect") {
+          REQUIRE_NOTHROW(stagedDatabase->add(path.generic_string() + "/"));
+        }
+
+        const auto stagedDirectories = stagedDatabase->listAllDirectories();
+
+        REQUIRE(stagedDirectories.size() == getNumberPathElements(path));
+
+        // The first directory must be / and is it's own parent
+        REQUIRE(stagedDirectories.at(0).name ==
+                StagedDirectory::RootDirectoryName);
+        REQUIRE(stagedDirectories.at(0).id == stagedDirectories.at(0).parent);
+
+        // Check all parts were staged
+        for (const auto& pathComponent : path) {
+          REQUIRE(std::ranges::find(stagedDirectories, pathComponent.string(),
+                                    &StagedDirectory::name) !=
+                  std::ranges::end(stagedDirectories));
+        }
+
+        // Check that the parents were assigned correctly
+        forEachNotLastIter(stagedDirectories, [&](auto iterator) {
+          const auto& cur = *iterator;
+          const auto& next = *(iterator + 1);
+
+          REQUIRE(cur.id == next.parent);
+        });
+      }
     }
-  }
 
-  SECTION("Removing directories") {
-    auto pathComponents = GENERATE(
-      take(10, chunk(GENERATE(take(3, random(2, 15))), randomFilename(1, 50))));
+    SECTION("Removing directories") {
+      stagedDatabase->add(path);
 
-    std::filesystem::path pathToAdd = "/" + joinStrings(pathComponents, "/");
+      SECTION("Removing a single directory") {
+        auto stagedDirectories = stagedDatabase->listAllDirectories();
+        REQUIRE(stagedDirectories.size() == getNumberPathElements(path));
 
-    REQUIRE_NOTHROW(stagedDatabase->add(pathToAdd));
+        SECTION("Can't remove a staged directory which is the parent of other "
+                "staged directories") {
+          REQUIRE_THROWS_MATCHES(
+            stagedDatabase->remove(stagedDirectories.at(0)),
+            StagedDatabaseException,
+            MessageStartsWith("Can not remove staged directory which is the "
+                              "parent of other staged directories."));
+          REQUIRE(stagedDatabase->listAllDirectories().size() ==
+                  getNumberPathElements(path));
+        }
+        if (path != StagedDirectory::RootDirectoryName) {
+          REQUIRE_NOTHROW(
+            stagedDatabase->remove(getLastElement(stagedDirectories)));
+          REQUIRE(stagedDatabase->listAllDirectories().size() ==
+                  getNumberPathElements(path) - 1);
 
-    auto stagedDirectories = stagedDatabase->listAllDirectories();
-    REQUIRE(stagedDirectories.size() == pathComponents.size() + 1);
-
-    SECTION("Can't remove a staged directory which is the parent of other "
-            "staged directories") {
-      REQUIRE_THROWS_MATCHES(
-        stagedDatabase->remove(stagedDirectories.at(0)),
-        StagedDatabaseException,
-        MessageStartsWith("Can not remove staged directory which is the "
-                          "parent of other staged directories."));
-      REQUIRE(stagedDatabase->listAllDirectories().size() ==
-              pathComponents.size() + 1);
-    }
-
-    REQUIRE_NOTHROW(
-      stagedDatabase->remove(stagedDirectories.at(pathComponents.size())));
-    REQUIRE(stagedDatabase->listAllDirectories().size() ==
-            pathComponents.size());
-
-    SECTION("Removal of a staged directory which has already been removed "
+          SECTION(
+            "Removal of a staged directory which has already been removed "
             "does nothing") {
-      REQUIRE_NOTHROW(
-        stagedDatabase->remove(stagedDirectories.at(pathComponents.size())));
-      REQUIRE(stagedDatabase->listAllDirectories().size() ==
-              pathComponents.size());
-    }
-
-    REQUIRE_NOTHROW(stagedDatabase->removeAllDirectories());
-    REQUIRE(stagedDatabase->listAllDirectories().size() == 0);
-  }
-
-  SECTION("Adding and listing files") {
-    REQUIRE_NOTHROW(stagedDatabase->add("/dirTest"));
-
-    RawFile testFile1{"test_data/TestData1.test", readBuffer};
-    RawFile testFile2{"test_data/TestData_Single.test", readBuffer};
-
-    SECTION("Adding a file which is in a directory that has not yet been "
-            "staged should throw an error") {
-      REQUIRE_THROWS_MATCHES(
-        stagedDatabase->add(testFile1, "/test/TestData1.test"),
-        StagedDatabaseException,
-        MessageStartsWith(
-          "Could not add file to staged file database as the parent "
-          "directory "
-          "hasn't been added to the staged directory database"));
-    }
-
-    REQUIRE_NOTHROW(stagedDatabase->add(testFile1, "/TestData1.test"));
-    REQUIRE_NOTHROW(stagedDatabase->add(testFile2, "/dirTest/TestData2.test"));
-
-    auto stagedFiles = stagedDatabase->listAllFiles();
-    auto stagedDirectories = stagedDatabase->listAllDirectories();
-
-    REQUIRE(stagedFiles.size() == 2);
-    REQUIRE(stagedFiles.at(0).parent == stagedDirectories.at(0).id);
-    REQUIRE(stagedFiles.at(0).size == testFile1.size);
-    REQUIRE(stagedFiles.at(0).hash == testFile1.hash);
-    REQUIRE(stagedFiles.at(0).name == "TestData1.test");
-    REQUIRE(stagedFiles.at(1).parent == stagedDirectories.at(1).id);
-    REQUIRE(stagedFiles.at(1).size == testFile2.size);
-    REQUIRE(stagedFiles.at(1).hash == testFile2.hash);
-    REQUIRE(stagedFiles.at(1).name == "TestData2.test");
-    REQUIRE(stagedFiles.at(1).parent != stagedFiles.at(0).parent);
-    REQUIRE(stagedFiles.at(1).id > stagedFiles.at(0).id);
-  }
-
-  SECTION("Removing files") {
-    REQUIRE_NOTHROW(stagedDatabase->add("/"));
-    REQUIRE_NOTHROW(stagedDatabase->add("/dirTest/"));
-
-    RawFile testFile1{"test_data/TestData1.test", readBuffer};
-    RawFile testFile2{"test_data/TestData_Single.test", readBuffer};
-
-    stagedDatabase->add(testFile1, "/TestData1.test");
-    stagedDatabase->add(testFile2, "/dirTest/TestData2.test");
-    stagedDatabase->add(testFile2, "/dirTest/TestData3.test");
-    auto stagedFiles = stagedDatabase->listAllFiles();
-
-    REQUIRE(stagedFiles.size() == 3);
-
-    SECTION("Remove a single staged file") {
-      REQUIRE_NOTHROW(stagedDatabase->remove(stagedFiles.at(0)));
-
-      auto updatedStagedFiles = stagedDatabase->listAllFiles();
-
-      REQUIRE(updatedStagedFiles.size() == 2);
-      REQUIRE(updatedStagedFiles.at(0).id == stagedFiles.at(1).id);
-    }
-    SECTION("Can't remove a staged file that is already removed") {
-      REQUIRE_NOTHROW(stagedDatabase->remove(stagedFiles.at(0)));
-      REQUIRE(stagedFiles.size() == 3);
-    }
-    SECTION("Removing all staged files") {
-      REQUIRE_NOTHROW(stagedDatabase->removeAllFiles());
-      REQUIRE(stagedDatabase->listAllFiles().empty());
+            REQUIRE_NOTHROW(
+              stagedDatabase->remove(getLastElement(stagedDirectories)));
+            REQUIRE(stagedDatabase->listAllDirectories().size() ==
+                    getNumberPathElements(path) - 1);
+          }
+        }
+      }
+      SECTION("Removing all directories") {
+        REQUIRE_NOTHROW(stagedDatabase->removeAllDirectories());
+        REQUIRE(stagedDatabase->listAllDirectories().size() == 0);
+      }
     }
   }
+  SECTION("File operations") {
+    std::vector<RawFile> rawFiles;
+    rawFiles.reserve(ArchiverTest::numberAdditionalTestFiles);
+    for (uint64_t i = 0; i < ArchiverTest::numberAdditionalTestFiles; ++i) {
+      rawFiles.emplace_back(fmt::format("test_files/{}.adt", i), readBuffer);
+    }
 
+    SECTION("Adding and listing files") {
+      stagedDatabase->add(path);
+
+      SECTION("Adding a single file") {
+        auto rawFile = GENERATE_REF(
+          take(5, map([&](auto index) { return rawFiles.at(index); },
+                      random(uint64_t{0}, std::size(rawFiles) - 1))));
+
+        SECTION("Adding a file which is in a directory that has not yet been "
+                "staged should throw an error") {
+          REQUIRE_THROWS_MATCHES(
+            stagedDatabase->add(rawFile, std::filesystem::path{"/t"} /
+                                           rawFile.path.filename()),
+            StagedDatabaseException,
+            MessageStartsWith(
+              "Could not add file to staged file database as the parent "
+              "directory "
+              "hasn't been added to the staged directory database"));
+        }
+
+        REQUIRE_NOTHROW(
+          stagedDatabase->add(rawFile, path / rawFile.path.filename()));
+
+        auto stagedFiles = stagedDatabase->listAllFiles();
+        auto stagedDirectories = stagedDatabase->listAllDirectories();
+
+        REQUIRE(std::size(stagedFiles) == 1);
+
+        auto stagedFile = stagedFiles.at(0);
+        REQUIRE(stagedFile.parent == getLastElement(stagedDirectories).id);
+        REQUIRE(stagedFile.size == rawFile.size);
+        REQUIRE(stagedFile.hash == rawFile.hash);
+        REQUIRE(stagedFile.name == rawFile.path.filename().string());
+      }
+      SECTION("Adding multiple files") {
+        for (const auto& rawFile : rawFiles) {
+          REQUIRE_NOTHROW(
+            stagedDatabase->add(rawFile, path / rawFile.path.filename()));
+        }
+
+        auto stagedFiles = stagedDatabase->listAllFiles();
+        auto stagedDirectories = stagedDatabase->listAllDirectories();
+        auto parentDirectory = getLastElement(stagedDirectories);
+
+        REQUIRE(std::size(stagedFiles) == std::size(rawFiles));
+
+        for (const auto& rawFile : rawFiles) {
+          // Get the corresponding staged file
+          auto stagedFile = *REQUIRE_NOT_EQUAL_RETURN(
+            std::ranges::find(stagedFiles, rawFile.path.filename().string(),
+                              &StagedFile::name),
+            std::ranges::end(stagedFiles));
+
+          // The name was implicitly checked when finding the staged file.
+          REQUIRE(stagedFile.size == rawFile.size);
+          REQUIRE(stagedFile.hash == rawFile.hash);
+          REQUIRE(stagedFile.parent == parentDirectory.id);
+        }
+
+        // Check that the id is unique
+        std::ranges::sort(stagedFiles, {}, &StagedFile::id);
+        forEachNotLastIter(stagedFiles, [](auto iter) {
+          const auto& cur = *iter;
+          const auto& next = *(iter + 1);
+          REQUIRE(cur.id != next.id);
+        });
+      }
+    }
+
+    SECTION("Removing files") {
+      stagedDatabase->add(path);
+      for (const auto& rawFile : rawFiles) {
+        stagedDatabase->add(rawFile, path / rawFile.path.filename());
+      }
+
+      auto stagedFiles = stagedDatabase->listAllFiles();
+      REQUIRE(std::size(stagedFiles) == std::size(rawFiles));
+
+      SECTION("Remove a single staged file") {
+        REQUIRE_NOTHROW(stagedDatabase->remove(stagedFiles.at(0)));
+
+        auto updatedStagedFiles = stagedDatabase->listAllFiles();
+        REQUIRE(std::size(updatedStagedFiles) == std::size(stagedFiles) - 1);
+
+        REQUIRE(std::ranges::find(updatedStagedFiles, stagedFiles.at(0).id,
+                                  &StagedFile::id) ==
+                std::ranges::end(updatedStagedFiles));
+
+        SECTION("Removing a staged file that is already removed does nothing") {
+          REQUIRE_NOTHROW(stagedDatabase->remove(stagedFiles.at(0)));
+          REQUIRE(std::size(stagedDatabase->listAllFiles()) ==
+                  std::size(updatedStagedFiles));
+        }
+      }
+      SECTION("Removing all staged files") {
+        REQUIRE_NOTHROW(stagedDatabase->removeAllFiles());
+        REQUIRE(stagedDatabase->listAllFiles().empty());
+      }
+    }
+  }
   REQUIRE_NOTHROW(stagedDatabase->rollback());
 
   REQUIRE(databaseIsEmpty(stagedDatabase));

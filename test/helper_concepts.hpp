@@ -27,4 +27,13 @@ concept Container = requires(ContainerType a, const ContainerType b){
                       {a.empty()}->std::same_as<bool>;
                     };
 
+template <typename ContainerType>
+concept HasForwardIterator = requires(ContainerType a, const ContainerType b){
+                      requires std::forward_iterator<typename ContainerType::iterator>;
+                      requires std::forward_iterator<typename ContainerType::const_iterator>;
+                      {a.begin()}->std::same_as<typename ContainerType::iterator>;
+                      {a.end()}->std::same_as<typename ContainerType::iterator>;
+                      {b.begin()}->std::same_as<typename ContainerType::const_iterator>;
+                      {b.end()}->std::same_as<typename ContainerType::const_iterator>;
+                    };
 #endif
