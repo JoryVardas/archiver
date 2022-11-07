@@ -20,10 +20,15 @@ std::string joinStrings(T& list, std::string_view joiner,
     [](std::string a, const std::string& b) { return std::move(a) + "/" + b; });
 }
 
+template <typename T> class EnumerateViewTransformer {
+private:
+  int i = 0;
+
+public:
+  auto operator()(T val) { return std::pair<int, T>{i++, val}; }
+};
 template <typename T>
 auto const enumerateView =
-  std::ranges::views::transform([i = 0](T val) mutable {
-    return std::pair<int, T>{i++, val};
-  });
+  std::ranges::views::transform(EnumerateViewTransformer<T>{});
 
 #endif
