@@ -58,3 +58,42 @@ const std::vector<char> filenameCharacters = {
   'T', 'U', 'V', 'W', 'X', 'Y', 'Z',  '[', ']', '^', '_', '`', 'a', 'b', 'c',
   'd', 'e', 'f', 'g', 'h', 'i', 'j',  'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
   's', 't', 'u', 'v', 'w', 'x', 'y',  'z', '{', '}', '~'};
+
+RandomFilePathGenerator::RandomFilePathGenerator(
+  uint64_t minNumberComponents, uint64_t maxNumberComponents,
+  Catch::Generators::GeneratorWrapper<std::string>&& componentStringGenerator,
+  std::uint32_t seed)
+  : rng(seed), minComponents(minNumberComponents),
+    maxComponents(maxNumberComponents),
+    lengthDistribution(minComponents, maxComponents),
+    componentGenerator(CATCH_MOVE(componentStringGenerator)) {
+  static_cast<void>(next());
+}
+
+std::filesystem::path const& RandomFilePathGenerator::get() const {
+  return currentPath;
+}
+bool RandomFilePathGenerator::next() {
+  auto numberComponents = lengthDistribution(rng);
+  currentPath = "/";
+
+  for (uint64_t i = 0; i < numberComponents; ++i) {
+    if (!componentGenerator.next())
+      return false;
+
+    currentPath /= componentGenerator.get();
+  }
+
+  return true;
+}
+
+Catch::Generators::GeneratorWrapper<std::filesystem::path> randomFilePath(
+  uint64_t minNumberComponents, uint64_t maxNumberComponents,
+  Catch::Generators::GeneratorWrapper<std::string>&& componentStringGenerator) {
+  return Catch::Generators::GeneratorWrapper<std::filesystem::path>(
+    Catch::Detail::make_unique<RandomFilePathGenerator>(
+      minNumberComponents, maxNumberComponents,
+      std::forward<Catch::Generators::GeneratorWrapper<std::string>>(
+        componentStringGenerator),
+      Catch::sharedRng()()));
+}
