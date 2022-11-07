@@ -21,6 +21,8 @@ target_link_libraries(Archiver-Tests PRIVATE Archiver_sources)
 # Include the source directory as an include directory
 target_include_directories(Archiver-Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../)
 target_include_directories(Archiver-Tests PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../)
+# Include FMT for formatting
+target_include_directories(Archiver_sources SYSTEM PUBLIC fmt/include)
 
 # Prevent warnings from included files when using MSVC
 if (MSVC)
