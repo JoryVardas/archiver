@@ -148,6 +148,13 @@ auto ArchivedDatabase::addDirectory(const StagedDirectory& directory,
                                     const ArchivedDirectory& parent,
                                     const ArchiveOperationID archiveOperation)
   -> ArchivedDirectory {
+  if (ranges::find(getArchiveOperationVector(), archiveOperation,
+                   &ArchiveOperation::id) ==
+      ranges::end(getArchiveOperationVector())) {
+    throw ArchivedDatabaseException(
+      "Could not add directory to archived directories");
+  }
+
   if (directory.name == ArchivedDirectory::RootDirectoryName)
     return getRootDirectory();
 
@@ -181,6 +188,15 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
                                const Archive& archive,
                                const ArchiveOperationID archiveOperation)
   -> std::pair<ArchivedFileAddedType, ArchivedFileRevisionID> {
+  if (ranges::find(getArchiveVector(), archive) ==
+      ranges::end(getArchiveVector()))
+    throw ArchivedDatabaseException("Could not add file to archived files");
+
+  if (ranges::find(getArchiveOperationVector(), archiveOperation,
+                   &ArchiveOperation::id) ==
+      ranges::end(getArchiveOperationVector()))
+    throw ArchivedDatabaseException("Could not add file to archived files");
+
   auto existingFile = ranges::find_if(getFileVector(), [&](const auto& file) {
     return file.parentDirectory.id == directory.id &&
            file.name == stagedFile.name;
