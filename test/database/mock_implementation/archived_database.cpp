@@ -46,8 +46,14 @@ void ArchivedDatabase::commit() {
 
 auto ArchivedDatabase::getArchiveForFile(const StagedFile& file) -> Archive {
   const std::string_view fileName = file.name;
-  const auto fileExtension =
-    std::string{fileName.substr(fileName.find_last_of('.'))};
+  const auto fileExtension = [&]() {
+    if (fileName.find_last_of('.') == std::string_view::npos)
+      return std::string{"<BLANK>"};
+    else if (fileName.back() == '.')
+      return std::string{"<BLANK>"};
+    else
+      return std::string{fileName.substr(fileName.find_last_of('.'))};
+  }();
   auto archiveForExtension = getArchiveForExtension(fileExtension);
 
   if (getArchiveSize(archiveForExtension) < targetSize) {
