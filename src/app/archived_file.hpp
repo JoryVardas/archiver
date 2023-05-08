@@ -4,21 +4,11 @@
 #include "archive.h"
 #include "archive_operation.hpp"
 #include "archived_directory.hpp"
+#include "archived_file_revision.hpp"
 #include "common.h"
 #include <vector>
 
 using ArchivedFileID = ID;
-using ArchivedFileRevisionID = ID;
-
-struct ArchivedFileRevision {
-public:
-  ArchivedFileRevisionID id;
-  std::string hash;
-  Size size;
-  ArchiveID containingArchiveId;
-  ArchiveOperationID containingOperation;
-  bool isDuplicate;
-};
 
 struct ArchivedFile {
 public:
