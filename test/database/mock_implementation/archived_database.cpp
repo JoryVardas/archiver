@@ -234,7 +234,7 @@ auto ArchivedDatabase::addFile(const StagedFile& stagedFile,
     auto dupRevision = *duplicateRevision;
     dupRevision.isDuplicate = true;
     addedFile.revisions.push_back(dupRevision);
-    return {ArchivedFileAddedType::DuplicateRevision, duplicateRevision->id};
+    return {ArchivedFileAddedType::DuplicateRevision, dupRevision.id};
   }
 }
 
