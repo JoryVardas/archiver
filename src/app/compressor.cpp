@@ -30,10 +30,10 @@ void Compressor::compress(const Archive& archive) {
     commandList.push_back("-index");
     commandList.push_back(archiveIndex.native());
 
-    subprocess::run(commandList, {.check = true,
-                                  .cout = subprocess::PipeOption::cout,
+    subprocess::run(commandList, {.cout = subprocess::PipeOption::cout,
                                   .cerr = subprocess::PipeOption::cerr,
-                                  .cwd = archiveLocations.at(0)});
+                                  .cwd = archiveLocations.at(0),
+                                  .check = true});
 
     archivedDatabase->incrementNextArchivePartNumber(archive);
   };
@@ -73,10 +73,10 @@ void Compressor::decompress(ArchiveID archiveId,
   std::vector<std::string> commandList = {"zpaq", "x",
                                           archiveLocation / archiveName};
 
-  subprocess::run(commandList, {.check = true,
-                                .cout = subprocess::PipeOption::cout,
+  subprocess::run(commandList, {.cout = subprocess::PipeOption::cout,
                                 .cerr = subprocess::PipeOption::cerr,
-                                .cwd = destination});
+                                .cwd = destination,
+                                .check = true});
 }
 void Compressor::decompressSingleArchive(
   ArchivedFileRevisionID revisionId, const std::filesystem::path& destination) {
@@ -94,10 +94,10 @@ void Compressor::decompressSingleArchive(
   std::vector<std::string> commandList = {"zpaq", "x",
                                           archiveLocation / archiveName};
 
-  subprocess::run(commandList, {.check = true,
-                                .cout = subprocess::PipeOption::cout,
+  subprocess::run(commandList, {.cout = subprocess::PipeOption::cout,
                                 .cerr = subprocess::PipeOption::cerr,
-                                .cwd = destination});
+                                .cwd = destination,
+                                .check = true});
 }
 
 void Compressor::compressSingleArchives() {
@@ -112,9 +112,9 @@ void Compressor::compressSingleArchives() {
         "zpaq", "a", newArchiveName,
         std::filesystem::path("1") / file.path().filename(), "-m5"};
 
-      subprocess::run(commandList, {.check = true,
-                                    .cout = subprocess::PipeOption::cout,
+      subprocess::run(commandList, {.cout = subprocess::PipeOption::cout,
                                     .cerr = subprocess::PipeOption::cerr,
-                                    .cwd = archiveLocations.at(0)});
+                                    .cwd = archiveLocations.at(0),
+                                    .check = true});
     });
 }
