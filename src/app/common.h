@@ -24,7 +24,7 @@
 #define FORMAT_LIB std
 #define SPDLOG_USE_STD_FORMAT
 #else
-//#define FMT_HEADER_ONLY
+// #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 
 #include <fmt/chrono.h>
@@ -59,6 +59,12 @@ using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
 #define _make_exception_(name)                                                 \
   struct name : public std::runtime_error {                                    \
     name(const std::string& msg) : std::runtime_error(msg){};                  \
+    template <typename T, typename... Ts>                                      \
+    name(const std::string& formattedMessage, T&& arg, Ts&&... args)           \
+      : std::runtime_error(FORMAT_LIB::vformat(                                \
+          formattedMessage,                                                    \
+          FORMAT_LIB::make_format_args(std::forward<T>(arg),                   \
+                                       std::forward<Ts>(args)...))){};         \
   };                                                                           \
   _make_formatter_for_exception_(name)
 

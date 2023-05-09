@@ -11,8 +11,8 @@ void Database::startTransaction() {
     databaseConnection.start_transaction();
     hasTransaction = true;
   } catch (sqlpp::exception& err) {
-    throw DatabaseException(FORMAT_LIB::format(
-      "Could not start a transaction on the staged database: {}", err));
+    throw DatabaseException(
+      "Could not start a transaction on the staged database: {}", err);
   }
 }
 void Database::commit() {
@@ -21,8 +21,8 @@ void Database::commit() {
       databaseConnection.commit_transaction();
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
-      throw DatabaseException(FORMAT_LIB::format(
-        "Could not commit the transaction on the staged database: {}", err));
+      throw DatabaseException(
+        "Could not commit the transaction on the staged database: {}", err);
     }
   }
 }
@@ -32,8 +32,8 @@ void Database::rollback() {
       databaseConnection.rollback_transaction(false);
       hasTransaction = false;
     } catch (sqlpp::exception& err) {
-      throw DatabaseException(FORMAT_LIB::format(
-        "Could not rollback the transaction on the staged database: {}", err));
+      throw DatabaseException(
+        "Could not rollback the transaction on the staged database: {}", err);
     }
   }
 }

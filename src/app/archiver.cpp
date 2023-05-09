@@ -50,10 +50,9 @@ void Archiver::archiveDirectories(
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedDirectory.parent);
         parentArchivedDirectory == archivedDirectoryMap.end()) {
-      throw ArchiverException(FORMAT_LIB::format(
-        "Could not archive staged directory with ID {} as its "
-        "parent hasn't been archived",
-        stagedDirectory.id));
+      throw ArchiverException("Could not archive staged directory with ID {} "
+                              "as its parent hasn't been archived",
+                              stagedDirectory.id);
     } else {
       const auto addedArchivedDirectory = archivedDatabase->addDirectory(
         stagedDirectory, parentArchivedDirectory->second, archiveOperation);
@@ -68,10 +67,9 @@ void Archiver::archiveFiles(const std::vector<StagedFile>& stagedFiles,
     if (const auto parentArchivedDirectory =
           archivedDirectoryMap.find(stagedFile.parent);
         parentArchivedDirectory == archivedDirectoryMap.end()) {
-      throw ArchiverException(
-        FORMAT_LIB::format("Could not archive staged file with ID {} as its "
-                           "parent hasn't been archived",
-                           stagedFile.id));
+      throw ArchiverException("Could not archive staged file with ID {} as its "
+                              "parent hasn't been archived",
+                              stagedFile.id);
     } else {
       const auto archive = [&]() -> Archive {
         if (stagedFile.size >= singleFileArchiveSize)

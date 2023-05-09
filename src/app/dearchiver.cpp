@@ -326,8 +326,8 @@ void Dearchiver::mergeArchiveParts(ArchiveID archiveId) {
   std::basic_ofstream<char> outputStream(outputPath, std::ios_base::binary |
                                                        std::ios_base::trunc);
   if (outputStream.bad() || !outputStream.is_open()) {
-    throw FileException(FORMAT_LIB::format(
-      "There was an error opening \"{}\" for writing", outputPath));
+    throw FileException("There was an error opening \"{}\" for writing",
+                        outputPath);
   }
 
   const auto archiveNameStart = FORMAT_LIB::format("{}_", archiveId);
@@ -365,8 +365,8 @@ void Dearchiver::mergeArchiveParts(ArchiveID archiveId) {
                                           std::ios_base::binary);
 
     if (inputStream.bad() || !inputStream.is_open()) {
-      throw FileException(FORMAT_LIB::format(
-        "There was an error opening \"{}\" for reading", archivePartPath));
+      throw FileException("There was an error opening \"{}\" for reading",
+                          archivePartPath);
     }
 
     while (!inputStream.eof()) {
@@ -374,8 +374,8 @@ void Dearchiver::mergeArchiveParts(ArchiveID archiveId) {
                        static_cast<std::streamsize>(readBuffer.size()));
 
       if (inputStream.bad()) {
-        throw FileException(FORMAT_LIB::format(
-          "There was an error reading \"{}\"", archivePartPath));
+        throw FileException("There was an error reading \"{}\"",
+                            archivePartPath);
       }
 
       Size read = static_cast<Size>(inputStream.gcount());

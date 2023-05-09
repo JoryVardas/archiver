@@ -31,31 +31,31 @@ void Stager::stage(const std::vector<path>& paths,
       try {
         stageFile(itemPath, removePrefix(itemPath));
       } catch (StagedDatabaseException& err) {
-        throw StagerException(FORMAT_LIB::format(
-          "Could not stage file \"{}\" : {}", itemPath, err.what()));
+        throw StagerException("Could not stage file \"{}\" : {}", itemPath,
+                              err.what());
       } catch (std::filesystem::filesystem_error& err) {
-        throw StagerException(FORMAT_LIB::format(
-          "Could not stage file \"{}\" : {}", itemPath, err.what()));
+        throw StagerException("Could not stage file \"{}\" : {}", itemPath,
+                              err.what());
       } catch (...) {
-        throw StagerException(FORMAT_LIB::format(
+        throw StagerException(
           "An unknown error occurred while trying to stage file \"{}\"",
-          itemPath));
+          itemPath);
       }
     } else if (std::filesystem::is_directory(itemPath))
       try {
         stageDirectory(itemPath, removePrefix(itemPath));
       } catch (StagedDatabaseException& err) {
-        throw StagerException(FORMAT_LIB::format(
-          "Could not stage directory \"{}\" : {}", itemPath, err.what()));
+        throw StagerException("Could not stage directory \"{}\" : {}", itemPath,
+                              err.what());
       } catch (...) {
-        throw StagerException(FORMAT_LIB::format(
+        throw StagerException(
           "An unknown error occurred while trying to stage directory \"{}\"",
-          itemPath));
+          itemPath);
       }
     else {
-      throw StagerException(FORMAT_LIB::format(
+      throw StagerException(
         "The provided path \"{}\" was neither a regular file or a directory",
-        itemPath));
+        itemPath);
     }
   };
 
@@ -72,8 +72,8 @@ void Stager::stage(const std::vector<path>& paths,
           stagePath);
       }
     } catch (StagerException& err) {
-      spdlog::error(FORMAT_LIB::format("Unable to stage \"{}\", skipping. {}",
-                                       currentPath, err.what()));
+      spdlog::error("Unable to stage \"{}\", skipping. {}", currentPath,
+                    err.what());
       stagedDatabase->rollback();
       continue;
     }

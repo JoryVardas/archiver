@@ -12,18 +12,16 @@ Config::Config(const std::filesystem::path& path) {
 
   std::ifstream configFile(path);
   if (!configFile.is_open())
-    throw ConfigError(FORMAT_LIB::format(
-      "Could not open the configuration file \"{}\".", path));
+    throw ConfigError("Could not open the configuration file \"{}\".", path);
 
   json configuration;
 
   try {
     configFile >> configuration;
   } catch (json::parse_error& e) {
-    throw ConfigError(
-      FORMAT_LIB::format("The following error occured while reading the "
-                         "configuration file:\n\t{}.",
-                         e));
+    throw ConfigError("The following error occured while reading the "
+                      "configuration file:\n\t{}.",
+                      e);
   }
 
   configFile.close();
@@ -34,8 +32,8 @@ Config::Config(const std::filesystem::path& path) {
     } catch (const json::out_of_range& err) {
       auto jsonPointerView = std::string_view{jsonPointer};
       jsonPointerView.remove_prefix(1);
-      throw ConfigError(FORMAT_LIB::format(
-        "Config file is missing a required entry \"{}\"", jsonPointerView));
+      throw ConfigError("Config file is missing a required entry \"{}\"",
+                        jsonPointerView);
     }
   };
 
@@ -45,10 +43,9 @@ Config::Config(const std::filesystem::path& path) {
     } catch (const json::type_error& err) {
       auto jsonPointerView = std::string_view{jsonPointer};
       jsonPointerView.remove_prefix(1);
-      throw ConfigError(
-        FORMAT_LIB::format("Config file could not be loaded as a required "
-                           "entry \"{}\" is of an incorrect type: {}",
-                           jsonPointerView, err.what()));
+      throw ConfigError("Config file could not be loaded as a required entry "
+                        "\"{}\" is of an incorrect type: {}",
+                        jsonPointerView, err.what());
     }
   };
 
