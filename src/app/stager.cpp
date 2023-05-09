@@ -75,10 +75,6 @@ void Stager::stageDirectory(const std::filesystem::path& path,
                             const std::filesystem::path& stagePath) {
   try {
     stagedDatabase->add({stagePath});
-  } catch (StagedDatabaseException& err) {
-    throw StagerException(
-      "Could not stage directory \"{}\" there was a database error : {}", path,
-      err.what());
   } catch (const std::exception& err) {
     throw StagerException("Could not stage directory \"{}\" : {}", path,
                           err.what());
@@ -95,20 +91,10 @@ void Stager::stageFile(const std::filesystem::path& path,
     std::filesystem::copy(rawFile.path.native(),
                           stageLocation /
                             FORMAT_LIB::format("{}", stagedFile.id));
-  } catch (const StagedDatabaseException& err) {
-    throw StagerException(
-      "Could not stage file \"{}\" there was a database error : {}", path,
-      err.what());
   } catch (const std::filesystem::filesystem_error& err) {
     throw StagerException(
       "Could not stage file \"{}\" there was a filesystem error : {}", path,
       err.what());
-  } catch (const FileDoesNotExist& err) {
-    throw StagerException(
-      "Could not stage file \"{}\" as it does not exit : {}", path, err);
-  } catch (const NotAFile& err) {
-    throw StagerException(
-      "Could not stage file \"{}\" as it is not a file : {}", path, err);
   } catch (const std::exception& err) {
     throw StagerException("Could not stage file \"{}\" : {}", path, err.what());
   } catch (...) {
