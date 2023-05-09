@@ -28,30 +28,9 @@ void Stager::stage(const std::vector<path>& paths,
 
   const auto stagePath = [&](const path& itemPath) {
     if (std::filesystem::is_regular_file(itemPath)) {
-      try {
-        stageFile(itemPath, removePrefix(itemPath));
-      } catch (StagedDatabaseException& err) {
-        throw StagerException("Could not stage file \"{}\" : {}", itemPath,
-                              err.what());
-      } catch (std::filesystem::filesystem_error& err) {
-        throw StagerException("Could not stage file \"{}\" : {}", itemPath,
-                              err.what());
-      } catch (...) {
-        throw StagerException(
-          "An unknown error occurred while trying to stage file \"{}\"",
-          itemPath);
-      }
+      stageFile(itemPath, removePrefix(itemPath));
     } else if (std::filesystem::is_directory(itemPath))
-      try {
-        stageDirectory(itemPath, removePrefix(itemPath));
-      } catch (StagedDatabaseException& err) {
-        throw StagerException("Could not stage directory \"{}\" : {}", itemPath,
-                              err.what());
-      } catch (...) {
-        throw StagerException(
-          "An unknown error occurred while trying to stage directory \"{}\"",
-          itemPath);
-      }
+      stageDirectory(itemPath, removePrefix(itemPath));
     else {
       throw StagerException(
         "The provided path \"{}\" was neither a regular file or a directory",
@@ -94,13 +73,46 @@ auto Stager::getFilesSorted() -> std::vector<StagedFile> {
 
 void Stager::stageDirectory(const std::filesystem::path& path,
                             const std::filesystem::path& stagePath) {
-  stagedDatabase->add({stagePath});
+  try {
+    stagedDatabase->add({stagePath});
+  } catch (StagedDatabaseException& err) {
+    throw StagerException(
+      "Could not stage directory \"{}\" there was a database error : {}", path,
+      err.what());
+  } catch (const std::exception& err) {
+    throw StagerException("Could not stage directory \"{}\" : {}", path,
+                          err.what());
+  } catch (...) {
+    throw StagerException(
+      "An unknown error occurred while trying to stage directory \"{}\"", path);
+  }
 }
 void Stager::stageFile(const std::filesystem::path& path,
                        const std::filesystem::path& stagePath) {
-  RawFile rawFile{path, readBuffer};
-  auto stagedFile = stagedDatabase->add(rawFile, stagePath);
-  std::filesystem::copy(rawFile.path.native(),
-                        stageLocation /
-                          FORMAT_LIB::format("{}", stagedFile.id));
+  try {
+    RawFile rawFile{path, readBuffer};
+    auto stagedFile = stagedDatabase->add(rawFile, stagePath);
+    std::filesystem::copy(rawFile.path.native(),
+                          stageLocation /
+                            FORMAT_LIB::format("{}", stagedFile.id));
+  } catch (const StagedDatabaseException& err) {
+    throw StagerException(
+      "Could not stage file \"{}\" there was a database error : {}", path,
+      err.what());
+  } catch (const std::filesystem::filesystem_error& err) {
+    throw StagerException(
+      "Could not stage file \"{}\" there was a filesystem error : {}", path,
+      err.what());
+  } catch (const FileDoesNotExist& err) {
+    throw StagerException(
+      "Could not stage file \"{}\" as it does not exit : {}", path, err);
+  } catch (const NotAFile& err) {
+    throw StagerException(
+      "Could not stage file \"{}\" as it is not a file : {}", path, err);
+  } catch (const std::exception& err) {
+    throw StagerException("Could not stage file \"{}\" : {}", path, err.what());
+  } catch (...) {
+    throw StagerException(
+      "An unknown error occurred while trying to stage file \"{}\"", path);
+  }
 }
