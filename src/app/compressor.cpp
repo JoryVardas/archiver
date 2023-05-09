@@ -66,8 +66,8 @@ void Compressor::decompress(ArchiveID archiveId,
       if (std::filesystem::exists(location / archiveName))
         return location;
     }
-    throw std::runtime_error{FORMAT_LIB::format(
-      "Archive {} could not be found to be decompressed!", archiveName)};
+    throw CompressorException(
+      "Archive {} could not be found to be decompressed!", archiveName);
   }();
 
   std::vector<std::string> commandList = {"zpaq", "x",
@@ -87,8 +87,8 @@ void Compressor::decompressSingleArchive(
       if (std::filesystem::exists(location / archiveName))
         return location;
     }
-    throw std::runtime_error{FORMAT_LIB::format(
-      "Archive {} could not be found to be decompressed!", archiveName)};
+    throw CompressorException(
+      "Archive {} could not be found to be decompressed!", archiveName);
   }();
 
   std::vector<std::string> commandList = {"zpaq", "x",
